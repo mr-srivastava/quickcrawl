@@ -40,7 +40,7 @@ cp .env.example .env
 # Development mode (with auto-reload)
 bun run dev
 
-# Build for production
+# Build for production (local only; Vercel deploy runs from source)
 bun run build
 
 # Start production server
@@ -48,6 +48,17 @@ bun start
 ```
 
 The server will start at `http://localhost:3000`
+
+### Deploying to Vercel
+
+The app runs on Vercel from source using the Bun runtime (no build step on deploy). Use [Vercel CLI](https://vercel.com/docs/cli) for Vercel-parity local dev and deployment:
+
+```bash
+vc dev      # Local dev matching Vercel (optional; or use bun run dev)
+vc deploy   # Deploy to Vercel
+```
+
+Environment variables can be set in the Vercel project settings.
 
 ## Usage
 
