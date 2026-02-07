@@ -1,10 +1,9 @@
-import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { createCrawlWorkflow, CrawlInputSchema } from './workflows/crawl/index';
 import { CrawlService } from './services/CrawlService';
 import { CachedCrawlService } from './services/CachedCrawlService';
 import { errorHandler } from './lib/errors';
-import { logger, createModuleLogger } from './lib/logger';
+import { createModuleLogger } from './lib/logger';
 import { rateLimitMiddleware } from './middleware/rateLimit';
 
 const apiLogger = createModuleLogger('api');
@@ -50,14 +49,4 @@ app.post('/crawl', rateLimitMiddleware(), async (c) => {
   }
 });
 
-const port = Number(process.env.PORT) || 3000;
-
-serve(
-  {
-    fetch: app.fetch,
-    port,
-  },
-  (info) => {
-    logger.info({ port: info.port, env: process.env.NODE_ENV }, 'Server started');
-  },
-);
+export default app;

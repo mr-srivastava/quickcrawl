@@ -2,10 +2,11 @@
   "name": "quickcrawl",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
+    "dev": "bun --watch src/server.ts",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "start": "bun run dist/index.js"
+    "start": "bun run dist/server.js",
+    "dev:vercel": "vc dev"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
