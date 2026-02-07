@@ -1,11 +1,10 @@
 import type { Workflow } from '../workflow/index';
-import type { CrawlResult, CrawlResultData } from '../workflows/crawl/types';
+import type { CrawlResult, CrawlResultData, CrawlContext, Metadata } from '../workflows/crawl/types';
 import { isCompleted } from '../workflows/crawl/guards';
 import { removeUndefined } from '../workflows/crawl/utils/runtime';
 import { createModuleLogger } from '../lib/logger';
 
 type InitialContext = Extract<CrawlContext, { stage: 'initial' }>;
-type FinalContext = Extract<CrawlContext, { stage: 'completed' }>;
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
@@ -13,9 +12,9 @@ export class CrawlService {
   private readonly log = createModuleLogger('CrawlService');
 
   constructor(
-    private readonly workflow: Workflow<InitialContext, FinalContext>,
+    private readonly workflow: Workflow<InitialContext, CrawlContext>,
     private readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
-  ) {}
+  ) { }
 
   async crawlUrl(url: string): Promise<CrawlResult> {
     const startTime = Date.now();
@@ -31,7 +30,7 @@ export class CrawlService {
 
       if (isCompleted(ctx)) {
         const metadata = ctx.metadata
-          ? removeUndefined(ctx.metadata as Record<string, unknown>)
+          ? (removeUndefined(ctx.metadata as Metadata) as Metadata)
           : undefined;
 
         const data: CrawlResultData = {

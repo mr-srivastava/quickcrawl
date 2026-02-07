@@ -72,7 +72,7 @@ export function errorHandler(error: unknown, c: Context): Response {
       {
         success: false,
         error: 'Validation failed',
-        details: error.errors,
+        details: error.issues,
       },
       400,
     );

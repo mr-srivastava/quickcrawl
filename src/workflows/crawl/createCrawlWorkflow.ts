@@ -9,14 +9,13 @@ import {
 } from './tasks/index';
 
 type InitialContext = Extract<CrawlContext, { stage: 'initial' }>;
-type FinalContext = Extract<CrawlContext, { stage: 'completed' }>;
 
 /**
  * Creates a crawl workflow that fetches a URL, extracts metadata, parses and cleans HTML, and converts to markdown.
- * Pass `{ stage: 'initial', url }` to run(); the result is a completed context with markdown (or throws).
+ * Pass `{ stage: 'initial', url }` to run(); the result is a CrawlContext (typically 'completed', but could be any stage).
  */
-export function createCrawlWorkflow(): Workflow<InitialContext, FinalContext> {
-  return new Workflow<InitialContext, FinalContext>([
+export function createCrawlWorkflow(): Workflow<InitialContext, CrawlContext> {
+  return new Workflow<InitialContext, CrawlContext>([
     fetchHtml,
     extractMetadata,
     parseDocument,
