@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { createCrawlWorkflow, CrawlInputSchema } from './workflows/crawl/index';
 import { CrawlService } from './services/CrawlService';
 import { CachedCrawlService } from './services/CachedCrawlService';
@@ -13,6 +14,8 @@ const crawlService = new CrawlService(workflow);
 const cachedCrawlService = new CachedCrawlService(crawlService);
 
 const app = new Hono();
+
+app.use('*', cors());
 
 app.get('/', (c) => {
   return c.text('Hello Hono!');
