@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { HomePage } from '../ui/HomePage';
 import { DocsPage } from '../ui/DocsPage';
-import { APP_NAME, APP_VERSION } from '../ui/constants';
+import { APP_NAME, APP_VERSION } from '../config';
 import { clearStylesCache, getStylesCss } from '../lib/styles';
 
 export const uiRoutes = new Hono();

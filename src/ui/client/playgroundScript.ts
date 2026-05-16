@@ -50,11 +50,14 @@ export const PLAYGROUND_SCRIPT = `
       const el = targetId ? document.getElementById(targetId) : null;
       if (!el) return;
       const text = el.textContent || '';
-      navigator.clipboard.writeText(text).then(function () {
-        const label = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(function () { btn.textContent = label; }, 1500);
-      });
+      navigator.clipboard.writeText(text).then(
+        function () {
+          const label = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(function () { btn.textContent = label; }, 1500);
+        },
+        function () { /* clipboard unavailable */ },
+      );
     });
   });
 

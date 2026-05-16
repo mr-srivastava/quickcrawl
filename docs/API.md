@@ -22,7 +22,7 @@ Interactive landing page with a live crawl playground. Open in a browser to try 
 
 JSON health check for monitoring and deploy probes.
 
-**Response:**
+**Response:** (version and service name match `src/config.ts`)
 
 ```json
 {
@@ -31,6 +31,8 @@ JSON health check for monitoring and deploy probes.
   "version": "1.0.0"
 }
 ```
+
+> Keep `version` in sync with `APP_VERSION` in `src/config.ts`.
 
 ---
 

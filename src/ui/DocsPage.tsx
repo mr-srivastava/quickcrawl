@@ -1,5 +1,12 @@
 import { Layout } from './Layout';
-import { RATE_LIMIT_DEFAULT } from './constants';
+import {
+  APP_NAME,
+  APP_VERSION,
+  DEFAULT_CACHE_MAX_SIZE,
+  DEFAULT_CACHE_TTL_MS,
+  DEFAULT_PORT,
+  getRateLimitConfig,
+} from '../config';
 
 const preClass =
   'my-3 overflow-x-auto rounded-md border border-border bg-paper px-4 py-4 font-mono text-xs leading-relaxed text-ink dark:border-border-dark dark:bg-paper-dark dark:text-paper-on-dark';
@@ -10,8 +17,20 @@ const thClass =
 const tdClass =
   'border border-border px-3 py-2 font-mono text-xs text-ink-muted dark:border-border-dark dark:text-paper-muted-dark';
 
+const healthExample = JSON.stringify(
+  {
+    status: 'ok',
+    service: APP_NAME.toLowerCase(),
+    version: APP_VERSION,
+  },
+  null,
+  2,
+);
+
 export function DocsPage() {
-  const windowSec = RATE_LIMIT_DEFAULT.windowMs / 1000;
+  const rateLimit = getRateLimitConfig();
+  const windowSec = rateLimit.windowMs / 1000;
+  const baseUrl = `http://localhost:${DEFAULT_PORT}`;
 
   return (
     <Layout title="API" activeNav="docs">
@@ -35,7 +54,7 @@ export function DocsPage() {
           <span class="text-ink-muted dark:text-paper-muted-dark">
             Same origin (e.g.{' '}
             <code class="rounded bg-paper px-1.5 py-0.5 font-mono text-xs dark:bg-paper-dark">
-              http://localhost:3000
+              {baseUrl}
             </code>
             ).
           </span>
@@ -47,11 +66,7 @@ export function DocsPage() {
         <p class="text-sm text-ink-muted dark:text-paper-muted-dark">
           JSON health check for monitoring and deploy probes.
         </p>
-        <pre class={preClass}>{`{
-  "status": "ok",
-  "service": "quickcrawl",
-  "version": "1.0.0"
-}`}</pre>
+        <pre class={preClass}>{healthExample}</pre>
 
         <h2 class="mt-10 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:border-border-dark dark:text-paper-on-dark">
           POST /crawl
@@ -106,13 +121,13 @@ export function DocsPage() {
         </h3>
         <pre class={preClass}>{`{ "error": "Rate limit exceeded" }`}</pre>
         <p class="text-sm text-ink-muted dark:text-paper-muted-dark">
-          Default: {RATE_LIMIT_DEFAULT.maxRequests} requests per {windowSec}s per IP.
+          Default: {rateLimit.maxRequests} requests per {windowSec}s per IP.
         </p>
 
         <h2 class="mt-10 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:border-border-dark dark:text-paper-on-dark">
           Example
         </h2>
-        <pre class={preClass}>{`curl -X POST http://localhost:3000/crawl \\
+        <pre class={preClass}>{`curl -X POST ${baseUrl}/crawl \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://example.com"}'`}</pre>
 
@@ -130,22 +145,22 @@ export function DocsPage() {
           <tbody>
             <tr>
               <td class={tdClass}>RATE_LIMIT_MAX_REQUESTS</td>
-              <td class={tdClass}>{RATE_LIMIT_DEFAULT.maxRequests}</td>
+              <td class={tdClass}>{rateLimit.maxRequests}</td>
               <td class={tdClass}>Max requests per window</td>
             </tr>
             <tr>
               <td class={tdClass}>RATE_LIMIT_WINDOW_MS</td>
-              <td class={tdClass}>{RATE_LIMIT_DEFAULT.windowMs}</td>
+              <td class={tdClass}>{rateLimit.windowMs}</td>
               <td class={tdClass}>Window (ms)</td>
             </tr>
             <tr>
               <td class={tdClass}>CACHE_TTL_MS</td>
-              <td class={tdClass}>300000</td>
+              <td class={tdClass}>{DEFAULT_CACHE_TTL_MS}</td>
               <td class={tdClass}>Cache TTL</td>
             </tr>
             <tr>
               <td class={tdClass}>CACHE_MAX_SIZE</td>
-              <td class={tdClass}>100</td>
+              <td class={tdClass}>{DEFAULT_CACHE_MAX_SIZE}</td>
               <td class={tdClass}>Max cache entries</td>
             </tr>
           </tbody>

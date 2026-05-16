@@ -1,9 +1,17 @@
 import { Layout } from './Layout';
 import { Playground } from './components/Playground';
-import { APP_TAGLINE, RATE_LIMIT_DEFAULT } from './constants';
+import { APP_TAGLINE } from './constants';
+import { getRateLimitConfig } from '../config';
 import { PLAYGROUND_SCRIPT } from './client/playgroundScript';
 
+const MARKED_SRI =
+  'sha384-b5hg04N6F0rvyz1a/GVoPPY0JcqGTARCmEuFCqwQKX3zq7LsxhV+n+6Ykh2pQOCH';
+const DOMPURIFY_SRI =
+  'sha384-eEu5CTj3qGvu9PdJuS+YlkNi7d2XxQROAFYOr59zgObtlcux1ae1Il3u7jvdCSWu';
+
 export function HomePage() {
+  const rateLimit = getRateLimitConfig();
+
   return (
     <Layout
       title="Try it"
@@ -11,8 +19,16 @@ export function HomePage() {
       wide
       extraHead={
         <>
-          <script src="https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js" />
-          <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js" />
+          <script
+            src="https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js"
+            integrity={MARKED_SRI}
+            crossorigin="anonymous"
+          />
+          <script
+            src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"
+            integrity={DOMPURIFY_SRI}
+            crossorigin="anonymous"
+          />
         </>
       }
     >
@@ -33,7 +49,7 @@ export function HomePage() {
         <span class="feature-pill">Metadata extraction</span>
         <span class="feature-pill">LRU caching</span>
         <span class="feature-pill">
-          {RATE_LIMIT_DEFAULT.maxRequests} req / {RATE_LIMIT_DEFAULT.windowMs / 1000}s
+          {rateLimit.maxRequests} req / {rateLimit.windowMs / 1000}s
         </span>
         <span class="feature-pill font-mono">POST /crawl</span>
       </aside>
