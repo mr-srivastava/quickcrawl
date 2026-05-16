@@ -3,8 +3,10 @@ import { CacheService } from '../lib/cache';
 import { createModuleLogger } from '../lib/logger';
 import type { CrawlService } from './CrawlService';
 
-const DEFAULT_CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS) || 300_000;
-const DEFAULT_CACHE_MAX_SIZE = Number(process.env.CACHE_MAX_SIZE) || 100;
+export const DEFAULT_CACHE_TTL_MS =
+  Number(process.env.CACHE_TTL_MS) || 300_000;
+export const DEFAULT_CACHE_MAX_SIZE =
+  Number(process.env.CACHE_MAX_SIZE) || 100;
 
 export class CachedCrawlService {
   private readonly log = createModuleLogger('CachedCrawlService');

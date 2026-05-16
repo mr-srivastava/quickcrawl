@@ -41,7 +41,13 @@ CACHE_MAX_SIZE=100
 bun run dev
 ```
 
-The server will start with auto-reload enabled. Any changes to source files will automatically restart the server.
+This compiles Tailwind CSS, watches `src/ui/**/*.tsx` for style changes, and runs the API with auto-reload. Open [http://localhost:3000](http://localhost:3000) for the web UI.
+
+To compile styles once without the full dev stack:
+
+```bash
+bun run build:css
+```
 
 ## Project Structure
 

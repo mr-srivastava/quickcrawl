@@ -8,17 +8,39 @@ http://localhost:3000
 
 ## Endpoints
 
-### Health Check
+### Web UI
 
 **GET /**
 
-Simple health check endpoint.
+Interactive landing page with a live crawl playground. Open in a browser to try URLs without `curl`.
 
-**Response:**
+---
 
+### Health Check
+
+**GET /health**
+
+JSON health check for monitoring and deploy probes.
+
+**Response:** (version and service name match `src/config.ts`)
+
+```json
+{
+  "status": "ok",
+  "service": "quickcrawl",
+  "version": "1.0.0"
+}
 ```
-Hello Hono!
-```
+
+> Keep `version` in sync with `APP_VERSION` in `src/config.ts`.
+
+---
+
+### API Docs (HTML)
+
+**GET /docs**
+
+Human-readable API reference in the browser (same content as this document, condensed).
 
 ---
 
