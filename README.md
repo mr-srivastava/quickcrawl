@@ -49,9 +49,28 @@ bun start
 
 The server will start at `http://localhost:3000`
 
+### Web UI
+
+Open [http://localhost:3000](http://localhost:3000) in your browser for:
+
+- **Playground** — enter a URL and preview Markdown, metadata, and raw JSON
+- **API docs** — [http://localhost:3000/docs](http://localhost:3000/docs)
+- **Health check** — `GET /health` returns JSON status
+
+### Styling (Tailwind CSS)
+
+The web UI uses [Tailwind CSS v4](https://tailwindcss.com/). Source styles live in `src/ui/styles/input.css`; the CLI compiles them to `public/styles.css`.
+
+```bash
+bun run build:css   # One-off compile (also runs before build)
+bun run dev:css     # Watch mode (included in bun run dev)
+```
+
+`bun run dev` builds CSS, starts the Tailwind watcher, and runs the API server.
+
 ### Deploying to Vercel
 
-The app runs on Vercel from source using the Bun runtime (no build step on deploy). Use [Vercel CLI](https://vercel.com/docs/cli) for Vercel-parity local dev and deployment:
+The app runs on Vercel from source using the Bun runtime. Vercel runs `bun run build:css` before deploy (see `vercel.json`). Use [Vercel CLI](https://vercel.com/docs/cli) for local parity:
 
 ```bash
 vc dev      # Local dev matching Vercel (optional; or use bun run dev)
@@ -183,15 +202,20 @@ Typical response times (without cache):
 ### Common Commands
 
 ```bash
-bun run dev              # Start dev server with auto-reload
-bun run build            # Build TypeScript to dist/
+bun run dev              # Dev server + Tailwind watch
+bun run build:css        # Compile Tailwind to public/styles.css
+bun run build            # CSS + TypeScript to dist/
 bun start                # Run production build
 bun test                 # Run tests (when implemented)
 ```
 
 ### Key Files
 
-- `src/index.ts` - Server entry point
+- `src/index.ts` - Server entry point and route wiring
+- `src/ui/` - Hono JSX web UI (Tailwind utility classes)
+- `src/ui/styles/input.css` - Tailwind source (`@import "tailwindcss"`)
+- `public/styles.css` - Compiled CSS (generated)
+- `src/routes/ui.tsx` - UI route handlers (`/`, `/docs`, `/health`)
 - `src/workflows/crawl/` - Crawl pipeline implementation
 - `src/services/` - Business logic (CrawlService, CachedCrawlService)
 - `src/lib/` - Shared utilities (cache, logger, rate limiter)

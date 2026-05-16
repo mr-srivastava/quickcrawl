@@ -60,7 +60,7 @@
 ### Monitoring & Observability
 - [ ] Prometheus metrics endpoint
 - [ ] OpenTelemetry integration
-- [ ] Health check endpoint with detailed status
+- [ ] Health check endpoint with detailed status (basic `GET /health` done)
 - [ ] Performance monitoring dashboard
 
 ## Ideas (Future Consideration)
@@ -78,6 +78,9 @@
 
 ## Completed ✓
 
+- [x] Web UI with crawl playground (`GET /`)
+- [x] In-app API docs page (`GET /docs`)
+- [x] JSON health endpoint (`GET /health`)
 - [x] Basic crawl workflow
 - [x] Markdown conversion with Turndown
 - [x] Metadata extraction (Open Graph, Twitter Cards)

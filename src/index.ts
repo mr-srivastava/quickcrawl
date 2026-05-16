@@ -6,6 +6,7 @@ import { CachedCrawlService } from './services/CachedCrawlService';
 import { errorHandler } from './lib/errors';
 import { createModuleLogger } from './lib/logger';
 import { rateLimitMiddleware } from './middleware/rateLimit';
+import { uiRoutes } from './routes/ui';
 
 const apiLogger = createModuleLogger('api');
 
@@ -17,9 +18,7 @@ const app = new Hono();
 
 app.use('*', cors());
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!');
-});
+app.route('/', uiRoutes);
 
 app.post('/crawl', rateLimitMiddleware(), async (c) => {
   const requestId = crypto.randomUUID();
