@@ -1,4 +1,11 @@
-import { Layout } from './Layout';
+import {
+  Activity,
+  BookOpen,
+  Globe,
+  Settings,
+  Terminal,
+} from 'lucide';
+import type { IconNode } from 'lucide';
 import {
   APP_NAME,
   APP_VERSION,
@@ -7,6 +14,31 @@ import {
   DEFAULT_PORT,
   getRateLimitConfig,
 } from '../config';
+import { Icon } from './components/Icon';
+import { Layout } from './Layout';
+
+function SectionHeading({
+  icon,
+  children,
+  first = false,
+}: {
+  icon: IconNode;
+  children: string;
+  first?: boolean;
+}) {
+  return (
+    <h2
+      class={`flex items-center gap-2 font-display text-xl font-semibold text-ink dark:text-paper-on-dark ${
+        first
+          ? 'mt-0 border-t-0 pt-0'
+          : 'mt-10 border-t border-border pt-8 dark:border-border-dark'
+      }`}
+    >
+      <Icon icon={icon} size={20} class="text-accent" />
+      {children}
+    </h2>
+  );
+}
 
 const preClass =
   'my-3 overflow-x-auto rounded-md border border-border bg-paper px-4 py-4 font-mono text-xs leading-relaxed text-ink dark:border-border-dark dark:bg-paper-dark dark:text-paper-on-dark';
@@ -35,10 +67,12 @@ export function DocsPage() {
   return (
     <Layout title="API" activeNav="docs">
       <article class="animate-fade-up">
-        <p class="mb-2 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+          <Icon icon={BookOpen} size={14} />
           Reference
         </p>
-        <h1 class="mb-4 font-display text-4xl font-semibold tracking-tight text-ink dark:text-paper-on-dark">
+        <h1 class="mb-4 flex items-center gap-3 font-display text-4xl font-semibold tracking-tight text-ink dark:text-paper-on-dark">
+          <Icon icon={BookOpen} size={32} class="text-accent" />
           API
         </h1>
         <p class="mb-8 max-w-2xl text-lg text-ink-muted dark:text-paper-muted-dark">
@@ -60,17 +94,15 @@ export function DocsPage() {
           </span>
         </div>
 
-        <h2 class="mt-10 border-t border-border pt-8 font-display text-xl font-semibold text-ink first:mt-0 first:border-t-0 first:pt-0 dark:border-border-dark dark:text-paper-on-dark">
+        <SectionHeading icon={Activity} first>
           GET /health
-        </h2>
+        </SectionHeading>
         <p class="text-sm text-ink-muted dark:text-paper-muted-dark">
           JSON health check for monitoring and deploy probes.
         </p>
         <pre class={preClass}>{healthExample}</pre>
 
-        <h2 class="mt-10 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:border-border-dark dark:text-paper-on-dark">
-          POST /crawl
-        </h2>
+        <SectionHeading icon={Globe}>POST /crawl</SectionHeading>
         <p class="text-sm text-ink-muted dark:text-paper-muted-dark">
           Fetches a URL and returns Markdown plus optional metadata.
         </p>
@@ -124,16 +156,12 @@ export function DocsPage() {
           Default: {rateLimit.maxRequests} requests per {windowSec}s per IP.
         </p>
 
-        <h2 class="mt-10 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:border-border-dark dark:text-paper-on-dark">
-          Example
-        </h2>
+        <SectionHeading icon={Terminal}>Example</SectionHeading>
         <pre class={preClass}>{`curl -X POST ${baseUrl}/crawl \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://example.com"}'`}</pre>
 
-        <h2 class="mt-10 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:border-border-dark dark:text-paper-on-dark">
-          Environment
-        </h2>
+        <SectionHeading icon={Settings}>Environment</SectionHeading>
         <table class={tableClass}>
           <thead>
             <tr>

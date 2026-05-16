@@ -1,8 +1,10 @@
-import { Layout } from './Layout';
-import { Playground } from './components/Playground';
-import { APP_TAGLINE } from './constants';
+import { ArrowRightLeft, Database, FileText, Gauge, Tags } from 'lucide';
 import { getRateLimitConfig } from '../config';
 import { PLAYGROUND_SCRIPT } from './client/playgroundScript';
+import { Icon } from './components/Icon';
+import { Playground } from './components/Playground';
+import { APP_TAGLINE } from './constants';
+import { Layout } from './Layout';
 
 const MARKED_SRI =
   'sha384-b5hg04N6F0rvyz1a/GVoPPY0JcqGTARCmEuFCqwQKX3zq7LsxhV+n+6Ykh2pQOCH';
@@ -33,7 +35,8 @@ export function HomePage() {
       }
     >
       <div class="mb-8 animate-fade-up">
-        <p class="mb-2 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+          <Icon icon={ArrowRightLeft} size={14} />
           Web to Markdown
         </p>
         <h1 class="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl dark:text-paper-on-dark">
@@ -46,12 +49,22 @@ export function HomePage() {
       </div>
 
       <aside class="mt-10 flex flex-wrap gap-2 border-t border-border pt-8 animate-fade-up-delay-3 dark:border-border-dark">
-        <span class="feature-pill">Metadata extraction</span>
-        <span class="feature-pill">LRU caching</span>
         <span class="feature-pill">
+          <Icon icon={Tags} size={14} />
+          Metadata extraction
+        </span>
+        <span class="feature-pill">
+          <Icon icon={Database} size={14} />
+          LRU caching
+        </span>
+        <span class="feature-pill">
+          <Icon icon={Gauge} size={14} />
           {rateLimit.maxRequests} req / {rateLimit.windowMs / 1000}s
         </span>
-        <span class="feature-pill font-mono">POST /crawl</span>
+        <span class="feature-pill font-mono">
+          <Icon icon={FileText} size={14} />
+          POST /crawl
+        </span>
       </aside>
 
       <script dangerouslySetInnerHTML={{ __html: PLAYGROUND_SCRIPT }} />

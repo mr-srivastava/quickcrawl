@@ -7,6 +7,7 @@
         "@hono/node-server": "^1.19.9",
         "cheerio": "^1.2.0",
         "hono": "^4.11.8",
+        "lucide": "^1.16.0",
         "p-pipe": "^4.0.0",
         "p-retry": "^7.1.1",
         "p-timeout": "^7.0.1",
@@ -335,6 +336,8 @@
     "lines-and-columns": ["lines-and-columns@1.2.4", "", {}, "sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg=="],
 
     "load-tsconfig": ["load-tsconfig@0.2.5", "", {}, "sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg=="],
+
+    "lucide": ["lucide@1.16.0", "", {}, "sha512-20QvduCJTB7e7K9WVvoLBuKPsYZ8d6ptwe9PIdTFiZmjVTPdFWQreBNyNCM9QQtGnqHR0PLiEQdxyhYsL1LdoA=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 

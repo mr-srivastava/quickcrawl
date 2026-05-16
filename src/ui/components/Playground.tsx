@@ -1,4 +1,15 @@
+import {
+  ArrowRight,
+  Braces,
+  Copy,
+  Eye,
+  FileText,
+  Link2,
+  Loader2,
+  Tags,
+} from 'lucide';
 import { EXAMPLE_URLS } from '../constants';
+import { Icon } from './Icon';
 
 export function Playground() {
   return (
@@ -8,9 +19,10 @@ export function Playground() {
       </h2>
       <form id="playground-form">
         <label
-          class="mb-3 block font-display text-sm font-medium text-ink dark:text-paper-on-dark"
+          class="mb-3 flex items-center gap-2 font-display text-sm font-medium text-ink dark:text-paper-on-dark"
           for="url-input"
         >
+          <Icon icon={Link2} size={16} class="text-accent" />
           Paste a URL
         </label>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-stretch">
@@ -24,6 +36,7 @@ export function Playground() {
             autocomplete="url"
           />
           <button type="submit" id="crawl-btn" class="btn-primary">
+            <Icon icon={ArrowRight} size={18} />
             Extract
           </button>
         </div>
@@ -32,7 +45,8 @@ export function Playground() {
           role="group"
           aria-label="Example URLs"
         >
-          <span class="font-mono text-xs uppercase tracking-wider text-ink-faint dark:text-paper-muted-dark">
+          <span class="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-ink-faint dark:text-paper-muted-dark">
+            <Icon icon={Link2} size={12} />
             Examples
           </span>
           {EXAMPLE_URLS.map((url) => (
@@ -49,7 +63,10 @@ export function Playground() {
         hidden
         aria-live="polite"
       >
-        <p class="mb-4 font-mono text-sm text-accent">Extracting page content…</p>
+        <p class="mb-4 inline-flex items-center gap-2 font-mono text-sm text-accent">
+          <Icon icon={Loader2} size={16} class="icon-spin" />
+          Extracting page content…
+        </p>
         <div class="document-sheet space-y-3 p-8">
           <div class="skeleton-line w-3/4" />
           <div class="skeleton-line w-full" />
@@ -92,6 +109,7 @@ export function Playground() {
             aria-selected="true"
             aria-controls="panel-preview"
           >
+            <Icon icon={Eye} size={16} />
             Preview
           </button>
           <button
@@ -102,6 +120,7 @@ export function Playground() {
             aria-selected="false"
             aria-controls="panel-markdown"
           >
+            <Icon icon={FileText} size={16} />
             Markdown
           </button>
           <button
@@ -112,6 +131,7 @@ export function Playground() {
             aria-selected="false"
             aria-controls="panel-metadata"
           >
+            <Icon icon={Tags} size={16} />
             Metadata
           </button>
           <button
@@ -122,6 +142,7 @@ export function Playground() {
             aria-selected="false"
             aria-controls="panel-json"
           >
+            <Icon icon={Braces} size={16} />
             JSON
           </button>
         </div>
@@ -146,6 +167,7 @@ export function Playground() {
         >
           <div class="mb-2 flex justify-end">
             <button type="button" class="btn-ghost" data-copy="markdown-raw">
+              <Icon icon={Copy} size={14} />
               Copy markdown
             </button>
           </div>
@@ -186,6 +208,7 @@ export function Playground() {
         >
           <div class="mb-2 flex justify-end">
             <button type="button" class="btn-ghost" data-copy="json-raw">
+              <Icon icon={Copy} size={14} />
               Copy JSON
             </button>
           </div>

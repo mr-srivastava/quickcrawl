@@ -1,7 +1,9 @@
 import type { Child } from 'hono/jsx';
+import { BookOpen, Sparkles } from 'lucide';
 import { APP_NAME } from './constants';
 import { cn } from './cn';
 import { FontLinks } from './FontLinks';
+import { Icon } from './components/Icon';
 import { Logo } from './components/Logo';
 
 type NavKey = 'home' | 'docs';
@@ -53,7 +55,7 @@ export function Layout({
               href="/"
               class="group flex items-center gap-2.5 no-underline"
             >
-              <Logo class="h-9 w-9 transition-transform duration-300 group-hover:scale-105" />
+              <Logo class="h-5 w-5 transition-transform duration-300 group-hover:scale-105" />
               <span class="font-display text-xl font-semibold tracking-tight text-ink dark:text-paper-on-dark">
                 {APP_NAME}
               </span>
@@ -64,6 +66,7 @@ export function Layout({
                 class={navLinkClass(activeNav === 'home')}
                 aria-current={activeNav === 'home' ? 'page' : undefined}
               >
+                <Icon icon={Sparkles} size={16} />
                 Try it
               </a>
               <a
@@ -71,6 +74,7 @@ export function Layout({
                 class={navLinkClass(activeNav === 'docs')}
                 aria-current={activeNav === 'docs' ? 'page' : undefined}
               >
+                <Icon icon={BookOpen} size={16} />
                 API
               </a>
             </nav>
@@ -91,9 +95,10 @@ export function Layout({
               wide ? 'max-w-5xl' : 'max-w-4xl',
             )}
           >
-            <p class="m-0 font-sans text-sm text-ink-muted dark:text-paper-muted-dark">
+            <p class="m-0 flex flex-wrap items-center gap-1 font-sans text-sm text-ink-muted dark:text-paper-muted-dark">
               Rate limited to protect the service.{' '}
-              <a href="/docs" class="link-accent">
+              <a href="/docs" class="link-accent inline-flex items-center gap-1">
+                <Icon icon={BookOpen} size={14} />
                 API docs
               </a>{' '}
               for limits and configuration.
