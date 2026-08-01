@@ -39,10 +39,11 @@ Run focused Vitest tests while iterating when appropriate.
 
 ## Repository structure
 
-- `src/index.ts` — Hono application and API route wiring
+- `src/app.ts` — injectable Hono application factory
+- `src/index.ts` — production dependency composition
 - `src/server.ts` — local Node.js server entry point
 - `src/config.ts` — validated runtime configuration and application metadata
-- `src/routes/` — UI routes
+- `src/routes/` — crawl transport and UI routes
 - `src/ui/` — Hono JSX components and browser-side UI code
 - `src/services/` — business services and caching decorator
 - `src/lib/` — shared cache, logging, errors, and rate-limiting utilities

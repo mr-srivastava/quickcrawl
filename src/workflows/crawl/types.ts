@@ -34,6 +34,44 @@ export type CrawlError =
   | { type: 'invalid_html'; message: string }
   | { type: 'unknown'; message: string; cause?: unknown };
 
+export const CrawlErrorSchema: z.ZodType<CrawlError> = z.discriminatedUnion(
+  'type',
+  [
+    z.object({
+      type: z.literal('fetch_failed'),
+      status: z.number(),
+      statusText: z.string(),
+      url: z.string(),
+    }),
+    z.object({
+      type: z.literal('timeout'),
+      timeoutMs: z.number(),
+      stage: z.string(),
+    }),
+    z.object({
+      type: z.literal('parse_failed'),
+      message: z.string(),
+      stage: z.string(),
+    }),
+    z.object({
+      type: z.literal('network_error'),
+      message: z.string(),
+      cause: z.string().optional(),
+    }),
+    z.object({ type: z.literal('invalid_url'), message: z.string() }),
+    z.object({ type: z.literal('invalid_html'), message: z.string() }),
+    z.object({
+      type: z.literal('unknown'),
+      message: z.string(),
+      cause: z.unknown().optional(),
+    }),
+  ],
+);
+
+export function isCrawlError(error: unknown): error is CrawlError {
+  return CrawlErrorSchema.safeParse(error).success;
+}
+
 // --- Result type ---
 
 /** Success variant of Result */

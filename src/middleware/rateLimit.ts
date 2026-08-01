@@ -2,6 +2,7 @@ import type { Context, Next } from 'hono';
 import { rateLimiter } from '../lib/rateLimiter';
 import { createModuleLogger } from '../lib/logger';
 import { getRateLimitConfig, TRUST_PROXY } from '../config';
+import { rateLimitErrorResponse } from '../lib/errors';
 
 const logger = createModuleLogger('rateLimit');
 
@@ -18,13 +19,7 @@ export function rateLimitMiddleware() {
     if (!result.allowed) {
       logger.warn({ identifier, maxRequests, windowMs }, 'Rate limit exceeded');
       c.header('Retry-After', String(result.retryAfterSeconds));
-      return c.json(
-        {
-          success: false,
-          error: { type: 'rate_limit', message: 'Rate limit exceeded' },
-        },
-        429,
-      );
+      return rateLimitErrorResponse(c);
     }
 
     await next();

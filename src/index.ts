@@ -1,61 +1,22 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { createCrawlWorkflow, CrawlInputSchema } from './workflows/crawl/index';
+import { createApp } from './app';
+import { DEFAULT_CACHE_MAX_SIZE, DEFAULT_CACHE_TTL_MS } from './config';
+import { CacheService } from './lib/cache';
+import { rateLimitMiddleware } from './middleware/rateLimit';
 import { CrawlService } from './services/CrawlService';
 import { CachedCrawlService } from './services/CachedCrawlService';
-import { errorHandler } from './lib/errors';
-import { createModuleLogger } from './lib/logger';
-import { rateLimitMiddleware } from './middleware/rateLimit';
-import { uiRoutes } from './routes/ui';
+import type { CrawlResultData } from './workflows/crawl';
+import { createCrawlWorkflow } from './workflows/crawl';
 
-const apiLogger = createModuleLogger('api');
+export function createProductionApp() {
+  const workflow = createCrawlWorkflow();
+  const crawlService = new CrawlService(workflow);
+  const cache = new CacheService<string, CrawlResultData>(
+    DEFAULT_CACHE_TTL_MS,
+    DEFAULT_CACHE_MAX_SIZE,
+  );
+  const crawler = new CachedCrawlService(crawlService, cache);
 
-const workflow = createCrawlWorkflow();
-const crawlService = new CrawlService(workflow);
-const cachedCrawlService = new CachedCrawlService(crawlService);
+  return createApp({ crawler, crawlRateLimit: rateLimitMiddleware() });
+}
 
-const app = new Hono();
-
-app.use('*', cors());
-
-app.route('/', uiRoutes);
-
-app.post('/crawl', rateLimitMiddleware(), async (c) => {
-  const requestId = crypto.randomUUID();
-  const requestLogger = apiLogger.child({ requestId });
-
-  try {
-    const body = await c.req.json();
-    const parsed = CrawlInputSchema.safeParse(body);
-
-    if (!parsed.success) {
-      requestLogger.warn({ issues: parsed.error.issues }, 'Invalid input');
-      return c.json(
-        {
-          success: false,
-          error: {
-            type: 'validation_error',
-            message: 'Invalid input',
-            details: parsed.error.issues,
-          },
-        },
-        422,
-      );
-    }
-
-    const { url } = parsed.data;
-    requestLogger.info({ url }, 'Crawl request received');
-
-    const result = await cachedCrawlService.crawlUrl(url);
-
-    if (result.success) {
-      return c.json(result, 200);
-    }
-
-    return errorHandler(result.error, c);
-  } catch (err) {
-    return errorHandler(err, c);
-  }
-});
-
-export default app;
+export default createProductionApp();

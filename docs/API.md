@@ -109,8 +109,10 @@ Known fields include:
 
 ### Validation response
 
-An invalid request body returns `422 Unprocessable Entity`. The `details` array
-contains Zod validation issues.
+An invalid request body returns `422 Unprocessable Entity`. This includes
+malformed JSON and JSON that doesn't match the request schema. The `details`
+array contains Zod validation issues when schema validation runs and is empty
+when the JSON itself can't be parsed.
 
 ```json
 {
@@ -147,6 +149,10 @@ error type.
 | `network_error` |       `503` | DNS, transport, redirect, or network processing failed.         |
 | `timeout`       |       `504` | The crawl exceeded its server-side timeout.                     |
 | `unknown`       |       `500` | An unexpected failure occurred.                                 |
+
+The API returns stable, general messages for network and unexpected failures.
+It records the underlying error in server logs without exposing internal
+details in the response.
 
 ### Rate-limit response
 

@@ -5,4 +5,9 @@ export type {
   CrawlResult,
   CrawlResultData,
 } from './types';
-export { CrawlInputSchema, CrawlResultSchema } from './types';
+export {
+  CrawlErrorSchema,
+  CrawlInputSchema,
+  CrawlResultSchema,
+  isCrawlError,
+} from './types';

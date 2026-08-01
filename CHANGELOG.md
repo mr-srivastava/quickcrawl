@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Standardized validation error responses, masked internal failure details,
+  validated crawl-error variants at runtime, and propagated request
+  cancellation through crawl services.
+- Separated production dependency composition from Hono application and route
+  factories, and made cache storage injectable.
 - Migrated the runtime and package-management workflow from Bun to Node.js and
   pnpm
 - Replaced the Bun test runner with Vitest

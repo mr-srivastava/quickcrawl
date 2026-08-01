@@ -4,6 +4,7 @@ import type { Task } from '../../../workflow/types';
 import { TASK_NAMES } from '../constants';
 import { createModuleLogger } from '../../../lib/logger';
 import { assertSafeCrawlUrl } from '../urlSafety';
+import { isCrawlError } from '../types';
 
 const taskLogger = createModuleLogger('task:fetchHtml');
 const FETCH_TIMEOUT_MS = 15_000;
@@ -112,10 +113,6 @@ async function fetchFollowingSafeRedirects(
     type: 'network_error',
     message: 'Too many redirects',
   } satisfies import('../types').CrawlError;
-}
-
-function isCrawlError(error: unknown): error is import('../types').CrawlError {
-  return typeof error === 'object' && error !== null && 'type' in error;
 }
 
 export const fetchHtml: Task<Input, Output> = {

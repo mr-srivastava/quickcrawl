@@ -5,13 +5,15 @@ import type {
   CrawlWorkflow,
   Metadata,
 } from '../workflows/crawl/types';
+import { isCrawlError } from '../workflows/crawl/types';
+import type { Crawler, CrawlOptions } from './types';
 import { isCompleted } from '../workflows/crawl/guards';
 import { removeUndefined } from '../workflows/crawl/utils/runtime';
 import { createModuleLogger } from '../lib/logger';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
-export class CrawlService {
+export class CrawlService implements Crawler {
   private readonly log = createModuleLogger('CrawlService');
 
   constructor(
@@ -19,14 +21,17 @@ export class CrawlService {
     private readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
   ) {}
 
-  async crawlUrl(url: string): Promise<CrawlResult> {
+  async crawlUrl(
+    url: string,
+    options: CrawlOptions = {},
+  ): Promise<CrawlResult> {
     const startTime = Date.now();
     this.log.info({ url }, 'Starting crawl');
 
     try {
       const ctx = await this.workflow.run(
         { stage: 'initial', url },
-        { timeoutMs: this.timeoutMs },
+        { timeoutMs: this.timeoutMs, signal: options.signal },
       );
 
       const duration = Date.now() - startTime;
@@ -80,8 +85,4 @@ function toCrawlError(error: unknown, timeoutMs: number): CrawlError {
   }
   const message = error instanceof Error ? error.message : 'Unknown error';
   return { type: 'unknown', message };
-}
-
-function isCrawlError(error: unknown): error is CrawlError {
-  return typeof error === 'object' && error !== null && 'type' in error;
 }

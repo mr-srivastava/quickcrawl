@@ -1,8 +1,8 @@
 # Architecture
 
-QuickCrawl is a single Node.js application with a Hono HTTP boundary, a service
-layer, and an explicit crawl workflow. This guide explains the runtime flow,
-module boundaries, core type contracts, security constraints, and supported
+QuickCrawl is a single Node.js application with a Hono HTTP adapter, crawl
+modules, and an explicit crawl workflow. This guide explains the runtime flow,
+module seams, core type contracts, security constraints, and supported
 extension points.
 
 ## Runtime flow
@@ -20,9 +20,10 @@ HTTP request
   -> structured HTTP response
 ```
 
-`src/index.ts` constructs these dependencies once when the module loads. The
-default export is the Hono application, while `src/server.ts` starts the local
-Node.js server.
+`src/index.ts` is the production composition root. Its `createProductionApp`
+factory constructs the workflow, crawl services, cache, and rate-limit
+middleware. It passes those adapters to `createApp` in `src/app.ts`, while
+`src/server.ts` starts the default production application.
 
 ## Module boundaries
 
@@ -31,9 +32,10 @@ shared infrastructure.
 
 | Location               | Responsibility                                                                          |
 | ---------------------- | --------------------------------------------------------------------------------------- |
-| `src/index.ts`         | Constructs services and defines the JSON crawl route.                                   |
+| `src/app.ts`           | Creates a Hono application from injected dependencies.                                  |
+| `src/index.ts`         | Composes and exports the production application.                                        |
 | `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                              |
-| `src/routes/`          | Defines browser UI, documentation, health, and stylesheet routes.                       |
+| `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and stylesheet routes.         |
 | `src/ui/`              | Renders Hono JSX and provides browser-side playground behavior.                         |
 | `src/services/`        | Coordinates workflows and decorates crawling with caching.                              |
 | `src/workflow/`        | Defines the generic task and run-option contracts.                                      |
@@ -41,8 +43,8 @@ shared infrastructure.
 | `src/middleware/`      | Applies HTTP concerns before route processing.                                          |
 | `src/lib/`             | Provides configuration-adjacent utilities, logging, errors, caching, and rate limiting. |
 
-Keep HTTP concerns at the application edge. Services must not depend on Hono
-contexts, and workflow tasks must not format HTTP responses.
+Keep HTTP concerns at the application edge. Crawl modules must not depend on
+Hono contexts, and workflow tasks must not format HTTP responses.
 
 ## Crawl workflow
 
@@ -99,31 +101,37 @@ The fetch task also applies a 15-second timeout to each fetch attempt and uses
 up to two retries after the initial attempt. A workflow timeout becomes a
 structured `timeout` error.
 
-## Services
+## Crawl modules
 
-The service layer converts workflow state into the stable result consumed by
-the HTTP route.
+The crawl modules convert workflow state into the stable result consumed by the
+HTTP route.
 
 ### `CrawlService`
 
-`CrawlService` accepts a `CrawlWorkflow` dependency and returns a
+`CrawlService` accepts a `CrawlWorkflow` adapter and returns a
 `CrawlResult`. It owns workflow timeout selection, completion checks, result
 projection, duration logging, and conversion of unexpected failures into
-structured crawl errors.
+structured crawl errors. Its optional `AbortSignal` is forwarded to the
+workflow so callers can cancel active work.
 
 ### `CachedCrawlService`
 
 `CachedCrawlService` implements the same `Crawler` interface and decorates
-another crawler with an in-memory cache. It caches successful results by exact
-URL and doesn't cache failures.
+another crawler with injected cache storage. It caches successful results by
+exact URL, doesn't cache failures, and forwards caller cancellation on cache
+misses. The production composition root supplies the bounded in-memory cache;
+tests can supply deterministic cache adapters.
 
 The cache has configurable time-to-live and capacity values. Its state belongs
 to one Node.js process and isn't shared across instances.
 
 ## HTTP boundary
 
-The Hono application validates requests, invokes the cached service, and maps
-results to HTTP responses.
+`createApp` assembles the Hono application from an injected `Crawler` and
+rate-limit middleware. `createCrawlRoutes` validates crawl requests, invokes
+the crawler, and maps results to HTTP responses. Response builders in
+`src/lib/errors.ts` keep validation, rate-limit, crawl, and internal error
+envelopes consistent.
 
 `CrawlInputSchema` performs structural URL validation before the workflow runs.
 The fetch task performs the network-safety validation that requires DNS
@@ -155,14 +163,15 @@ logic require focused security tests.
 
 QuickCrawl uses discriminated unions at workflow, service, and API boundaries.
 Expected crawl failures use `CrawlError`, while service results use
-`Result<T, E>`.
+`Result<T, E>`. A shared runtime schema validates unknown thrown values before
+the service or HTTP boundary treats them as a `CrawlError`.
 
 ```typescript
 type Result<T, E> = { success: true; data: T } | { success: false; error: E };
 ```
 
 Callers must narrow on `success` before reading `data` or `error`. Preserve the
-specific error variant while crossing layers so the HTTP boundary can choose
+specific error variant while crossing modules so the HTTP adapter can choose
 the correct status code.
 
 All layers use structured Pino logging. Add values such as URLs, request IDs,
@@ -231,10 +240,11 @@ export const analyzeDocument: Task<Input, Output> = {
 
 ### Add an endpoint
 
-Keep request parsing and response formatting in `src/index.ts` or a route
-module. Put reusable business behavior in a service, and put multistage
-processing behind a workflow interface. Update the [API reference](API.md) in
-the same change.
+Keep request parsing and response formatting in a route module. Accept runtime
+dependencies through the route factory, and assemble production adapters in
+`createProductionApp`. Put reusable business behavior in a crawl module, and
+put multistage processing behind a workflow interface. Update the
+[API reference](API.md) in the same change.
 
 ### Change infrastructure behavior
 

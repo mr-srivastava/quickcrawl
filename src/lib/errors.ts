@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { z } from 'zod';
-import type { CrawlError } from '../workflows/crawl/types';
+import { isCrawlError, type CrawlError } from '../workflows/crawl/types';
 import { logger } from './logger';
 
 export class ApiError extends Error {
@@ -13,6 +13,33 @@ export class ApiError extends Error {
     Object.setPrototypeOf(this, ApiError.prototype);
     this.name = 'ApiError';
   }
+}
+
+export function validationErrorResponse(
+  c: Context,
+  details: z.core.$ZodIssue[],
+): Response {
+  return c.json(
+    {
+      success: false,
+      error: {
+        type: 'validation_error',
+        message: 'Invalid input',
+        details,
+      },
+    },
+    422,
+  );
+}
+
+export function rateLimitErrorResponse(c: Context): Response {
+  return c.json(
+    {
+      success: false,
+      error: { type: 'rate_limit', message: 'Rate limit exceeded' },
+    },
+    429,
+  );
 }
 
 function crawlErrorToStatusCode(error: CrawlError): number {
@@ -42,31 +69,27 @@ function getErrorMessage(error: CrawlError): string {
     case 'parse_failed':
     case 'invalid_html':
     case 'invalid_url':
-    case 'network_error':
-    case 'unknown':
       return error.message;
+    case 'network_error':
+      return 'Network request failed';
+    case 'unknown':
+      return 'Internal server error';
     default:
       return 'Unknown error';
   }
 }
 
-function isCrawlError(error: unknown): error is CrawlError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'type' in error &&
-    typeof error.type === 'string'
-  );
-}
-
 export function errorHandler(error: unknown, c: Context): Response {
   if (error instanceof ApiError) {
+    const publicMessage = error.isOperational
+      ? error.message
+      : 'Internal server error';
     logger.warn(
       { statusCode: error.statusCode, message: error.message },
       'ApiError',
     );
     return c.json(
-      { success: false, error: { type: 'unknown', message: error.message } },
+      { success: false, error: { type: 'unknown', message: publicMessage } },
       error.statusCode as
         | 400
         | 401
@@ -83,14 +106,7 @@ export function errorHandler(error: unknown, c: Context): Response {
 
   if (error instanceof z.ZodError) {
     logger.warn({ issues: error.issues }, 'Validation failed');
-    return c.json(
-      {
-        success: false,
-        error: 'Validation failed',
-        details: error.issues,
-      },
-      400,
-    );
+    return validationErrorResponse(c, error.issues);
   }
 
   if (isCrawlError(error)) {
@@ -113,5 +129,11 @@ export function errorHandler(error: unknown, c: Context): Response {
     'Unexpected error',
   );
 
-  return c.json({ success: false, error: { type: 'unknown', message } }, 500);
+  return c.json(
+    {
+      success: false,
+      error: { type: 'unknown', message: 'Internal server error' },
+    },
+    500,
+  );
 }
