@@ -95,7 +95,8 @@ export const PLAYGROUND_SCRIPT = `
       }
 
       if (res.status === 422) {
-        const issues = body.issues ? JSON.stringify(body.issues, null, 2) : body.error || 'Invalid URL';
+        const details = body.error?.details;
+        const issues = details ? JSON.stringify(details, null, 2) : body.error?.message || 'Invalid URL';
         throw new Error('Validation failed: ' + issues);
       }
 

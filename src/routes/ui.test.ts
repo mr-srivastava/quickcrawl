@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import app from '../index';
@@ -11,6 +11,19 @@ import {
 } from '../config';
 
 describe('UI routes', () => {
+  test('POST /crawl rejects non-HTTP URLs with the standard error envelope', async () => {
+    const res = await app.request('/crawl', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url: 'ftp://example.com' }),
+    });
+    expect(res.status).toBe(422);
+    expect(await res.json()).toMatchObject({
+      success: false,
+      error: { type: 'validation_error', message: 'Invalid input' },
+    });
+  });
+
   test('GET /health returns service metadata', async () => {
     const res = await app.request('/health');
     expect(res.status).toBe(200);

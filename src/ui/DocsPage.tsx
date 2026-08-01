@@ -12,6 +12,7 @@ import {
   DEFAULT_CACHE_MAX_SIZE,
   DEFAULT_CACHE_TTL_MS,
   DEFAULT_PORT,
+  TRUST_PROXY,
   getRateLimitConfig,
 } from '../config';
 import { Icon } from './components/Icon';
@@ -136,12 +137,16 @@ export function DocsPage() {
           Validation error (422)
         </h3>
         <pre class={preClass}>{`{
-  "error": "Invalid input",
-  "issues": [{ "path": ["url"], "message": "..." }]
+  "success": false,
+  "error": {
+    "type": "validation_error",
+    "message": "Invalid input",
+    "details": [{ "path": ["url"], "message": "..." }]
+  }
 }`}</pre>
 
         <h3 class="mt-6 font-display text-base font-semibold text-ink dark:text-paper-on-dark">
-          Crawl failure (500)
+          Crawl failure (422, 500, 502, 503, or 504)
         </h3>
         <pre class={preClass}>{`{
   "success": false,
@@ -151,9 +156,13 @@ export function DocsPage() {
         <h3 class="mt-6 font-display text-base font-semibold text-ink dark:text-paper-on-dark">
           Rate limit (429)
         </h3>
-        <pre class={preClass}>{`{ "error": "Rate limit exceeded" }`}</pre>
+        <pre class={preClass}>{`{
+  "success": false,
+  "error": { "type": "rate_limit", "message": "Rate limit exceeded" }
+}`}</pre>
         <p class="text-sm text-ink-muted dark:text-paper-muted-dark">
-          Default: {rateLimit.maxRequests} requests per {windowSec}s per IP.
+          Default: {rateLimit.maxRequests} requests per {windowSec}s{' '}
+          {TRUST_PROXY ? 'per proxy-provided client IP' : 'globally'}.
         </p>
 
         <SectionHeading icon={Terminal}>Example</SectionHeading>
@@ -164,6 +173,11 @@ export function DocsPage() {
         <SectionHeading icon={Settings}>Environment</SectionHeading>
         <table class={tableClass}>
           <thead>
+            <tr>
+              <td class={tdClass}>TRUST_PROXY</td>
+              <td class={tdClass}>{String(TRUST_PROXY)}</td>
+              <td class={tdClass}>Trust a proxy that overwrites X-Forwarded-For</td>
+            </tr>
             <tr>
               <th class={thClass}>Variable</th>
               <th class={thClass}>Default</th>

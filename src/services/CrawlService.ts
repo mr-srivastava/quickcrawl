@@ -1,10 +1,7 @@
-import type { Workflow } from '../workflow/index';
-import type { CrawlResult, CrawlResultData, CrawlContext, Metadata } from '../workflows/crawl/types';
+import type { CrawlResult, CrawlResultData, CrawlError, CrawlWorkflow, Metadata } from '../workflows/crawl/types';
 import { isCompleted } from '../workflows/crawl/guards';
 import { removeUndefined } from '../workflows/crawl/utils/runtime';
 import { createModuleLogger } from '../lib/logger';
-
-type InitialContext = Extract<CrawlContext, { stage: 'initial' }>;
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
@@ -12,7 +9,7 @@ export class CrawlService {
   private readonly log = createModuleLogger('CrawlService');
 
   constructor(
-    private readonly workflow: Workflow<InitialContext, CrawlContext>,
+    private readonly workflow: CrawlWorkflow,
     private readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
   ) { }
 
@@ -58,13 +55,24 @@ export class CrawlService {
         error: { type: 'unknown', message: 'Workflow incomplete' },
       };
     } catch (err) {
+      const error = toCrawlError(err, this.timeoutMs);
       const message = err instanceof Error ? err.message : 'Unknown error';
       this.log.error({ url, err: err instanceof Error ? err : undefined, message }, 'Crawl failed');
 
-      return {
-        success: false,
-        error: { type: 'unknown', message, cause: err },
-      };
+      return { success: false, error };
     }
   }
+}
+
+function toCrawlError(error: unknown, timeoutMs: number): CrawlError {
+  if (isCrawlError(error)) return error;
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    return { type: 'timeout', timeoutMs, stage: 'workflow' };
+  }
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  return { type: 'unknown', message };
+}
+
+function isCrawlError(error: unknown): error is CrawlError {
+  return typeof error === 'object' && error !== null && 'type' in error;
 }

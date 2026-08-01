@@ -31,7 +31,14 @@ app.post('/crawl', rateLimitMiddleware(), async (c) => {
     if (!parsed.success) {
       requestLogger.warn({ issues: parsed.error.issues }, 'Invalid input');
       return c.json(
-        { error: 'Invalid input', issues: parsed.error.issues },
+        {
+          success: false,
+          error: {
+            type: 'validation_error',
+            message: 'Invalid input',
+            details: parsed.error.issues,
+          },
+        },
         422,
       );
     }
@@ -45,7 +52,7 @@ app.post('/crawl', rateLimitMiddleware(), async (c) => {
       return c.json(result, 200);
     }
 
-    return c.json(result, 500);
+    return errorHandler(result.error, c);
   } catch (err) {
     return errorHandler(err, c);
   }

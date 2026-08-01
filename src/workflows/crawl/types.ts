@@ -30,6 +30,7 @@ export type CrawlError =
   | { type: 'timeout'; timeoutMs: number; stage: string }
   | { type: 'parse_failed'; message: string; stage: string }
   | { type: 'network_error'; message: string; cause?: string }
+  | { type: 'invalid_url'; message: string }
   | { type: 'invalid_html'; message: string }
   | { type: 'unknown'; message: string; cause?: unknown };
 
@@ -105,7 +106,11 @@ export type CrawlContext =
 // --- Zod schemas (unchanged for runtime validation) ---
 
 export const CrawlInputSchema = z.object({
-  url: z.string().url(),
+  url: z
+    .url()
+    .refine((value) => ['http:', 'https:'].includes(new URL(value).protocol), {
+      message: 'URL must use HTTP or HTTPS',
+    }),
 });
 
 export type CrawlInput = z.infer<typeof CrawlInputSchema>;
@@ -124,3 +129,10 @@ export type CrawlResultData = {
 };
 
 export type CrawlResult = Result<CrawlResultData>;
+
+export interface CrawlWorkflow {
+  run(
+    initial: InitialContext,
+    options?: import('../../workflow/types').RunOptions,
+  ): Promise<CrawlContext>;
+}

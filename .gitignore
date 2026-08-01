@@ -1,7 +1,6 @@
 # dev
 .yarn/
 !.yarn/releases
-.bun/
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
@@ -27,7 +26,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-bun-debug.log*
 
 # test coverage
 coverage/

@@ -20,7 +20,7 @@ uiRoutes.get('/styles.css', async (c) => {
           : 'public, max-age=31536000, immutable',
     });
   } catch {
-    return c.text('/* styles not built — run: bun run build:css */', 503, {
+    return c.text('/* styles not built — run: pnpm run build:css */', 503, {
       'Content-Type': 'text/css',
     });
   }

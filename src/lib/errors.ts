@@ -23,6 +23,7 @@ function crawlErrorToStatusCode(error: CrawlError): number {
       return 504;
     case 'parse_failed':
     case 'invalid_html':
+    case 'invalid_url':
       return 422;
     case 'network_error':
       return 503;
@@ -40,6 +41,7 @@ function getErrorMessage(error: CrawlError): string {
       return `Request timed out after ${error.timeoutMs}ms`;
     case 'parse_failed':
     case 'invalid_html':
+    case 'invalid_url':
     case 'network_error':
     case 'unknown':
       return error.message;
@@ -53,7 +55,7 @@ function isCrawlError(error: unknown): error is CrawlError {
     typeof error === 'object' &&
     error !== null &&
     'type' in error &&
-    'message' in error
+    typeof error.type === 'string'
   );
 }
 

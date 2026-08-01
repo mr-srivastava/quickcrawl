@@ -7,10 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrated the runtime and package-management workflow from Bun to Node.js and
+  pnpm
+- Replaced the Bun test runner with Vitest
+- Upgraded the build and test toolchain to Vite 8 and TypeScript 7
+- Replaced tsup with Rolldown and raised the Node.js requirement to version 24
+
 ### Added
-- Comprehensive documentation (API, Architecture, Development guides)
-- Architectural Decision Records (ADR)
-- TODO and roadmap tracking
+
+- Added API, architecture, development, contribution, and agent documentation.
+- Added architectural decision records.
+- Added roadmap tracking.
 
 ## [0.1.0] - 2024
 
@@ -29,17 +38,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - Bun runtime support
 
-### Technical Details
-- **Runtime**: Bun
-- **Framework**: Hono
-- **HTML Parser**: Cheerio
-- **Markdown**: Turndown + turndown-plugin-gfm
-- **Logging**: Pino
-- **Validation**: Zod
-- **Language**: TypeScript (strict mode)
+### Technical details
+
+- Runtime: Bun
+- Framework: Hono
+- HTML parser: Cheerio
+- Markdown conversion: Turndown and `turndown-plugin-gfm`
+- Logging: Pino
+- Validation: Zod
+- Language: TypeScript in strict mode
 
 ---
 
-## Version History
+## Version history
 
 - **0.1.0** - Initial release with core crawling functionality

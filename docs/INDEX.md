@@ -1,184 +1,91 @@
-# Documentation Index
+# QuickCrawl documentation
 
-Welcome to QuickCrawl's documentation! This index helps you find the right documentation for your needs.
+This page routes you to the canonical source for each QuickCrawl topic. Start
+with the document that matches what you want to do, and follow its links when
+you need more detail.
 
-## Quick Navigation
+## Use QuickCrawl
 
-### For Users
+Use these documents to install QuickCrawl, call the API, and understand release
+changes.
 
-- **[README](../README.md)** - Start here! Quick overview and getting started guide
-- **[API Reference](API.md)** - Complete API documentation with examples
-- **[Changelog](../CHANGELOG.md)** - Version history and what's new
+- [README](../README.md) — product overview, requirements, quick start, and a
+  minimal crawl example
+- [API reference](API.md) — endpoints, request and response schemas, status
+  codes, rate limiting, caching, and client examples
+- [Changelog](../CHANGELOG.md) — released and unreleased behavior changes
 
-### For Developers
+## Develop QuickCrawl
 
-- **[Development Guide](DEVELOPMENT.md)** - Setup, workflows, and how to contribute
-- **[Architecture](ARCHITECTURE.md)** - Technical deep dive into the system design
-- **[Decisions](DECISIONS.md)** - Why we made specific technical choices (ADRs)
-- **[TODO](../TODO.md)** - Roadmap and planned features
+Use these documents when you change the codebase or contribute a patch.
 
-## Documentation Overview
+- [Development guide](DEVELOPMENT.md) — local setup, development commands,
+  testing, debugging, and production builds
+- [Contributing guide](../CONTRIBUTING.md) — contribution workflow, code
+  conventions, commits, pull requests, and review expectations
+- [Architecture](ARCHITECTURE.md) — module boundaries, runtime flow, workflow
+  stages, extension points, and technical constraints
+- [Architectural decisions](DECISIONS.md) — accepted decisions and their
+  rationale
+- [Roadmap](../TODO.md) — planned work, known issues, and technical debt
 
-### README.md
-**Purpose:** Entry point for the project  
-**Audience:** Everyone  
-**Contains:**
-- Quick start guide
-- Basic usage examples
-- Configuration overview
-- Links to detailed docs
+Repository agents also follow [AGENTS.md](../AGENTS.md). That file contains
+operational guardrails for automated changes; it isn't contributor or product
+documentation.
 
-### API.md
-**Purpose:** Complete API reference  
-**Audience:** API users, frontend developers  
-**Contains:**
-- Endpoint specifications
-- Request/response examples
-- Error handling
-- Rate limiting details
-- Usage examples in multiple languages
+## Documentation ownership
 
-### ARCHITECTURE.md
-**Purpose:** Technical architecture documentation  
-**Audience:** Developers, contributors  
-**Contains:**
-- Workflow pipeline details
-- Type system explanation
-- Services layer architecture
-- Error handling patterns
-- Extension points
+Each topic has one canonical owner. Other documents can summarize the topic,
+but they must link to the canonical document instead of repeating detailed
+instructions.
 
-### DEVELOPMENT.md
-**Purpose:** Developer onboarding and guidelines  
-**Audience:** Contributors, maintainers  
-**Contains:**
-- Setup instructions
-- How to add features
-- Testing strategies
-- Code style guidelines
-- Git commit conventions
-- Debugging tips
+| Topic | Canonical document |
+| --- | --- |
+| Product purpose and first run | [README](../README.md) |
+| HTTP endpoints and payloads | [API reference](API.md) |
+| Local setup, commands, testing, and debugging | [Development guide](DEVELOPMENT.md) |
+| Contribution process and code conventions | [Contributing guide](../CONTRIBUTING.md) |
+| Components, data flow, and extension points | [Architecture](ARCHITECTURE.md) |
+| Decision rationale | [Architectural decisions](DECISIONS.md) |
+| Planned work and known issues | [Roadmap](../TODO.md) |
+| Released changes | [Changelog](../CHANGELOG.md) |
+| Coding-agent constraints | [AGENTS.md](../AGENTS.md) |
 
-### DECISIONS.md
-**Purpose:** Architectural Decision Records (ADRs)  
-**Audience:** Developers, future maintainers  
-**Contains:**
-- Why we chose Bun over Node.js
-- Why workflow-based architecture
-- Why specific libraries (Hono, Cheerio, etc.)
-- Trade-offs and consequences
-- Alternatives considered
+## Choose a starting point
 
-### TODO.md
-**Purpose:** Roadmap and task tracking  
-**Audience:** Contributors, project planners  
-**Contains:**
-- Current work in progress
-- Planned features
-- Future ideas
-- Completed features
-- Known issues
+Use the shortest path for your task.
 
-### CHANGELOG.md
-**Purpose:** Version history  
-**Audience:** Users, developers  
-**Contains:**
-- What changed in each version
-- New features
-- Bug fixes
-- Breaking changes
+- To run the project, start with the [README](../README.md), then use the
+  [development guide](DEVELOPMENT.md) for the full local workflow.
+- To integrate with the service, use the [API reference](API.md).
+- To fix or extend the implementation, read the
+  [development guide](DEVELOPMENT.md) and the relevant section of the
+  [architecture guide](ARCHITECTURE.md).
+- To submit a change, follow the [contributing guide](../CONTRIBUTING.md).
+- To understand why a technology or pattern was selected, read the
+  [architectural decisions](DECISIONS.md).
 
-## Common Workflows
+## Maintain the documentation
 
-### "I want to use QuickCrawl"
-1. Read [README](../README.md) for quick start
-2. Check [API Reference](API.md) for detailed usage
-3. Review [Changelog](../CHANGELOG.md) for latest features
+When behavior changes, update the canonical document in the same change. Keep
+summaries short, link to the canonical source, and don't copy long examples
+between pages.
 
-### "I want to contribute"
-1. Read [Development Guide](DEVELOPMENT.md) for setup
-2. Review [Architecture](ARCHITECTURE.md) to understand the system
-3. Check [Decisions](DECISIONS.md) to understand why things are the way they are
-4. Look at [TODO](../TODO.md) for what needs to be done
+- Update `API.md` when an endpoint, payload, status code, or HTTP behavior
+  changes.
+- Update `DEVELOPMENT.md` when setup, commands, tests, debugging, or build steps
+  change.
+- Update `CONTRIBUTING.md` when contribution policy or code conventions change.
+- Update `ARCHITECTURE.md` when module boundaries, data flow, workflow stages,
+  or extension patterns change.
+- Add an entry to `DECISIONS.md` when a significant technical choice needs a
+  durable explanation.
+- Update `README.md` only when the product overview, requirements, quick start,
+  or primary example changes.
+- Update `TODO.md` for planned work and `CHANGELOG.md` for delivered behavior.
+- Update `AGENTS.md` when automated contributors need a new repository-specific
+  constraint.
 
-### "I want to understand the design"
-1. Read [Architecture](ARCHITECTURE.md) for technical details
-2. Review [Decisions](DECISIONS.md) for rationale
-3. Check code examples in [Development Guide](DEVELOPMENT.md)
-
-### "I want to extend functionality"
-1. Read [Architecture](ARCHITECTURE.md) → Extension Points section
-2. Follow examples in [Development Guide](DEVELOPMENT.md) → Adding a New Task
-3. Review [Decisions](DECISIONS.md) to align with existing patterns
-
-### "I'm debugging an issue"
-1. Check [Development Guide](DEVELOPMENT.md) → Debugging section
-2. Review [API Reference](API.md) → Troubleshooting
-3. Enable debug logging (see [README](../README.md) → Configuration)
-
-## Documentation Maintenance
-
-### When to Update Each Document
-
-**README.md:**
-- New major features
-- Changed installation process
-- Updated configuration options
-
-**API.md:**
-- New endpoints
-- Changed request/response formats
-- New error types
-- Updated rate limits
-
-**ARCHITECTURE.md:**
-- New architectural patterns
-- Changed workflow stages
-- New services or layers
-- Updated type system
-
-**DEVELOPMENT.md:**
-- New development tools
-- Changed setup process
-- Updated code style guidelines
-- New testing approaches
-
-**DECISIONS.md:**
-- Any significant architectural decision
-- Technology changes
-- Pattern adoptions
-- Trade-off discussions
-
-**TODO.md:**
-- When starting new work (move to "In Progress")
-- When completing features (move to "Completed")
-- When planning new features (add to "Planned")
-
-**CHANGELOG.md:**
-- Every release
-- Significant changes
-- Breaking changes
-- New features
-
-## Contributing to Documentation
-
-Documentation improvements are always welcome! When contributing:
-
-1. **Keep it current**: Update docs alongside code changes
-2. **Be clear**: Write for someone unfamiliar with the project
-3. **Use examples**: Show, don't just tell
-4. **Link related docs**: Help readers find more information
-5. **Follow the format**: Match the style of existing docs
-
-## Questions?
-
-If you can't find what you're looking for:
-1. Check the [README](../README.md) first
-2. Search across all documentation files
-3. Look at code comments for implementation details
-4. Open an issue on GitHub
-
----
-
-**Last Updated:** 2024  
-**Documentation Version:** 0.1.0
+Before finishing a documentation change, verify commands and examples against
+the current code, check relative links, and remove conflicting guidance from
+noncanonical pages.

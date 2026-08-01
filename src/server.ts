@@ -1,8 +1,9 @@
 import { serve } from '@hono/node-server';
 import app from './index';
 import { logger } from './lib/logger';
+import { DEFAULT_PORT } from './config';
 
-const port = Number(process.env.PORT) || 3000;
+const port = DEFAULT_PORT;
 
 serve(
   {

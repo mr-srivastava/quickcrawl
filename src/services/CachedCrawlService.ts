@@ -1,12 +1,11 @@
 import type { CrawlResult, CrawlResultData } from '../workflows/crawl/types';
 import { CacheService } from '../lib/cache';
 import { createModuleLogger } from '../lib/logger';
-import type { CrawlService } from './CrawlService';
+import { DEFAULT_CACHE_MAX_SIZE, DEFAULT_CACHE_TTL_MS } from '../config';
 
-export const DEFAULT_CACHE_TTL_MS =
-  Number(process.env.CACHE_TTL_MS) || 300_000;
-export const DEFAULT_CACHE_MAX_SIZE =
-  Number(process.env.CACHE_MAX_SIZE) || 100;
+export interface Crawler {
+  crawlUrl(url: string): Promise<CrawlResult>;
+}
 
 export class CachedCrawlService {
   private readonly log = createModuleLogger('CachedCrawlService');
@@ -15,7 +14,7 @@ export class CachedCrawlService {
     DEFAULT_CACHE_MAX_SIZE,
   );
 
-  constructor(private readonly crawlService: CrawlService) {}
+  constructor(private readonly crawlService: Crawler) {}
 
   async crawlUrl(url: string): Promise<CrawlResult> {
     const cached = this.cache.get(url);

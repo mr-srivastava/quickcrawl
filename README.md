@@ -1,26 +1,34 @@
 # QuickCrawl
 
-A fast, type-safe web crawler API built with TypeScript, Hono, and Bun. Fetches web pages, extracts metadata, and converts HTML to clean Markdown with built-in caching and rate limiting.
+A type-safe web crawler API built with TypeScript, Hono, and Node.js. QuickCrawl
+fetches public web pages, extracts metadata, and converts HTML to Markdown with
+built-in caching and rate limiting.
 
 ## Features
 
-- 🚀 **Fast & Lightweight** - Built on Bun runtime and Hono framework
-- 📝 **Markdown Conversion** - Converts HTML to clean, readable Markdown
-- 🔍 **Metadata Extraction** - Automatically extracts page metadata (title, description, Open Graph, etc.)
-- 💾 **Built-in Caching** - Configurable LRU cache to reduce redundant requests
-- 🛡️ **Rate Limiting** - Protects your API from abuse
-- 🔒 **Type-Safe** - Advanced TypeScript with discriminated unions and type guards
-- 📊 **Structured Logging** - Pino logger with request tracking
-- 🔄 **Workflow-Based** - Modular pipeline architecture for easy extension
+QuickCrawl provides a focused set of crawling and conversion capabilities:
 
-## Quick Start
+- Converts cleaned HTML to GitHub Flavored Markdown.
+- Extracts standard, Open Graph, Twitter Card, and custom metadata.
+- Caches successful results with configurable expiration and capacity.
+- Limits crawl requests through configurable in-memory counters.
+- Models workflow stages and service results with discriminated unions.
+- Emits structured Pino logs with request and module context.
+- Validates each target and redirect against private and reserved networks.
+
+## Quick start
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) v1.0 or higher
-- Node.js v20+ (for development)
+Install the supported runtime and package manager:
+
+- [Node.js](https://nodejs.org/) v24 or higher
+- [pnpm](https://pnpm.io/) v10 or higher
 
 ### Installation
+
+Clone the repository, install the locked dependencies, and create a local
+environment file:
 
 ```bash
 # Clone the repository
@@ -28,68 +36,75 @@ git clone <your-repo-url>
 cd quickcrawl
 
 # Install dependencies
-bun install
+pnpm install
 
 # Configure environment
 cp .env.example .env
 ```
 
-### Running the Server
+### Run the server
+
+Use development mode while editing, or build and start the production bundle:
 
 ```bash
 # Development mode (with auto-reload)
-bun run dev
+pnpm run dev
 
 # Build for production (local only; Vercel deploy runs from source)
-bun run build
+pnpm run build
 
 # Start production server
-bun start
+pnpm start
 ```
 
-The server will start at `http://localhost:3000`
+The server starts at `http://localhost:3000`.
 
-### Web UI
+### Use the web UI
 
 Open [http://localhost:3000](http://localhost:3000) in your browser for:
 
-- **Playground** — enter a URL and preview Markdown, metadata, and raw JSON
-- **API docs** — [http://localhost:3000/docs](http://localhost:3000/docs)
-- **Health check** — `GET /health` returns JSON status
+- Use the playground to enter a URL and preview Markdown, metadata, and JSON.
+- Open the [browser API reference](http://localhost:3000/docs).
+- Call `GET /health` to check server status.
 
-### Styling (Tailwind CSS)
+### Build styles
 
-The web UI uses [Tailwind CSS v4](https://tailwindcss.com/). Source styles live in `src/ui/styles/input.css`; the CLI compiles them to `public/styles.css`.
+The web UI uses [Tailwind CSS v4](https://tailwindcss.com/). Source styles live
+in `src/ui/styles/input.css`; the CLI generates `public/styles.css`.
 
 ```bash
-bun run build:css   # One-off compile (also runs before build)
-bun run dev:css     # Watch mode (included in bun run dev)
+pnpm run build:css   # One-off compile (also runs before build)
+pnpm run dev:css     # Watch mode (included in pnpm run dev)
 ```
 
-`bun run dev` builds CSS, starts the Tailwind watcher, and runs the API server.
+`pnpm run dev` builds CSS, starts the Tailwind watcher, and runs the API server.
 
-### Deploying to Vercel
+### Deploy to Vercel
 
-The app runs on Vercel from source using the Bun runtime. Vercel runs `bun run build:css` before deploy (see `vercel.json`). Use [Vercel CLI](https://vercel.com/docs/cli) for local parity:
+The app runs on Vercel from source using Node.js. Vercel installs dependencies
+with pnpm and runs `pnpm run build:css` before deployment (see `vercel.json`).
+Use [Vercel CLI](https://vercel.com/docs/cli) for local parity:
 
 ```bash
-vc dev      # Local dev matching Vercel (optional; or use bun run dev)
+vc dev      # Local dev matching Vercel (optional; or use pnpm run dev)
 vc deploy   # Deploy to Vercel
 ```
 
 Environment variables can be set in the Vercel project settings.
 
-## Usage
+## Call the API
 
-### Basic Example
+### curl example
+
+Send a JSON request to the local crawl endpoint:
 
 ```bash
-curl -X POST http://localhost:3000/crawl \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com"}'
+curl --request POST http://localhost:3000/crawl \
+  --header 'Content-Type: application/json' \
+  --data '{"url":"https://example.com"}'
 ```
 
-**Response:**
+The endpoint returns a discriminated JSON result:
 
 ```json
 {
@@ -106,13 +121,15 @@ curl -X POST http://localhost:3000/crawl \
 }
 ```
 
-### JavaScript/TypeScript
+### JavaScript and TypeScript example
+
+Use the standard Fetch API to call QuickCrawl from JavaScript or TypeScript:
 
 ```typescript
 const response = await fetch('http://localhost:3000/crawl', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ url: 'https://example.com' })
+  body: JSON.stringify({ url: 'https://example.com' }),
 });
 
 const result = await response.json();
@@ -126,139 +143,48 @@ if (result.success) {
 
 ## Documentation
 
-📚 **[Documentation Index](docs/INDEX.md)** - Complete guide to all documentation
+Use the [documentation map](docs/INDEX.md) to find the canonical source for
+each topic. The main entry points are:
 
-**Quick Links:**
-- **[API Reference](docs/API.md)** - Complete API documentation with examples
-- **[Architecture](docs/ARCHITECTURE.md)** - Technical architecture and design patterns
-- **[Development Guide](docs/DEVELOPMENT.md)** - Setup, workflows, and contribution guidelines
-- **[Decisions](docs/DECISIONS.md)** - Architectural decision records (ADRs)
-- **[TODO](TODO.md)** - Roadmap and planned features
-- **[Changelog](CHANGELOG.md)** - Version history and changes
+- [API reference](docs/API.md) — endpoints, payloads, status codes, and client
+  examples
+- [Development guide](docs/DEVELOPMENT.md) — local setup, tests, debugging, and
+  builds
+- [Architecture](docs/ARCHITECTURE.md) — module boundaries, runtime flow, and
+  extension points
+- [Contributing guide](CONTRIBUTING.md) — code conventions and pull request
+  workflow
+- [Changelog](CHANGELOG.md) — released and unreleased changes
 
-## Configuration
+## Configure QuickCrawl
 
-Environment variables (see `.env.example`):
+Use `.env.example` as the configuration template. The
+[development guide](docs/DEVELOPMENT.md#configure-the-application) contains the
+canonical configuration reference.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `NODE_ENV` | `development` | Environment mode |
 | `LOG_LEVEL` | `info` | Logging level (debug/info/warn/error) |
 | `PORT` | `3000` | Server port |
-| `RATE_LIMIT_MAX_REQUESTS` | `10` | Max requests per window |
-| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate limit window (ms) |
-| `CACHE_TTL_MS` | `300000` | Cache TTL (5 minutes) |
-| `CACHE_MAX_SIZE` | `100` | Max cache entries |
+| `RATE_LIMIT_MAX_REQUESTS` | `10` | Request ceiling per window |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Window duration in milliseconds |
+| `TRUST_PROXY` | `false` | Trust proxy-provided client IPs when the proxy overwrites `X-Forwarded-For` |
+| `CACHE_TTL_MS` | `300000` | Cache lifetime in milliseconds |
+| `CACHE_MAX_SIZE` | `100` | Maximum cached results |
 
-## Project Structure
+## How it works
 
-```
-quickcrawl/
-├── src/
-│   ├── index.ts                 # Server entry point
-│   ├── lib/                     # Shared utilities
-│   ├── middleware/              # Hono middleware
-│   ├── services/                # Business logic
-│   ├── workflow/                # Generic workflow engine
-│   └── workflows/               # Specific workflows
-│       └── crawl/               # Web crawling workflow
-├── docs/                        # Documentation
-│   ├── API.md
-│   ├── ARCHITECTURE.md
-│   └── DEVELOPMENT.md
-├── .env.example                 # Environment template
-└── README.md
-```
-
-## How It Works
-
-QuickCrawl uses a **workflow-based pipeline** that processes web pages through five stages:
-
-```
-URL → Fetch HTML → Extract Metadata → Parse Document → Clean Document → Convert to Markdown
-```
-
-Each stage is:
-- **Type-safe** - TypeScript knows exactly what data exists at each stage
-- **Composable** - Stages can be added, removed, or reordered
-- **Testable** - Each stage can be tested in isolation
-
-See [Architecture](docs/ARCHITECTURE.md) for detailed technical information.
-
-## Performance
-
-- **Fast**: Built on Bun runtime for optimal performance
-- **Cached**: LRU cache reduces redundant requests
-- **Protected**: Rate limiting prevents abuse
-- **Efficient**: Streaming and optimized HTML parsing
-
-Typical response times (without cache):
-- Simple pages: 500ms - 2s
-- Complex pages: 2s - 5s
-- Cached responses: < 10ms
-
-## Quick Reference
-
-### Common Commands
-
-```bash
-bun run dev              # Dev server + Tailwind watch
-bun run build:css        # Compile Tailwind to public/styles.css
-bun run build            # CSS + TypeScript to dist/
-bun start                # Run production build
-bun test                 # Run tests (when implemented)
-```
-
-### Key Files
-
-- `src/index.ts` - Server entry point and route wiring
-- `src/ui/` - Hono JSX web UI (Tailwind utility classes)
-- `src/ui/styles/input.css` - Tailwind source (`@import "tailwindcss"`)
-- `public/styles.css` - Compiled CSS (generated)
-- `src/routes/ui.tsx` - UI route handlers (`/`, `/docs`, `/health`)
-- `src/workflows/crawl/` - Crawl pipeline implementation
-- `src/services/` - Business logic (CrawlService, CachedCrawlService)
-- `src/lib/` - Shared utilities (cache, logger, rate limiter)
-- `.env` - Configuration (copy from `.env.example`)
-
-### Troubleshooting
-
-**Port already in use:**
-```bash
-lsof -ti:3000 | xargs kill -9
-```
-
-**Module not found errors:**
-- Verify `tsconfig.json` has `"moduleResolution": "bundler"`
-- Run `bun install` to ensure dependencies are installed
-
-**Slow crawl performance:**
-- Check target site response time
-- Verify cache is enabled (check logs for cache hits)
-- Consider increasing timeout in CrawlService
-
-See [Development Guide](docs/DEVELOPMENT.md) for detailed instructions on:
-- Adding new tasks to the workflow
-- Creating custom workflows
-- Testing strategies
-- Debugging tips
+QuickCrawl processes each URL through an explicit, typed workflow: fetch HTML,
+extract metadata, parse and clean the document, and convert it to Markdown. Read
+the [architecture guide](docs/ARCHITECTURE.md) for component boundaries,
+workflow stages, security constraints, and extension points.
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for:
-- How to report bugs and suggest features
-- Development workflow and setup
-- Code style guidelines and commit conventions
-- Testing requirements and PR process
-
-See also: [Development Guide](docs/DEVELOPMENT.md) for detailed technical information.
+Follow the [contributing guide](CONTRIBUTING.md) for contribution policy and the
+[development guide](docs/DEVELOPMENT.md) for local setup and verification.
 
 ## License
 
 MIT
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/quickcrawl/issues)
-- **Documentation**: See `docs/` directory
-- **Examples**: See [API Reference](docs/API.md)

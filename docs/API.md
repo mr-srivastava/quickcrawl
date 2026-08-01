@@ -1,28 +1,38 @@
-# API Reference
+# API reference
 
-## Base URL
+QuickCrawl exposes a JSON crawl endpoint, a health endpoint, and two browser
+pages. This reference describes the HTTP contract implemented by
+`src/index.ts` and `src/routes/ui.tsx`.
 
-```
-http://localhost:3000
-```
+Local examples use `http://localhost:3000`. Replace that origin with your
+deployed QuickCrawl URL in production.
 
-## Endpoints
+## Browser pages
 
-### Web UI
+QuickCrawl serves its playground and browser documentation from the same Hono
+application as the API.
 
-**GET /**
+### `GET /`
 
-Interactive landing page with a live crawl playground. Open in a browser to try URLs without `curl`.
+The root route returns the HTML playground. Open it in a browser to submit a URL
+and inspect the resulting Markdown, metadata, and JSON.
 
----
+### `GET /docs`
 
-### Health Check
+The docs route returns a condensed HTML API reference for browser users.
 
-**GET /health**
+### `GET /styles.css`
 
-JSON health check for monitoring and deploy probes.
+The stylesheet route returns the generated UI stylesheet. It returns `503` with
+a CSS comment when `public/styles.css` hasn't been built.
 
-**Response:** (version and service name match `src/config.ts`)
+## Health endpoint
+
+Use the health endpoint for local checks and deployment probes.
+
+### `GET /health`
+
+The endpoint returns `200 OK` with application metadata from `src/config.ts`.
 
 ```json
 {
@@ -32,435 +42,240 @@ JSON health check for monitoring and deploy probes.
 }
 ```
 
-> Keep `version` in sync with `APP_VERSION` in `src/config.ts`.
+## Crawl endpoint
 
----
+The crawl endpoint validates a public HTTP or HTTPS URL, fetches its HTML,
+extracts metadata, cleans the document, and converts the content to Markdown.
 
-### API Docs (HTML)
+### `POST /crawl`
 
-**GET /docs**
+Send a JSON body with one `url` field.
 
-Human-readable API reference in the browser (same content as this document, condensed).
-
----
-
-### Crawl URL
-
-**POST /crawl**
-
-Fetches a web page, extracts metadata, and converts it to Markdown.
-
-#### Request
-
-**Headers:**
-
-```
+```http
 Content-Type: application/json
 ```
 
-**Body:**
-
 ```json
 {
-  "url": "string"  // Required: Valid HTTP/HTTPS URL
+  "url": "https://example.com"
 }
 ```
 
-**Validation:**
+The URL must meet these requirements:
 
-- `url` must be a valid URL string
-- `url` must start with `http://` or `https://`
+- It must be a valid absolute URL.
+- It must use HTTP or HTTPS.
+- It must not contain a username or password.
+- Its hostname must resolve to public IP addresses.
+- Every followed redirect must also resolve to public IP addresses.
 
-#### Response
+QuickCrawl rejects localhost, private, link-local, reserved, multicast, and
+other non-public destinations. It follows at most five redirects.
 
-##### Success (200 OK)
+### Successful response
+
+A successful crawl returns `200 OK`. `title` and `metadata` are optional.
 
 ```json
 {
   "success": true,
   "data": {
-    "markdown": "string",     // Converted Markdown content
-    "title": "string",        // Page title (optional)
-    "metadata": {             // Extracted metadata (optional)
-      "description": "string",
-      "keywords": "string",
-      "author": "string",
-      "ogTitle": "string",
-      "ogDescription": "string",
-      "ogImage": "string",
-      "ogUrl": "string",
-      "twitterCard": "string",
-      "twitterTitle": "string",
-      "twitterDescription": "string",
-      "twitterImage": "string"
+    "markdown": "# Example Domain",
+    "title": "Example Domain",
+    "metadata": {
+      "description": "An example page",
+      "ogTitle": "Example Domain"
     }
   }
 }
 ```
 
-**Metadata Fields:**
+Metadata can include known fields and additional string-valued HTML metadata.
+Known fields include:
 
-All metadata fields are optional and depend on what's available on the target page:
+- `title`
+- `description`
+- `author`
+- `keywords`
+- `ogTitle`
+- `ogDescription`
+- `ogImage`
+- `ogUrl`
+- `ogType`
+- `twitterCard`
+- `twitterSite`
+- `twitterCreator`
+- `favicon`
 
-| Field | Description |
-|-------|-------------|
-| `description` | Meta description tag |
-| `keywords` | Meta keywords tag |
-| `author` | Meta author tag |
-| `ogTitle` | Open Graph title |
-| `ogDescription` | Open Graph description |
-| `ogImage` | Open Graph image URL |
-| `ogUrl` | Open Graph canonical URL |
-| `twitterCard` | Twitter card type |
-| `twitterTitle` | Twitter card title |
-| `twitterDescription` | Twitter card description |
-| `twitterImage` | Twitter card image URL |
+### Validation response
 
-##### Validation Error (422 Unprocessable Entity)
-
-```json
-{
-  "error": "Invalid input",
-  "issues": [
-    {
-      "code": "string",
-      "path": ["string"],
-      "message": "string"
-    }
-  ]
-}
-```
-
-##### Server Error (500 Internal Server Error)
+An invalid request body returns `422 Unprocessable Entity`. The `details` array
+contains Zod validation issues.
 
 ```json
 {
   "success": false,
   "error": {
-    "type": "fetch_error" | "parse_error" | "timeout_error" | "unknown",
-    "message": "string",
-    "cause": {}  // Optional: Original error object
+    "type": "validation_error",
+    "message": "Invalid input",
+    "details": []
   }
 }
 ```
 
-**Error Types:**
+### Crawl error response
 
-| Type | Description |
-|------|-------------|
-| `fetch_error` | Failed to fetch the URL (network error, DNS failure, etc.) |
-| `parse_error` | Failed to parse HTML or convert to Markdown |
-| `timeout_error` | Request exceeded timeout limit (30 seconds) |
-| `unknown` | Unexpected error occurred |
-
-##### Rate Limit Exceeded (429 Too Many Requests)
+A crawl failure returns a structured error. The HTTP status depends on the
+error type.
 
 ```json
 {
-  "error": "Rate limit exceeded"
+  "success": false,
+  "error": {
+    "type": "invalid_url",
+    "message": "Private or reserved network addresses are not allowed"
+  }
 }
 ```
 
-**Headers:**
+| Error type | HTTP status | Meaning |
+| --- | ---: | --- |
+| `invalid_url` | `422` | The URL violates protocol, credential, or network-safety rules. |
+| `invalid_html` | `422` | The response doesn't contain usable HTML. |
+| `parse_failed` | `422` | QuickCrawl couldn't parse or transform the response. |
+| `fetch_failed` | `502` | The destination returned a non-successful HTTP response. |
+| `network_error` | `503` | DNS, transport, redirect, or network processing failed. |
+| `timeout` | `504` | The crawl exceeded its server-side timeout. |
+| `unknown` | `500` | An unexpected failure occurred. |
 
+### Rate-limit response
+
+When the request ceiling is exhausted, the endpoint returns `429 Too Many
+Requests` and a `Retry-After` header measured in seconds.
+
+```json
+{
+  "success": false,
+  "error": {
+    "type": "rate_limit",
+    "message": "Rate limit exceeded"
+  }
+}
 ```
-Retry-After: 60  // Seconds until rate limit resets
-```
 
-## Rate Limiting
+## Rate limiting
 
-The API implements rate limiting to prevent abuse:
+QuickCrawl limits crawl requests before it starts workflow processing. The
+defaults permit 10 requests in each 60-second window.
 
-- **Default Limit**: 10 requests per minute per IP
-- **Window**: 60 seconds (sliding window)
-- **Response**: 429 status code with `Retry-After` header
-- **Configuration**: Configurable via environment variables
+When `TRUST_PROXY=false`, all requests in one application instance share the
+same rate-limit identity. When `TRUST_PROXY=true`, QuickCrawl uses the first
+`X-Forwarded-For` value as the client identity.
 
-**Environment Variables:**
+<!-- prettier-ignore -->
+> [!WARNING]
+> Enable `TRUST_PROXY` only behind a proxy that removes incoming forwarded
+> headers and writes the correct client address. Otherwise, clients can forge
+> their identity and bypass per-client limits.
+
+Configure the behavior with these environment variables:
 
 ```env
-RATE_LIMIT_MAX_REQUESTS=10      # Max requests per window
-RATE_LIMIT_WINDOW_MS=60000      # Window duration in milliseconds
+RATE_LIMIT_MAX_REQUESTS=10
+RATE_LIMIT_WINDOW_MS=60000
+TRUST_PROXY=false
 ```
 
 ## Caching
 
-The API uses an LRU cache to improve performance:
+QuickCrawl caches successful crawl results in memory by exact URL. Failed
+results aren't cached.
 
-- **Cache Key**: URL (exact match)
-- **Default TTL**: 5 minutes
-- **Max Size**: 100 entries
-- **Behavior**: Cached responses are returned immediately without re-fetching
-
-**Environment Variables:**
+The cache expires entries after five minutes by default and stores at most 100
+entries. When it reaches capacity, it removes the least recently stored or
+updated entry.
 
 ```env
-CACHE_TTL_MS=300000    # Cache TTL in milliseconds (5 minutes)
-CACHE_MAX_SIZE=100     # Maximum number of cached entries
+CACHE_TTL_MS=300000
+CACHE_MAX_SIZE=100
 ```
 
-**Cache Behavior:**
+The cache and rate limiter are local to each application instance. They aren't
+shared across horizontally scaled deployments.
 
-- Cache hit: Returns cached result immediately
-- Cache miss: Fetches URL, caches result, returns result
-- Cache full: Evicts least recently used entry
-- Cache expired: Re-fetches URL and updates cache
+## Client examples
 
-## Examples
+These examples call the local server and handle both HTTP-level and structured
+API failures.
 
-### cURL
+### curl
 
-**Basic Request:**
+Use curl to inspect a response from the command line.
 
 ```bash
-curl -X POST http://localhost:3000/crawl \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com"}'
+curl --request POST http://localhost:3000/crawl \
+  --header 'Content-Type: application/json' \
+  --data '{"url":"https://example.com"}'
 ```
 
-**With Pretty Output:**
+### JavaScript and TypeScript
 
-```bash
-curl -X POST http://localhost:3000/crawl \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com"}' | jq '.'
-```
-
-### JavaScript/TypeScript
-
-**Using Fetch:**
+Use the standard Fetch API from a browser or supported Node.js runtime.
 
 ```typescript
-const response = await fetch('http://localhost:3000/crawl', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    url: 'https://example.com'
-  })
-});
-
-const result = await response.json();
-
-if (result.success) {
-  console.log('Title:', result.data.title);
-  console.log('Markdown:', result.data.markdown);
-  console.log('Metadata:', result.data.metadata);
-} else {
-  console.error('Error:', result.error.message);
-}
-```
-
-**With Error Handling:**
-
-```typescript
-async function crawlUrl(url: string) {
-  try {
-    const response = await fetch('http://localhost:3000/crawl', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-
-    if (response.status === 429) {
-      const retryAfter = response.headers.get('Retry-After');
-      throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
+type CrawlResponse =
+  | {
+      success: true;
+      data: {
+        markdown: string;
+        title?: string;
+        metadata?: Record<string, string>;
+      };
     }
+  | {
+      success: false;
+      error: { type: string; message: string };
+    };
 
-    const result = await response.json();
+async function crawlUrl(url: string): Promise<string> {
+  const response = await fetch('http://localhost:3000/crawl', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
 
-    if (!result.success) {
-      throw new Error(result.error.message);
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error('Failed to crawl URL:', error);
-    throw error;
+  const result = (await response.json()) as CrawlResponse;
+  if (!response.ok || !result.success) {
+    const message = result.success
+      ? `Request failed with status ${response.status}`
+      : result.error.message;
+    throw new Error(message);
   }
+
+  return result.data.markdown;
 }
 ```
 
 ### Python
 
-**Using requests:**
+Use the third-party `requests` package when it is available in your Python
+environment.
 
 ```python
 import requests
 
-url = "http://localhost:3000/crawl"
-payload = {"url": "https://example.com"}
-
-response = requests.post(url, json=payload)
+response = requests.post(
+    "http://localhost:3000/crawl",
+    json={"url": "https://example.com"},
+    timeout=35,
+)
+response.raise_for_status()
 result = response.json()
-
-if result.get("success"):
-    print("Title:", result["data"].get("title"))
-    print("Markdown:", result["data"]["markdown"])
-    print("Metadata:", result["data"].get("metadata"))
-else:
-    print("Error:", result["error"]["message"])
+print(result["data"]["markdown"])
 ```
 
-### Node.js (with axios)
+## Next steps
 
-```javascript
-const axios = require('axios');
-
-async function crawlUrl(url) {
-  try {
-    const response = await axios.post('http://localhost:3000/crawl', {
-      url: url
-    });
-
-    if (response.data.success) {
-      return response.data.data;
-    } else {
-      throw new Error(response.data.error.message);
-    }
-  } catch (error) {
-    if (error.response?.status === 429) {
-      const retryAfter = error.response.headers['retry-after'];
-      console.error(`Rate limited. Retry after ${retryAfter} seconds`);
-    } else {
-      console.error('Error:', error.message);
-    }
-    throw error;
-  }
-}
-
-// Usage
-crawlUrl('https://example.com')
-  .then(data => {
-    console.log('Title:', data.title);
-    console.log('Markdown length:', data.markdown.length);
-  })
-  .catch(err => console.error(err));
-```
-
-## Response Times
-
-Typical response times (without cache):
-
-- **Simple pages**: 500ms - 2s
-- **Complex pages**: 2s - 5s
-- **Very large pages**: 5s - 10s
-- **Timeout**: 30s (configurable)
-
-Cached responses typically return in < 10ms.
-
-## Best Practices
-
-### 1. Handle Rate Limits
-
-Always check for 429 responses and respect the `Retry-After` header:
-
-```typescript
-if (response.status === 429) {
-  const retryAfter = parseInt(response.headers.get('Retry-After') || '60');
-  await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-  // Retry request
-}
-```
-
-### 2. Implement Retries
-
-Network requests can fail. Implement exponential backoff:
-
-```typescript
-async function crawlWithRetry(url: string, maxRetries = 3) {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await crawlUrl(url);
-    } catch (error) {
-      if (i === maxRetries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
-    }
-  }
-}
-```
-
-### 3. Validate URLs
-
-Validate URLs before sending requests:
-
-```typescript
-function isValidUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-```
-
-### 4. Handle Large Responses
-
-Markdown output can be large. Consider streaming or pagination:
-
-```typescript
-const result = await crawlUrl(url);
-if (result.markdown.length > 1_000_000) {
-  console.warn('Large response:', result.markdown.length, 'characters');
-  // Consider chunking or summarizing
-}
-```
-
-### 5. Cache on Client Side
-
-Implement client-side caching to reduce API calls:
-
-```typescript
-const cache = new Map<string, { data: any; expires: number }>();
-
-async function cachedCrawl(url: string, ttl = 300_000) {
-  const cached = cache.get(url);
-  if (cached && cached.expires > Date.now()) {
-    return cached.data;
-  }
-
-  const data = await crawlUrl(url);
-  cache.set(url, { data, expires: Date.now() + ttl });
-  return data;
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**422 Validation Error:**
-- Ensure URL is properly formatted with `http://` or `https://`
-- Check that URL is a valid string
-
-**429 Rate Limit:**
-- Wait for the duration specified in `Retry-After` header
-- Consider implementing request queuing
-- Increase rate limits via environment variables (for self-hosted)
-
-**500 Server Error:**
-- Check if target URL is accessible
-- Verify target site doesn't block crawlers
-- Check server logs for detailed error information
-
-**Timeout:**
-- Target site may be slow or unresponsive
-- Consider increasing timeout via environment variables
-- Implement client-side timeout handling
-
-### Debug Mode
-
-Enable debug logging:
-
-```env
-LOG_LEVEL=debug
-```
-
-This will output detailed logs including:
-- Request/response details
-- Cache hits/misses
-- Rate limit tracking
-- Workflow stage transitions
-- Error stack traces
+Use the [development guide](DEVELOPMENT.md) to run and debug QuickCrawl. Read
+the [architecture guide](ARCHITECTURE.md) before changing endpoint behavior,
+URL safety, caching, or rate limiting.
