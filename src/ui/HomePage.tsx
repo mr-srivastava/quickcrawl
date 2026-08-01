@@ -34,21 +34,30 @@ export function HomePage() {
         </>
       }
     >
-      <div class="animate-fade-up mb-8">
-        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-[0.2em] text-accent uppercase">
-          <Icon icon={ArrowRightLeft} size={14} />
-          Web to Markdown
+      <div class="animate-fade-up mb-8 grid gap-6 border-b border-border pb-8 md:grid-cols-[minmax(0,1fr)_18rem] md:items-end dark:border-border-dark">
+        <div>
+          <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-[0.2em] text-accent uppercase">
+            <Icon icon={ArrowRightLeft} size={14} />
+            Web to Markdown
+          </p>
+          <h1 class="max-w-3xl font-display text-4xl leading-[1.05] font-semibold tracking-tight text-ink sm:text-5xl dark:text-paper-on-dark">
+            {APP_TAGLINE}
+          </h1>
+        </div>
+        <p class="m-0 max-w-md text-base leading-relaxed text-ink-muted dark:text-paper-muted-dark">
+          Enter any public page. QuickCrawl fetches it safely, removes the
+          noise, and returns clean Markdown with structured metadata.
         </p>
-        <h1 class="font-display text-4xl leading-[1.1] font-semibold tracking-tight text-ink sm:text-5xl dark:text-paper-on-dark">
-          {APP_TAGLINE}
-        </h1>
       </div>
 
       <div class="animate-fade-up-delay-1">
         <Playground />
       </div>
 
-      <aside class="animate-fade-up-delay-3 mt-10 flex flex-wrap gap-2 border-t border-border pt-8 dark:border-border-dark">
+      <aside
+        class="animate-fade-up-delay-3 mt-8 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4 dark:border-border-dark dark:bg-border-dark"
+        aria-label="QuickCrawl capabilities"
+      >
         <span class="feature-pill">
           <Icon icon={Tags} size={14} />
           Metadata extraction

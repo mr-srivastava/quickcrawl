@@ -13,7 +13,10 @@ import { Icon } from './Icon';
 
 export function Playground() {
   return (
-    <section class="card-editorial p-6 sm:p-8">
+    <section
+      class="card-editorial p-5 sm:p-8"
+      aria-labelledby="playground-heading"
+    >
       <h2 id="playground-heading" class="sr-only">
         Crawl playground
       </h2>
@@ -34,12 +37,20 @@ export function Playground() {
             placeholder="https://example.com"
             required
             autocomplete="url"
+            aria-describedby="url-hint"
           />
           <button type="submit" id="crawl-btn" class="btn-primary">
             <Icon icon={ArrowRight} size={18} />
             Extract
           </button>
         </div>
+        <p
+          id="url-hint"
+          class="mt-2 text-sm text-ink-muted dark:text-paper-muted-dark"
+        >
+          Public HTTP and HTTPS pages only. Private network addresses are
+          blocked.
+        </p>
         <div
           class="mt-4 flex flex-wrap items-center gap-2"
           role="group"
@@ -62,6 +73,7 @@ export function Playground() {
         class="mt-8 border-t border-border pt-8 dark:border-border-dark"
         hidden
         aria-live="polite"
+        aria-busy="true"
       >
         <p class="mb-4 inline-flex items-center gap-2 font-mono text-sm text-accent">
           <Icon icon={Loader2} size={16} class="icon-spin" />
@@ -94,6 +106,7 @@ export function Playground() {
         id="playground-results"
         class="mt-8 border-t border-border pt-8 dark:border-border-dark"
         hidden
+        tabindex={-1}
       >
         <p class="mb-5 font-display text-lg text-ink dark:text-paper-on-dark">
           <span class="text-ink-muted dark:text-paper-muted-dark">
@@ -108,45 +121,53 @@ export function Playground() {
           aria-label="Result views"
         >
           <button
+            id="tab-preview"
             type="button"
             class="tab tab-active"
             data-tab="preview"
             role="tab"
             aria-selected="true"
             aria-controls="panel-preview"
+            tabindex={0}
           >
             <Icon icon={Eye} size={16} />
             Preview
           </button>
           <button
+            id="tab-markdown"
             type="button"
             class="tab"
             data-tab="markdown"
             role="tab"
             aria-selected="false"
             aria-controls="panel-markdown"
+            tabindex={-1}
           >
             <Icon icon={FileText} size={16} />
             Markdown
           </button>
           <button
+            id="tab-metadata"
             type="button"
             class="tab"
             data-tab="metadata"
             role="tab"
             aria-selected="false"
             aria-controls="panel-metadata"
+            tabindex={-1}
           >
             <Icon icon={Tags} size={16} />
             Metadata
           </button>
           <button
+            id="tab-json"
             type="button"
             class="tab"
             data-tab="json"
             role="tab"
             aria-selected="false"
             aria-controls="panel-json"
+            tabindex={-1}
           >
             <Icon icon={Braces} size={16} />
             JSON
@@ -158,6 +179,8 @@ export function Playground() {
           class="tab-panel"
           data-panel="preview"
           role="tabpanel"
+          aria-labelledby="tab-preview"
+          tabindex={0}
         >
           <div class="document-sheet">
             <div id="markdown-preview" class="markdown-preview" />
@@ -169,6 +192,8 @@ export function Playground() {
           class="tab-panel"
           data-panel="markdown"
           role="tabpanel"
+          aria-labelledby="tab-markdown"
+          tabindex={0}
           hidden
         >
           <div class="mb-2 flex justify-end">
@@ -188,21 +213,30 @@ export function Playground() {
           class="tab-panel"
           data-panel="metadata"
           role="tabpanel"
+          aria-labelledby="tab-metadata"
+          tabindex={0}
           hidden
         >
-          <table class="w-full border-collapse text-sm">
-            <thead>
-              <tr>
-                <th class="w-[30%] border border-border bg-paper px-3 py-2 text-left font-display text-sm font-medium dark:border-border-dark dark:bg-paper-dark">
-                  Field
-                </th>
-                <th class="border border-border bg-paper px-3 py-2 text-left font-display text-sm font-medium dark:border-border-dark dark:bg-paper-dark">
-                  Value
-                </th>
-              </tr>
-            </thead>
-            <tbody id="metadata-body" />
-          </table>
+          <div
+            class="overflow-x-auto"
+            tabindex={0}
+            role="region"
+            aria-label="Extracted metadata"
+          >
+            <table class="w-full min-w-[32rem] border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th class="w-[30%] border border-border bg-paper px-3 py-2 text-left font-display text-sm font-medium dark:border-border-dark dark:bg-paper-dark">
+                    Field
+                  </th>
+                  <th class="border border-border bg-paper px-3 py-2 text-left font-display text-sm font-medium dark:border-border-dark dark:bg-paper-dark">
+                    Value
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="metadata-body" />
+            </table>
+          </div>
         </div>
 
         <div
@@ -210,6 +244,8 @@ export function Playground() {
           class="tab-panel"
           data-panel="json"
           role="tabpanel"
+          aria-labelledby="tab-json"
+          tabindex={0}
           hidden
         >
           <div class="mb-2 flex justify-end">

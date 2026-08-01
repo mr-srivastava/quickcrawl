@@ -40,6 +40,11 @@ describe('UI routes', () => {
     expect(res.headers.get('content-type')).toContain('text/html');
     const html = await res.text();
     expect(html).toContain('playground-form');
+    expect(html).toContain('aria-labelledby="playground-heading"');
+    expect(html).toContain('aria-describedby="url-hint"');
+    expect(html).toContain('aria-labelledby="tab-preview"');
+    expect(html).toContain('aria-labelledby="tab-metadata"');
+    expect(html).toContain('href="#main-content"');
   });
 
   test('GET /docs returns HTML', async () => {

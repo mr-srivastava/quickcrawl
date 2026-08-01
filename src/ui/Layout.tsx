@@ -44,6 +44,12 @@ export function Layout({
         {extraHead}
       </head>
       <body class="body-bg flex min-h-screen flex-col">
+        <a
+          href="#main-content"
+          class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-paper-elevated"
+        >
+          Skip to main content
+        </a>
         <header class="sticky top-0 z-20 border-b border-border/80 bg-paper-elevated/85 backdrop-blur-md dark:border-border-dark/80 dark:bg-paper-dark-elevated/85">
           <div
             class={cn(
@@ -78,6 +84,7 @@ export function Layout({
           </div>
         </header>
         <main
+          id="main-content"
           class={cn(
             'mx-auto w-full flex-1 px-5 py-10',
             wide ? 'max-w-5xl' : 'max-w-4xl',

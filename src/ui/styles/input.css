@@ -41,6 +41,10 @@
   body {
     @apply font-sans text-ink;
   }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
 }
 
 /* Atmospheric background */
@@ -136,7 +140,7 @@
   }
 
   .btn-ghost {
-    @apply inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-paper-elevated/60 px-3 py-1.5 font-mono text-xs text-ink-muted transition-colors hover:border-accent/40 hover:text-accent dark:border-border-dark dark:bg-paper-dark-elevated/60 dark:text-paper-muted-dark dark:hover:text-accent;
+    @apply inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-border bg-paper-elevated/60 px-3 py-1.5 font-mono text-xs text-ink-muted transition-colors hover:border-accent/40 hover:text-accent dark:border-border-dark dark:bg-paper-dark-elevated/60 dark:text-paper-muted-dark dark:hover:text-accent;
   }
 
   .input-field {
@@ -222,7 +226,18 @@
   }
 
   .feature-pill {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-paper-elevated/80 px-3 py-1 font-sans text-xs text-ink-muted dark:border-border-dark dark:bg-paper-dark-elevated/80 dark:text-paper-muted-dark;
+    @apply inline-flex min-h-12 items-center gap-2 bg-paper-elevated px-4 py-3 font-sans text-sm text-ink-muted dark:bg-paper-dark-elevated dark:text-paper-muted-dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

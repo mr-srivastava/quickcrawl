@@ -13,12 +13,14 @@ export const PLAYGROUND_SCRIPT = `
   if (!form || !urlInput || !submitBtn) return;
 
   let activeTab = 'preview';
+  const idleButtonLabel = submitBtn.innerHTML;
 
   function showPanel(tab) {
     document.querySelectorAll('[data-tab]').forEach(function (b) {
       const isActive = b.getAttribute('data-tab') === tab;
       b.classList.toggle('tab-active', isActive);
       b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      b.setAttribute('tabindex', isActive ? '0' : '-1');
     });
     document.querySelectorAll('[data-panel]').forEach(function (panel) {
       panel.hidden = panel.getAttribute('data-panel') !== tab;
@@ -42,6 +44,23 @@ export const PLAYGROUND_SCRIPT = `
       activeTab = tab;
       showPanel(tab);
     });
+    btn.addEventListener('keydown', function (event) {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      const tabs = Array.from(document.querySelectorAll('[data-tab]'));
+      const currentIndex = tabs.indexOf(btn);
+      let nextIndex = currentIndex;
+      if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+      if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = tabs.length - 1;
+      const nextTab = tabs[nextIndex];
+      const tab = nextTab && nextTab.getAttribute('data-tab');
+      if (!tab) return;
+      event.preventDefault();
+      activeTab = tab;
+      showPanel(tab);
+      nextTab.focus();
+    });
   });
 
   document.querySelectorAll('[data-copy]').forEach(function (btn) {
@@ -52,9 +71,13 @@ export const PLAYGROUND_SCRIPT = `
       const text = el.textContent || '';
       navigator.clipboard.writeText(text).then(
         function () {
-          const label = btn.textContent;
-          btn.textContent = 'Copied!';
-          setTimeout(function () { btn.textContent = label; }, 1500);
+          const label = btn.innerHTML;
+          btn.innerHTML = 'Copied';
+          btn.setAttribute('aria-live', 'polite');
+          setTimeout(function () {
+            btn.innerHTML = label;
+            btn.removeAttribute('aria-live');
+          }, 1500);
         },
         function () { /* clipboard unavailable */ },
       );
@@ -73,6 +96,8 @@ export const PLAYGROUND_SCRIPT = `
     if (loadingEl) loadingEl.hidden = false;
     statusEl.hidden = true;
     submitBtn.disabled = true;
+    submitBtn.setAttribute('aria-busy', 'true');
+    submitBtn.textContent = 'Extracting…';
 
     try {
       const res = await fetch('/crawl', {
@@ -146,12 +171,17 @@ export const PLAYGROUND_SCRIPT = `
       resultsEl.hidden = false;
       resultsEl.classList.add('results-reveal');
       showPanel(activeTab);
+      statusEl.textContent = 'Extraction complete. Result views are ready below.';
+      statusEl.hidden = false;
+      resultsEl.focus({ preventScroll: true });
     } catch (err) {
       if (loadingEl) loadingEl.hidden = true;
       errorEl.hidden = false;
       errorEl.textContent = err instanceof Error ? err.message : String(err);
     } finally {
       submitBtn.disabled = false;
+      submitBtn.removeAttribute('aria-busy');
+      submitBtn.innerHTML = idleButtonLabel;
     }
   });
 })();
