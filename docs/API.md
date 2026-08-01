@@ -138,15 +138,15 @@ error type.
 }
 ```
 
-| Error type | HTTP status | Meaning |
-| --- | ---: | --- |
-| `invalid_url` | `422` | The URL violates protocol, credential, or network-safety rules. |
-| `invalid_html` | `422` | The response doesn't contain usable HTML. |
-| `parse_failed` | `422` | QuickCrawl couldn't parse or transform the response. |
-| `fetch_failed` | `502` | The destination returned a non-successful HTTP response. |
-| `network_error` | `503` | DNS, transport, redirect, or network processing failed. |
-| `timeout` | `504` | The crawl exceeded its server-side timeout. |
-| `unknown` | `500` | An unexpected failure occurred. |
+| Error type      | HTTP status | Meaning                                                         |
+| --------------- | ----------: | --------------------------------------------------------------- |
+| `invalid_url`   |       `422` | The URL violates protocol, credential, or network-safety rules. |
+| `invalid_html`  |       `422` | The response doesn't contain usable HTML.                       |
+| `parse_failed`  |       `422` | QuickCrawl couldn't parse or transform the response.            |
+| `fetch_failed`  |       `502` | The destination returned a non-successful HTTP response.        |
+| `network_error` |       `503` | DNS, transport, redirect, or network processing failed.         |
+| `timeout`       |       `504` | The crawl exceeded its server-side timeout.                     |
+| `unknown`       |       `500` | An unexpected failure occurred.                                 |
 
 ### Rate-limit response
 

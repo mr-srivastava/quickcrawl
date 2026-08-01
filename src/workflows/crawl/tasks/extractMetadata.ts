@@ -47,7 +47,10 @@ async function extractMetadataTask(ctx: Input): Promise<Output> {
   if (favicon) metadata.favicon = favicon;
 
   const keyCount = Object.keys(metadata).length;
-  taskLogger.info({ url: ctx.url, metadataKeys: keyCount }, 'Metadata extracted');
+  taskLogger.info(
+    { url: ctx.url, metadataKeys: keyCount },
+    'Metadata extracted',
+  );
   return {
     ...ctx,
     stage: 'metadata_extracted',

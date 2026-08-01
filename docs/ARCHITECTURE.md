@@ -29,17 +29,17 @@ Node.js server.
 The source tree separates transport, orchestration, workflow processing, and
 shared infrastructure.
 
-| Location | Responsibility |
-| --- | --- |
-| `src/index.ts` | Constructs services and defines the JSON crawl route. |
-| `src/server.ts` | Starts the Hono Node.js adapter for local and bundled use. |
-| `src/routes/` | Defines browser UI, documentation, health, and stylesheet routes. |
-| `src/ui/` | Renders Hono JSX and provides browser-side playground behavior. |
-| `src/services/` | Coordinates workflows and decorates crawling with caching. |
-| `src/workflow/` | Defines the generic task and run-option contracts. |
-| `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition. |
-| `src/middleware/` | Applies HTTP concerns before route processing. |
-| `src/lib/` | Provides configuration-adjacent utilities, logging, errors, caching, and rate limiting. |
+| Location               | Responsibility                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `src/index.ts`         | Constructs services and defines the JSON crawl route.                                   |
+| `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                              |
+| `src/routes/`          | Defines browser UI, documentation, health, and stylesheet routes.                       |
+| `src/ui/`              | Renders Hono JSX and provides browser-side playground behavior.                         |
+| `src/services/`        | Coordinates workflows and decorates crawling with caching.                              |
+| `src/workflow/`        | Defines the generic task and run-option contracts.                                      |
+| `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition.                          |
+| `src/middleware/`      | Applies HTTP concerns before route processing.                                          |
+| `src/lib/`             | Provides configuration-adjacent utilities, logging, errors, caching, and rate limiting. |
 
 Keep HTTP concerns at the application edge. Services must not depend on Hono
 contexts, and workflow tasks must not format HTTP responses.
@@ -61,14 +61,14 @@ initial
 
 The stages carry these primary values:
 
-| Stage | Added value |
-| --- | --- |
-| `initial` | Validated input URL string |
-| `fetched` | HTML and an optional title |
-| `metadata_extracted` | Page metadata |
-| `parsed` | Serialized parsed document |
-| `cleaned` | Serialized cleaned document |
-| `completed` | Markdown output |
+| Stage                | Added value                 |
+| -------------------- | --------------------------- |
+| `initial`            | Validated input URL string  |
+| `fetched`            | HTML and an optional title  |
+| `metadata_extracted` | Page metadata               |
+| `parsed`             | Serialized parsed document  |
+| `cleaned`            | Serialized cleaned document |
+| `completed`          | Markdown output             |
 
 `createCrawlWorkflow.ts` calls the tasks in order instead of using a dynamic
 pipeline. This makes incompatible transitions compile-time errors and keeps the
@@ -158,9 +158,7 @@ Expected crawl failures use `CrawlError`, while service results use
 `Result<T, E>`.
 
 ```typescript
-type Result<T, E> =
-  | { success: true; data: T }
-  | { success: false; error: E };
+type Result<T, E> = { success: true; data: T } | { success: false; error: E };
 ```
 
 Callers must narrow on `success` before reading `data` or `error`. Preserve the

@@ -1,10 +1,4 @@
-import {
-  Activity,
-  BookOpen,
-  Globe,
-  Settings,
-  Terminal,
-} from 'lucide';
+import { Activity, BookOpen, Globe, Settings, Terminal } from 'lucide';
 import type { IconNode } from 'lucide';
 import {
   APP_NAME,
@@ -68,7 +62,7 @@ export function DocsPage() {
   return (
     <Layout title="API" activeNav="docs">
       <article class="animate-fade-up">
-        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-[0.2em] text-accent uppercase">
           <Icon icon={BookOpen} size={14} />
           Reference
         </p>
@@ -85,7 +79,9 @@ export function DocsPage() {
         </p>
 
         <div class="card-editorial mb-8 px-5 py-4 text-sm">
-          <strong class="font-display text-ink dark:text-paper-on-dark">Base URL:</strong>{' '}
+          <strong class="font-display text-ink dark:text-paper-on-dark">
+            Base URL:
+          </strong>{' '}
           <span class="text-ink-muted dark:text-paper-muted-dark">
             Same origin (e.g.{' '}
             <code class="rounded bg-paper px-1.5 py-0.5 font-mono text-xs dark:bg-paper-dark">
@@ -176,7 +172,9 @@ export function DocsPage() {
             <tr>
               <td class={tdClass}>TRUST_PROXY</td>
               <td class={tdClass}>{String(TRUST_PROXY)}</td>
-              <td class={tdClass}>Trust a proxy that overwrites X-Forwarded-For</td>
+              <td class={tdClass}>
+                Trust a proxy that overwrites X-Forwarded-For
+              </td>
             </tr>
             <tr>
               <th class={thClass}>Variable</th>

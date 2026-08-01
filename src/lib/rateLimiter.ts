@@ -20,14 +20,19 @@ export class RateLimiter {
   ): RateLimitResult {
     const now = this.now();
     const entry = this.requests.get(identifier);
-    const recent = (entry?.timestamps ?? []).filter((timestamp) => now - timestamp < windowMs);
+    const recent = (entry?.timestamps ?? []).filter(
+      (timestamp) => now - timestamp < windowMs,
+    );
     this.pruneExpired(windowMs, now);
 
     if (recent.length >= maxRequests) {
       this.requests.set(identifier, { timestamps: recent, lastSeen: now });
       return {
         allowed: false,
-        retryAfterSeconds: Math.max(1, Math.ceil((recent[0] + windowMs - now) / 1000)),
+        retryAfterSeconds: Math.max(
+          1,
+          Math.ceil((recent[0] + windowMs - now) / 1000),
+        ),
       };
     }
 

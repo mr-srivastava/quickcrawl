@@ -18,10 +18,13 @@ export function rateLimitMiddleware() {
     if (!result.allowed) {
       logger.warn({ identifier, maxRequests, windowMs }, 'Rate limit exceeded');
       c.header('Retry-After', String(result.retryAfterSeconds));
-      return c.json({
-        success: false,
-        error: { type: 'rate_limit', message: 'Rate limit exceeded' },
-      }, 429);
+      return c.json(
+        {
+          success: false,
+          error: { type: 'rate_limit', message: 'Rate limit exceeded' },
+        },
+        429,
+      );
     }
 
     await next();

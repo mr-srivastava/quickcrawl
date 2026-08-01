@@ -18,7 +18,7 @@ export function removeUndefined<T extends Record<string, unknown>>(
 /**
  * Converts unknown thrown value to a CrawlError for consistent error handling.
  */
-function toCrawlError(error: unknown, stage: string): CrawlError {
+function toCrawlError(error: unknown, _stage: string): CrawlError {
   if (error instanceof Error) {
     if (error.message.includes('fetch')) {
       return {

@@ -39,17 +39,17 @@ Each topic has one canonical owner. Other documents can summarize the topic,
 but they must link to the canonical document instead of repeating detailed
 instructions.
 
-| Topic | Canonical document |
-| --- | --- |
-| Product purpose and first run | [README](../README.md) |
-| HTTP endpoints and payloads | [API reference](API.md) |
-| Local setup, commands, testing, and debugging | [Development guide](DEVELOPMENT.md) |
-| Contribution process and code conventions | [Contributing guide](../CONTRIBUTING.md) |
-| Components, data flow, and extension points | [Architecture](ARCHITECTURE.md) |
-| Decision rationale | [Architectural decisions](DECISIONS.md) |
-| Planned work and known issues | [Roadmap](../TODO.md) |
-| Released changes | [Changelog](../CHANGELOG.md) |
-| Coding-agent constraints | [AGENTS.md](../AGENTS.md) |
+| Topic                                         | Canonical document                       |
+| --------------------------------------------- | ---------------------------------------- |
+| Product purpose and first run                 | [README](../README.md)                   |
+| HTTP endpoints and payloads                   | [API reference](API.md)                  |
+| Local setup, commands, testing, and debugging | [Development guide](DEVELOPMENT.md)      |
+| Contribution process and code conventions     | [Contributing guide](../CONTRIBUTING.md) |
+| Components, data flow, and extension points   | [Architecture](ARCHITECTURE.md)          |
+| Decision rationale                            | [Architectural decisions](DECISIONS.md)  |
+| Planned work and known issues                 | [Roadmap](../TODO.md)                    |
+| Released changes                              | [Changelog](../CHANGELOG.md)             |
+| Coding-agent constraints                      | [AGENTS.md](../AGENTS.md)                |
 
 ## Choose a starting point
 

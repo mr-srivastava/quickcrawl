@@ -162,16 +162,16 @@ Use `.env.example` as the configuration template. The
 [development guide](docs/DEVELOPMENT.md#configure-the-application) contains the
 canonical configuration reference.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NODE_ENV` | `development` | Environment mode |
-| `LOG_LEVEL` | `info` | Logging level (debug/info/warn/error) |
-| `PORT` | `3000` | Server port |
-| `RATE_LIMIT_MAX_REQUESTS` | `10` | Request ceiling per window |
-| `RATE_LIMIT_WINDOW_MS` | `60000` | Window duration in milliseconds |
-| `TRUST_PROXY` | `false` | Trust proxy-provided client IPs when the proxy overwrites `X-Forwarded-For` |
-| `CACHE_TTL_MS` | `300000` | Cache lifetime in milliseconds |
-| `CACHE_MAX_SIZE` | `100` | Maximum cached results |
+| Variable                  | Default       | Description                                                                 |
+| ------------------------- | ------------- | --------------------------------------------------------------------------- |
+| `NODE_ENV`                | `development` | Environment mode                                                            |
+| `LOG_LEVEL`               | `info`        | Logging level (debug/info/warn/error)                                       |
+| `PORT`                    | `3000`        | Server port                                                                 |
+| `RATE_LIMIT_MAX_REQUESTS` | `10`          | Request ceiling per window                                                  |
+| `RATE_LIMIT_WINDOW_MS`    | `60000`       | Window duration in milliseconds                                             |
+| `TRUST_PROXY`             | `false`       | Trust proxy-provided client IPs when the proxy overwrites `X-Forwarded-For` |
+| `CACHE_TTL_MS`            | `300000`      | Cache lifetime in milliseconds                                              |
+| `CACHE_MAX_SIZE`          | `100`         | Maximum cached results                                                      |
 
 ## How it works
 

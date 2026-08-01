@@ -7,13 +7,25 @@ describe('crawl services', () => {
   test('CrawlService preserves typed workflow errors', async () => {
     const workflow: CrawlWorkflow = {
       async run() {
-        throw { type: 'fetch_failed', status: 404, statusText: 'Not Found', url: 'https://example.com' };
+        throw {
+          type: 'fetch_failed',
+          status: 404,
+          statusText: 'Not Found',
+          url: 'https://example.com',
+        };
       },
     };
-    const result = await new CrawlService(workflow).crawlUrl('https://example.com');
+    const result = await new CrawlService(workflow).crawlUrl(
+      'https://example.com',
+    );
     expect(result).toEqual({
       success: false,
-      error: { type: 'fetch_failed', status: 404, statusText: 'Not Found', url: 'https://example.com' },
+      error: {
+        type: 'fetch_failed',
+        status: 404,
+        statusText: 'Not Found',
+        url: 'https://example.com',
+      },
     });
   });
 

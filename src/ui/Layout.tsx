@@ -51,10 +51,7 @@ export function Layout({
               wide ? 'max-w-5xl' : 'max-w-4xl',
             )}
           >
-            <a
-              href="/"
-              class="group flex items-center gap-2.5 no-underline"
-            >
+            <a href="/" class="group flex items-center gap-2.5 no-underline">
               <Logo class="h-5 w-5 transition-transform duration-300 group-hover:scale-105" />
               <span class="font-display text-xl font-semibold tracking-tight text-ink dark:text-paper-on-dark">
                 {APP_NAME}
@@ -89,15 +86,13 @@ export function Layout({
           {children}
         </main>
         <footer class="border-t border-border/80 bg-paper-elevated/60 py-6 dark:border-border-dark/80 dark:bg-paper-dark-elevated/60">
-          <div
-            class={cn(
-              'mx-auto px-5',
-              wide ? 'max-w-5xl' : 'max-w-4xl',
-            )}
-          >
+          <div class={cn('mx-auto px-5', wide ? 'max-w-5xl' : 'max-w-4xl')}>
             <p class="m-0 flex flex-wrap items-center gap-1 font-sans text-sm text-ink-muted dark:text-paper-muted-dark">
               Rate limited to protect the service.{' '}
-              <a href="/docs" class="link-accent inline-flex items-center gap-1">
+              <a
+                href="/docs"
+                class="link-accent inline-flex items-center gap-1"
+              >
                 <Icon icon={BookOpen} size={14} />
                 API docs
               </a>{' '}

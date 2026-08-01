@@ -22,10 +22,7 @@ async function cleanDocumentTask(ctx: Input): Promise<Output> {
   $('button, [role="button"]').each((_, el) => {
     const $el = $(el);
     const text = $el.text().trim().toLowerCase();
-    if (
-      text.includes('copy') ||
-      text.includes('copy code to clipboard')
-    ) {
+    if (text.includes('copy') || text.includes('copy code to clipboard')) {
       $el.remove();
     }
   });

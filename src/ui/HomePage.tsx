@@ -34,12 +34,12 @@ export function HomePage() {
         </>
       }
     >
-      <div class="mb-8 animate-fade-up">
-        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+      <div class="animate-fade-up mb-8">
+        <p class="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-[0.2em] text-accent uppercase">
           <Icon icon={ArrowRightLeft} size={14} />
           Web to Markdown
         </p>
-        <h1 class="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl dark:text-paper-on-dark">
+        <h1 class="font-display text-4xl leading-[1.1] font-semibold tracking-tight text-ink sm:text-5xl dark:text-paper-on-dark">
           {APP_TAGLINE}
         </h1>
       </div>
@@ -48,7 +48,7 @@ export function HomePage() {
         <Playground />
       </div>
 
-      <aside class="mt-10 flex flex-wrap gap-2 border-t border-border pt-8 animate-fade-up-delay-3 dark:border-border-dark">
+      <aside class="animate-fade-up-delay-3 mt-10 flex flex-wrap gap-2 border-t border-border pt-8 dark:border-border-dark">
         <span class="feature-pill">
           <Icon icon={Tags} size={14} />
           Metadata extraction

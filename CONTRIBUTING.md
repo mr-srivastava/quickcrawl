@@ -55,10 +55,12 @@ Keep each pull request focused on one coherent outcome. Follow this workflow:
 Run these checks before submission:
 
 ```bash
-pnpm run typecheck
-pnpm test
-pnpm run build
+pnpm run check
 ```
+
+The aggregate check verifies formatting, lint rules, types, tests, and the
+production build. Run `pnpm run format` and `pnpm run lint:fix` to apply safe
+automatic fixes while you work.
 
 ## Code conventions
 
@@ -78,16 +80,17 @@ these repository conventions:
 
 Use these naming conventions:
 
-| Element | Convention | Example |
-| --- | --- | --- |
-| Types and classes | PascalCase | `CrawlContext`, `CrawlService` |
-| Functions and variables | camelCase | `extractMetadata`, `crawlResult` |
-| Constants | Upper snake case | `DEFAULT_TIMEOUT_MS` |
-| Utility and task files | camelCase | `urlSafety.ts`, `fetchHtml.ts` |
-| Class and JSX component files | PascalCase | `CrawlService.ts`, `HomePage.tsx` |
+| Element                       | Convention       | Example                           |
+| ----------------------------- | ---------------- | --------------------------------- |
+| Types and classes             | PascalCase       | `CrawlContext`, `CrawlService`    |
+| Functions and variables       | camelCase        | `extractMetadata`, `crawlResult`  |
+| Constants                     | Upper snake case | `DEFAULT_TIMEOUT_MS`              |
+| Utility and task files        | camelCase        | `urlSafety.ts`, `fetchHtml.ts`    |
+| Class and JSX component files | PascalCase       | `CrawlService.ts`, `HomePage.tsx` |
 
 Keep imports grouped as external dependencies, internal modules, and type-only
-imports. Follow the formatting already used in the file you change.
+imports. Use Oxfmt for repository formatting and Oxlint for correctness-focused
+static analysis. Don't reformat generated `public/styles.css` manually.
 
 ## Security requirements
 

@@ -19,6 +19,7 @@ manager. Use `tsx` during development, Vitest for tests, and Rolldown for
 production bundles.
 
 **Rationale:**
+
 - Broad hosting and package compatibility
 - Strict, deterministic dependency installation through `pnpm-lock.yaml`
 - Fast TypeScript execution during development with `tsx`
@@ -27,6 +28,7 @@ production bundles.
 - One package-manager workflow for local development and Vercel
 
 **Consequences:**
+
 - **Positive:**
   - Broad ecosystem and deployment support
   - Efficient dependency storage with pnpm
@@ -37,6 +39,7 @@ production bundles.
   - Testing requires a separate test runner
 
 **Alternatives Considered:**
+
 - Bun: Integrated runtime, package manager, and test runner, but less universal
   hosting support
 - npm: Bundled with Node.js, but less space-efficient for multi-project setups
@@ -57,6 +60,7 @@ Represent workflow state with discriminated unions and compose each transition
 explicitly behind a small workflow interface.
 
 **Rationale:**
+
 - Each stage is independently testable
 - Type-safe progression through stages using discriminated unions
 - Explicit ordering makes incompatible adjacent stages fail type checking
@@ -64,6 +68,7 @@ explicitly behind a small workflow interface.
 - A small public interface hides task composition from callers
 
 **Consequences:**
+
 - **Positive:**
   - Excellent maintainability
   - Easy to extend with new stages
@@ -75,6 +80,7 @@ explicitly behind a small workflow interface.
   - Slightly more complex for simple use cases
 
 **Alternatives Considered:**
+
 - Monolithic function: Simpler but harder to test and maintain
 - Generic dynamic pipeline: More reusable, but it weakens adjacent-stage type
   guarantees
@@ -95,6 +101,7 @@ Need a lightweight, fast web framework for the API server.
 Use Hono instead of Express or Fastify.
 
 **Rationale:**
+
 - Extremely lightweight and fast
 - Includes an official Node.js server adapter
 - Modern API design (similar to Express but cleaner)
@@ -102,6 +109,7 @@ Use Hono instead of Express or Fastify.
 - Edge-runtime compatible (future-proof)
 
 **Consequences:**
+
 - **Positive:**
   - Minimal overhead
   - Excellent performance
@@ -113,6 +121,7 @@ Use Hono instead of Express or Fastify.
   - Less community resources
 
 **Alternatives Considered:**
+
 - Express: More mature but heavier and slower
 - Fastify: Fast but more complex configuration
 
@@ -130,6 +139,7 @@ Need to ensure type safety across workflow stages and prevent accessing fields t
 Use discriminated unions with a `stage` discriminator for workflow context types.
 
 **Rationale:**
+
 - Compile-time guarantees about available fields
 - TypeScript can narrow types based on stage
 - Impossible to access fields that don't exist yet
@@ -137,6 +147,7 @@ Use discriminated unions with a `stage` discriminator for workflow context types
 - Prevents entire classes of runtime errors
 
 **Consequences:**
+
 - **Positive:**
   - Excellent type safety
   - Catches errors at compile time
@@ -148,6 +159,7 @@ Use discriminated unions with a `stage` discriminator for workflow context types
   - Learning curve for contributors
 
 **Alternatives Considered:**
+
 - Optional fields: Less safe, can access undefined values
 - Separate types per stage: More verbose, harder to compose
 
@@ -166,6 +178,7 @@ Use a `Result<T, E>` discriminated union at service and API boundaries instead
 of relying only on thrown exceptions.
 
 **Rationale:**
+
 - Forces explicit error handling
 - Type-safe access to data or error
 - Clear API contracts
@@ -173,6 +186,7 @@ of relying only on thrown exceptions.
 - Functional programming approach
 
 **Consequences:**
+
 - **Positive:**
   - No unhandled exceptions
   - Explicit error handling in API
@@ -184,6 +198,7 @@ of relying only on thrown exceptions.
   - Different from typical JavaScript patterns
 
 **Alternatives Considered:**
+
 - Throwing exceptions: Standard but can be missed
 - Error-first callbacks: Outdated pattern
 - Promise rejection: Less type-safe
@@ -203,6 +218,7 @@ Implement an in-memory cache with configurable expiration and capacity. Evict
 the oldest stored or updated key when the cache reaches capacity.
 
 **Rationale:**
+
 - Bounded memory usage (max size limit)
 - Automatic eviction of stale entries (TTL)
 - Evicts the oldest stored or updated entry when full
@@ -210,6 +226,7 @@ the oldest stored or updated key when the cache reaches capacity.
 - Configurable via environment variables
 
 **Consequences:**
+
 - **Positive:**
   - Significant performance improvement for repeated URLs
   - Predictable memory usage
@@ -221,6 +238,7 @@ the oldest stored or updated key when the cache reaches capacity.
   - State isn't distributed across application instances
 
 **Alternatives Considered:**
+
 - No caching: Simple but slow for repeated requests
 - Redis: Distributed but adds complexity
 - Simple Map: No eviction, unbounded memory
@@ -239,6 +257,7 @@ Need to parse and manipulate HTML efficiently in a Node.js environment.
 Use Cheerio for HTML parsing and manipulation.
 
 **Rationale:**
+
 - jQuery-like API (familiar to many developers)
 - Fast and lightweight
 - Works in Node.js (no browser required)
@@ -246,6 +265,7 @@ Use Cheerio for HTML parsing and manipulation.
 - Mature and well-maintained
 
 **Consequences:**
+
 - **Positive:**
   - Familiar API
   - Excellent performance
@@ -257,6 +277,7 @@ Use Cheerio for HTML parsing and manipulation.
   - Limited to static HTML
 
 **Alternatives Considered:**
+
 - JSDOM: Full DOM but much slower
 - Playwright/Puppeteer: Can execute JS but heavy and slow
 - Native parsing: Too low-level
@@ -275,6 +296,7 @@ Need to convert cleaned HTML to clean, readable Markdown.
 Use Turndown with GitHub Flavored Markdown plugin.
 
 **Rationale:**
+
 - Mature and well-tested
 - Supports GitHub Flavored Markdown
 - Configurable output
@@ -282,6 +304,7 @@ Use Turndown with GitHub Flavored Markdown plugin.
 - Active maintenance
 
 **Consequences:**
+
 - **Positive:**
   - Clean Markdown output
   - GFM support (tables, strikethrough, etc.)
@@ -291,6 +314,7 @@ Use Turndown with GitHub Flavored Markdown plugin.
   - Limited customization options
 
 **Alternatives Considered:**
+
 - html-to-md: Less mature
 - Custom conversion: Too much work, error-prone
 - Pandoc: Requires external binary
@@ -309,6 +333,7 @@ Need fast, structured logging with minimal performance impact.
 Use Pino for structured logging with JSON output.
 
 **Rationale:**
+
 - Extremely fast (fastest Node.js logger)
 - Structured JSON logging
 - Child loggers for context
@@ -316,6 +341,7 @@ Use Pino for structured logging with JSON output.
 - Production-ready
 
 **Consequences:**
+
 - **Positive:**
   - Minimal performance impact
   - Structured logs easy to parse
@@ -325,9 +351,54 @@ Use Pino for structured logging with JSON output.
   - Requires log parsing tools for analysis
 
 **Alternatives Considered:**
+
 - Winston: Slower, more complex
 - Console.log: Not structured, no levels
 - Bunyan: Similar but less maintained
+
+---
+
+## ADR-010: Use Oxlint and Oxfmt for code quality
+
+**Date:** August 1, 2026
+**Status:** Accepted
+
+**Context:**
+The project needs consistent formatting and correctness-focused static analysis
+for TypeScript, TSX, tests, documentation, and configuration files.
+
+**Decision:**
+Use Oxlint for linting and Oxfmt for formatting. Enable selected type-aware
+TypeScript rules, fail CI on warnings, and use Oxfmt's Tailwind CSS v4 class
+sorting. Keep TypeScript type checking as a separate required check.
+
+**Rationale:**
+
+- Native TypeScript, TSX, Node.js, import, and Vitest rule coverage
+- Type-aware linting aligned with the project's TypeScript 7 toolchain
+- Built-in Tailwind CSS v4 class sorting for Hono JSX
+- Fast local and CI feedback with a small configuration surface
+- No existing ESLint, Prettier, or plugin configuration to migrate
+
+**Consequences:**
+
+- **Positive:**
+  - One formatter covers source, documentation, styles, and configuration
+  - Linting catches asynchronous TypeScript errors beyond syntax checks
+  - Contributors can run every required check through `pnpm run check`
+- **Negative:**
+  - Oxlint's JavaScript plugin compatibility and type-aware mode are newer than
+    the equivalent ESLint ecosystem
+  - Unsupported third-party lint rules may require adding ESLint in the future
+
+**Alternatives Considered:**
+
+- ESLint with Prettier: Mature and extensible, but requires more dependencies and
+  configuration for the current needs
+- Biome: Integrated linting and formatting, but doesn't match the selected
+  TypeScript 7 type-aware workflow and Tailwind setup as directly
+- No repository tooling: Minimal setup, but leaves formatting and static-analysis
+  behavior inconsistent across contributors
 
 ---
 

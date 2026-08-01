@@ -47,7 +47,11 @@
 .body-bg {
   background-color: var(--color-paper);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(180 83 9 / 0.08), transparent),
+    radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgb(180 83 9 / 0.08),
+      transparent
+    ),
     url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
@@ -55,8 +59,16 @@
   .body-bg {
     background-color: var(--color-paper-dark);
     background-image:
-      radial-gradient(ellipse 70% 45% at 80% 0%, rgb(180 83 9 / 0.12), transparent),
-      radial-gradient(ellipse 50% 40% at 10% 100%, rgb(180 83 9 / 0.06), transparent),
+      radial-gradient(
+        ellipse 70% 45% at 80% 0%,
+        rgb(180 83 9 / 0.12),
+        transparent
+      ),
+      radial-gradient(
+        ellipse 50% 40% at 10% 100%,
+        rgb(180 83 9 / 0.06),
+        transparent
+      ),
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
     @apply text-paper-on-dark;
   }
@@ -120,7 +132,7 @@
   }
 
   .btn-primary {
-    @apply inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold tracking-wide text-paper-elevated uppercase transition-all duration-200 hover:bg-accent-hover hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 focus:ring-offset-2 focus:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-paper-dark;
+    @apply inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold tracking-wide text-paper-elevated uppercase transition-all duration-200 hover:bg-accent-hover hover:shadow-md focus:ring-2 focus:ring-accent/40 focus:ring-offset-2 focus:ring-offset-paper focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-paper-dark;
   }
 
   .btn-ghost {
@@ -128,7 +140,7 @@
   }
 
   .input-field {
-    @apply min-w-0 flex-1 rounded-md border border-border bg-paper-elevated px-4 py-3 font-mono text-base text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25 dark:border-border-dark dark:bg-paper-dark-elevated dark:text-paper-on-dark dark:placeholder:text-paper-muted-dark/60;
+    @apply min-w-0 flex-1 rounded-md border border-border bg-paper-elevated px-4 py-3 font-mono text-base text-ink placeholder:text-ink-faint focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none dark:border-border-dark dark:bg-paper-dark-elevated dark:text-paper-on-dark dark:placeholder:text-paper-muted-dark/60;
   }
 
   .card-editorial {
@@ -215,7 +227,7 @@
 }
 
 .markdown-preview {
-  @apply prose prose-lg max-w-none font-sans prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink prose-p:text-ink/90 prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none dark:prose-invert dark:prose-headings:text-paper-on-dark dark:prose-p:text-paper-on-dark/90 dark:prose-a:text-accent;
+  @apply prose prose-lg max-w-none font-sans dark:prose-invert prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink dark:prose-headings:text-paper-on-dark prose-p:text-ink/90 dark:prose-p:text-paper-on-dark/90 prose-a:text-accent prose-a:no-underline hover:prose-a:underline dark:prose-a:text-accent prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none;
 }
 
 #metadata-body td,
@@ -228,7 +240,7 @@
 }
 
 #metadata-body td {
-  @apply break-words font-mono text-xs text-ink-muted dark:text-paper-muted-dark;
+  @apply font-mono text-xs break-words text-ink-muted dark:text-paper-muted-dark;
 }
 
 #playground-loading[hidden] {

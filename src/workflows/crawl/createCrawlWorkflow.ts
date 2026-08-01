@@ -19,18 +19,25 @@ export function createCrawlWorkflow(): CrawlWorkflow {
       const controller = new AbortController();
       const abort = () => controller.abort(options.signal?.reason);
       options.signal?.addEventListener('abort', abort, { once: true });
-      const timeoutId = options.timeoutMs == null
-        ? undefined
-        : setTimeout(() => controller.abort('timeout'), options.timeoutMs);
+      const timeoutId =
+        options.timeoutMs == null
+          ? undefined
+          : setTimeout(() => controller.abort('timeout'), options.timeoutMs);
 
       try {
         const fetched = await fetchHtml.run(initial, controller.signal);
-        const withMetadata = await extractMetadata.run(fetched, controller.signal);
+        const withMetadata = await extractMetadata.run(
+          fetched,
+          controller.signal,
+        );
         const parsed = await parseDocument.run(withMetadata, controller.signal);
         const cleaned = await cleanDocument.run(parsed, controller.signal);
         return await convertToMarkdown.run(cleaned, controller.signal);
       } catch (error) {
-        if (controller.signal.aborted && controller.signal.reason === 'timeout') {
+        if (
+          controller.signal.aborted &&
+          controller.signal.reason === 'timeout'
+        ) {
           throw {
             type: 'timeout',
             timeoutMs: options.timeoutMs ?? 0,

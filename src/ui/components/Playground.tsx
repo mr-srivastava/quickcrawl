@@ -45,7 +45,7 @@ export function Playground() {
           role="group"
           aria-label="Example URLs"
         >
-          <span class="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-ink-faint dark:text-paper-muted-dark">
+          <span class="inline-flex items-center gap-1 font-mono text-xs tracking-wider text-ink-faint uppercase dark:text-paper-muted-dark">
             <Icon icon={Link2} size={12} />
             Examples
           </span>
@@ -90,9 +90,15 @@ export function Playground() {
         role="alert"
       />
 
-      <div id="playground-results" class="mt-8 border-t border-border pt-8 dark:border-border-dark" hidden>
+      <div
+        id="playground-results"
+        class="mt-8 border-t border-border pt-8 dark:border-border-dark"
+        hidden
+      >
         <p class="mb-5 font-display text-lg text-ink dark:text-paper-on-dark">
-          <span class="text-ink-muted dark:text-paper-muted-dark">Title · </span>
+          <span class="text-ink-muted dark:text-paper-muted-dark">
+            Title ·{' '}
+          </span>
           <span id="result-title" class="font-medium" />
         </p>
 
@@ -173,7 +179,7 @@ export function Playground() {
           </div>
           <pre
             id="markdown-raw"
-            class="max-h-[420px] overflow-auto whitespace-pre-wrap break-words rounded-md border border-border bg-paper px-4 py-4 font-mono text-xs leading-relaxed text-ink dark:border-border-dark dark:bg-paper-dark dark:text-paper-on-dark"
+            class="max-h-[420px] overflow-auto rounded-md border border-border bg-paper px-4 py-4 font-mono text-xs leading-relaxed break-words whitespace-pre-wrap text-ink dark:border-border-dark dark:bg-paper-dark dark:text-paper-on-dark"
           />
         </div>
 
@@ -214,7 +220,7 @@ export function Playground() {
           </div>
           <pre
             id="json-raw"
-            class="max-h-[420px] overflow-auto whitespace-pre-wrap break-words rounded-md border border-border bg-paper px-4 py-4 font-mono text-xs leading-relaxed text-ink dark:border-border-dark dark:bg-paper-dark dark:text-paper-on-dark"
+            class="max-h-[420px] overflow-auto rounded-md border border-border bg-paper px-4 py-4 font-mono text-xs leading-relaxed break-words whitespace-pre-wrap text-ink dark:border-border-dark dark:bg-paper-dark dark:text-paper-on-dark"
           />
         </div>
       </div>

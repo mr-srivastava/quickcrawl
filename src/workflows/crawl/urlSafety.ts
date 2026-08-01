@@ -19,15 +19,25 @@ export async function assertSafeCrawlUrl(
     throw invalidUrl('URLs containing credentials are not allowed');
   }
 
-  const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
-  if (!hostname || BLOCKED_HOSTNAMES.has(hostname) || hostname.endsWith('.localhost')) {
+  const hostname = url.hostname
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
+    .replace(/\.$/, '');
+  if (
+    !hostname ||
+    BLOCKED_HOSTNAMES.has(hostname) ||
+    hostname.endsWith('.localhost')
+  ) {
     throw invalidUrl('Local network addresses are not allowed');
   }
 
   const addresses = isIP(hostname)
     ? [{ address: hostname }]
     : await resolve(hostname);
-  if (addresses.length === 0 || addresses.some(({ address }) => !isPublicAddress(address))) {
+  if (
+    addresses.length === 0 ||
+    addresses.some(({ address }) => !isPublicAddress(address))
+  ) {
     throw invalidUrl('Private or reserved network addresses are not allowed');
   }
 
@@ -46,11 +56,18 @@ function isPublicAddress(address: string): boolean {
 
 function isPublicIpv4(address: string): boolean {
   const [a, b, c, d] = address.split('.').map(Number);
-  if ([a, b, c, d].some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+  if (
+    [a, b, c, d].some(
+      (part) => !Number.isInteger(part) || part < 0 || part > 255,
+    )
+  ) {
     return false;
   }
   return !(
-    a === 0 || a === 10 || a === 127 || a >= 224 ||
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    a >= 224 ||
     (a === 100 && b >= 64 && b <= 127) ||
     (a === 169 && b === 254) ||
     (a === 172 && b >= 16 && b <= 31) ||

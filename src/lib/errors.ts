@@ -61,10 +61,23 @@ function isCrawlError(error: unknown): error is CrawlError {
 
 export function errorHandler(error: unknown, c: Context): Response {
   if (error instanceof ApiError) {
-    logger.warn({ statusCode: error.statusCode, message: error.message }, 'ApiError');
+    logger.warn(
+      { statusCode: error.statusCode, message: error.message },
+      'ApiError',
+    );
     return c.json(
       { success: false, error: { type: 'unknown', message: error.message } },
-      error.statusCode as 400 | 401 | 403 | 404 | 422 | 429 | 500 | 502 | 503 | 504,
+      error.statusCode as
+        | 400
+        | 401
+        | 403
+        | 404
+        | 422
+        | 429
+        | 500
+        | 502
+        | 503
+        | 504,
     );
   }
 
@@ -83,7 +96,10 @@ export function errorHandler(error: unknown, c: Context): Response {
   if (isCrawlError(error)) {
     const statusCode = crawlErrorToStatusCode(error);
     const message = getErrorMessage(error);
-    logger.warn({ crawlErrorType: error.type, statusCode, message }, 'CrawlError');
+    logger.warn(
+      { crawlErrorType: error.type, statusCode, message },
+      'CrawlError',
+    );
     return c.json(
       { success: false, error: { type: error.type, message } },
       statusCode as 422 | 500 | 502 | 503 | 504,
@@ -92,10 +108,10 @@ export function errorHandler(error: unknown, c: Context): Response {
 
   const message = error instanceof Error ? error.message : 'Unknown error';
   const stack = error instanceof Error ? error.stack : undefined;
-  logger.error({ err: error instanceof Error ? error : undefined, message, stack }, 'Unexpected error');
-
-  return c.json(
-    { success: false, error: { type: 'unknown', message } },
-    500,
+  logger.error(
+    { err: error instanceof Error ? error : undefined, message, stack },
+    'Unexpected error',
   );
+
+  return c.json({ success: false, error: { type: 'unknown', message } }, 500);
 }

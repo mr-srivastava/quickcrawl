@@ -55,16 +55,16 @@ server when source files change.
 Copy `.env.example` and change only the values you need. `src/config.ts`
 validates numeric and proxy-related runtime settings.
 
-| Variable | Default | Purpose |
-| --- | ---: | --- |
-| `NODE_ENV` | `development` | Selects the runtime environment. |
-| `LOG_LEVEL` | `info` | Sets the Pino log level. |
-| `PORT` | `3000` | Sets the local HTTP port. |
-| `RATE_LIMIT_MAX_REQUESTS` | `10` | Sets the request ceiling for each rate-limit window. |
-| `RATE_LIMIT_WINDOW_MS` | `60000` | Sets the rate-limit window in milliseconds. |
-| `TRUST_PROXY` | `false` | Trusts proxy-provided client addresses when the upstream proxy overwrites them. |
-| `CACHE_TTL_MS` | `300000` | Sets cache lifetime in milliseconds. |
-| `CACHE_MAX_SIZE` | `100` | Sets the maximum number of cached crawl results. |
+| Variable                  |       Default | Purpose                                                                         |
+| ------------------------- | ------------: | ------------------------------------------------------------------------------- |
+| `NODE_ENV`                | `development` | Selects the runtime environment.                                                |
+| `LOG_LEVEL`               |        `info` | Sets the Pino log level.                                                        |
+| `PORT`                    |        `3000` | Sets the local HTTP port.                                                       |
+| `RATE_LIMIT_MAX_REQUESTS` |          `10` | Sets the request ceiling for each rate-limit window.                            |
+| `RATE_LIMIT_WINDOW_MS`    |       `60000` | Sets the rate-limit window in milliseconds.                                     |
+| `TRUST_PROXY`             |       `false` | Trusts proxy-provided client addresses when the upstream proxy overwrites them. |
+| `CACHE_TTL_MS`            |      `300000` | Sets cache lifetime in milliseconds.                                            |
+| `CACHE_MAX_SIZE`          |         `100` | Sets the maximum number of cached crawl results.                                |
 
 Don't commit `.env` or production credentials. When you add a variable, update
 `.env.example`, `src/config.ts`, and the user-facing configuration reference.
@@ -73,17 +73,22 @@ Don't commit `.env` or production credentials. When you add a variable, update
 
 Run scripts through pnpm so local and hosted builds use the same toolchain.
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm run dev` | Runs the server and Tailwind watcher. |
-| `pnpm run dev:css` | Watches and recompiles Tailwind CSS. |
-| `pnpm run build:css` | Generates minified `public/styles.css`. |
-| `pnpm run typecheck` | Runs TypeScript without emitting files. |
-| `pnpm test` | Runs the Vitest suite once. |
-| `pnpm run test:watch` | Runs Vitest in watch mode. |
-| `pnpm run build` | Generates CSS and bundles the server with Rolldown. |
-| `pnpm start` | Runs `dist/server.js`. |
-| `pnpm run dev:vercel` | Runs the application through Vercel CLI. |
+| Command                 | Purpose                                                |
+| ----------------------- | ------------------------------------------------------ |
+| `pnpm run dev`          | Runs the server and Tailwind watcher.                  |
+| `pnpm run dev:css`      | Watches and recompiles Tailwind CSS.                   |
+| `pnpm run build:css`    | Generates minified `public/styles.css`.                |
+| `pnpm run format`       | Formats supported repository files with Oxfmt.         |
+| `pnpm run format:check` | Checks formatting without changing files.              |
+| `pnpm run lint`         | Runs Oxlint, including type-aware TypeScript rules.    |
+| `pnpm run lint:fix`     | Applies Oxlint's safe automatic fixes.                 |
+| `pnpm run typecheck`    | Runs TypeScript without emitting files.                |
+| `pnpm test`             | Runs the Vitest suite once.                            |
+| `pnpm run test:watch`   | Runs Vitest in watch mode.                             |
+| `pnpm run build`        | Generates CSS and bundles the server with Rolldown.    |
+| `pnpm run check`        | Runs formatting, linting, types, tests, and the build. |
+| `pnpm start`            | Runs `dist/server.js`.                                 |
+| `pnpm run dev:vercel`   | Runs the application through Vercel CLI.               |
 
 `public/styles.css` is generated output. Change `src/ui/styles/input.css` or the
 classes in `src/ui/`, then run `pnpm run build:css` instead of editing the
@@ -97,15 +102,17 @@ before you finish.
 
 ```bash
 pnpm exec vitest run src/workflows/crawl/urlSafety.test.ts
-pnpm run typecheck
-pnpm test
-pnpm run build
+pnpm run check
 ```
 
 Write deterministic tests that don't require live public websites. Inject or
 mock network and DNS behavior when you test crawling. Cover success, expected
 errors, validation boundaries, and cancellation or timeout behavior when it is
 relevant.
+
+Oxlint uses `.oxlintrc.json`. Its type-aware rules use the TypeScript 7 compiler
+through `oxlint-tsgolint`. Oxfmt uses `.oxfmtrc.json`, skips generated output,
+and sorts Tailwind CSS v4 classes using `src/ui/styles/input.css`.
 
 The [contributing guide](../CONTRIBUTING.md#testing-guidelines) defines the
 repository's test expectations. The [architecture guide](ARCHITECTURE.md)

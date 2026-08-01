@@ -5,7 +5,8 @@ export const APP_NAME = 'QuickCrawl';
 export const APP_VERSION = '1.0.0';
 export const APP_TAGLINE = 'Turn any URL into clean Markdown';
 
-const positiveInteger = (fallback: number) => z.coerce.number().int().positive().default(fallback);
+const positiveInteger = (fallback: number) =>
+  z.coerce.number().int().positive().default(fallback);
 const RuntimeConfigSchema = z.object({
   PORT: positiveInteger(3000),
   CACHE_TTL_MS: positiveInteger(300_000),

@@ -56,13 +56,12 @@ describe('UI routes', () => {
   test('GET /styles.css serves compiled CSS or 503', async () => {
     const res = await app.request('/styles.css');
     const cssPath = join(process.cwd(), 'public', 'styles.css');
-    try {
-      await readFile(cssPath, 'utf-8');
-      expect(res.status).toBe(200);
-      expect(res.headers.get('content-type')).toContain('text/css');
-      expect((await res.text()).length).toBeGreaterThan(0);
-    } catch {
-      expect(res.status).toBe(503);
-    }
+    const expectedCss = await readFile(cssPath, 'utf-8').catch(() => undefined);
+
+    expect(res.status).toBe(expectedCss === undefined ? 503 : 200);
+    expect(res.headers.get('content-type')).toContain('text/css');
+    expect(await res.text()).toBe(
+      expectedCss ?? '/* styles not built — run: pnpm run build:css */',
+    );
   });
 });

@@ -24,7 +24,10 @@ async function parseDocumentTask(ctx: Input): Promise<Output> {
     document = $.html();
   }
 
-  taskLogger.info({ url: ctx.url, documentLength: document.length }, 'Document parsed');
+  taskLogger.info(
+    { url: ctx.url, documentLength: document.length },
+    'Document parsed',
+  );
   return {
     ...ctx,
     stage: 'parsed',

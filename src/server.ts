@@ -11,6 +11,9 @@ serve(
     port,
   },
   (info) => {
-    logger.info({ port: info.port, env: process.env.NODE_ENV }, 'Server started');
+    logger.info(
+      { port: info.port, env: process.env.NODE_ENV },
+      'Server started',
+    );
   },
 );

@@ -44,7 +44,7 @@ These items improve deployment, observability, and multi-instance behavior.
 - [ ] Add metrics and tracing with an agreed observability standard.
 - [ ] Evaluate shared caching and rate limiting for multi-instance deployments.
 - [ ] Add persistent crawl history only after defining retention and privacy
-  requirements.
+      requirements.
 - [ ] Add background queues if batch or scheduled crawling requires them.
 
 ## Technical debt
@@ -52,10 +52,10 @@ These items improve deployment, observability, and multi-instance behavior.
 These items address known implementation limitations.
 
 - [ ] Rename or revise the cache implementation so its documented eviction
-  semantics match its ordered insertion behavior.
+      semantics match its ordered insertion behavior.
 - [ ] Centralize response schemas for runtime validation and API documentation.
 - [ ] Review whether `NODE_ENV` and `LOG_LEVEL` belong in the validated runtime
-  configuration schema.
+      configuration schema.
 - [ ] Test DNS rebinding assumptions and document the residual risk.
 - [ ] Decide whether CORS must remain open for every route.
 

@@ -20,10 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added API, architecture, development, contribution, and agent documentation.
 - Added architectural decision records.
 - Added roadmap tracking.
+- Added Oxlint and Oxfmt checks, including type-aware TypeScript linting and
+  Tailwind CSS v4 class sorting.
 
 ## [0.1.0] - 2024
 
 ### Added
+
 - Initial release
 - Workflow-based crawling architecture
 - Five-stage pipeline: Fetch → Extract Metadata → Parse → Clean → Convert to Markdown
