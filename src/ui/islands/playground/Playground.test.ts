@@ -162,7 +162,7 @@ describe('Playground', () => {
     await fireEvent.keyDown(markdownTab, { key: 'ArrowRight' });
     expect(screen.getByRole('tab', { name: 'JSON' })).toHaveFocus();
     await user.click(screen.getByRole('tab', { name: 'Markdown' }));
-    await user.click(screen.getByRole('button', { name: 'Raw' }));
+    await user.click(screen.getByRole('radio', { name: 'Raw' }));
     await user.click(screen.getByRole('button', { name: 'Copy markdown' }));
     await waitFor(() => expect(writeText).toHaveBeenCalledWith('# Example'));
     expect(screen.getByRole('button', { name: 'Copied' })).toBeVisible();
@@ -210,7 +210,7 @@ describe('Playground', () => {
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
     await user.click(screen.getByRole('button', { name: 'Start crawling' }));
     await user.click(
-      await screen.findByRole('button', { name: 'Raw' }, { timeout: 5000 }),
+      await screen.findByRole('radio', { name: 'Raw' }, { timeout: 5000 }),
     );
     await user.click(screen.getByRole('button', { name: 'Copy markdown' }));
     expect(screen.getByRole('button', { name: 'Copy markdown' })).toBeVisible();

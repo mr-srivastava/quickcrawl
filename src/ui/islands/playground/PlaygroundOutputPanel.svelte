@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { AlertCircle, LoaderCircle } from '@lucide/svelte';
+  import { AlertCircle } from '@lucide/svelte';
   import { onDestroy } from 'svelte';
   import * as Alert from '$playground/ui/alert/index.js';
+  import { Button } from '$playground/ui/button/index.js';
+  import * as Empty from '$playground/ui/empty/index.js';
+  import { Spinner } from '$playground/ui/spinner/index.js';
   import type PlaygroundResults from './PlaygroundResults.svelte';
   import type { CrawlSuccess, PlaygroundState } from './types';
 
@@ -54,14 +57,14 @@
 
 <section class={panelClass} aria-label="Playground output">
   {#if panelState.type === 'idle'}
-    <div
-      class="flex min-h-48 flex-col items-center justify-center gap-2 px-6 py-12 text-center"
-    >
-      <p class="m-0 text-sm font-medium text-foreground">Paste a URL to crawl</p>
-      <p class="m-0 max-w-sm text-sm text-muted-foreground">
-        Results appear here as Markdown preview and JSON once extraction finishes.
-      </p>
-    </div>
+    <Empty.Root class="min-h-48 border-0 bg-transparent">
+      <Empty.Header>
+        <Empty.Title>Paste a URL to crawl</Empty.Title>
+        <Empty.Description>
+          Results appear here as Markdown preview and JSON once extraction finishes.
+        </Empty.Description>
+      </Empty.Header>
+    </Empty.Root>
   {:else if panelState.type === 'loading'}
     <div
       class="flex min-h-48 flex-col items-center justify-center gap-4 px-6 py-12"
@@ -69,7 +72,7 @@
       aria-busy="true"
       aria-label="Extracting page content"
     >
-      <LoaderCircle class="size-8 animate-spin text-info" />
+      <Spinner class="size-8 text-info" aria-hidden="true" />
       <div class="text-center">
         <p class="m-0 text-sm font-semibold text-info-foreground">
           {stages[stageIndex]}…
@@ -91,9 +94,9 @@
         {/each}
       </ol>
       {#if onCancel}
-        <button type="button" class="btn-ghost" onclick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onclick={onCancel}>
           Stop
-        </button>
+        </Button>
       {/if}
     </div>
   {:else if panelState.type === 'error'}

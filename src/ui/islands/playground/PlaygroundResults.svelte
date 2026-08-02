@@ -12,6 +12,7 @@
   import { Badge } from '$playground/ui/badge/index.js';
   import { Button } from '$playground/ui/button/index.js';
   import * as Tabs from '$playground/ui/tabs/index.js';
+  import * as ToggleGroup from '$playground/ui/toggle-group/index.js';
   import { CopyFeedback } from './lib/copy-feedback.svelte';
   import type { CrawlSuccess } from './types';
 
@@ -36,7 +37,7 @@
       `${metadataEntries.length} metadata ${metadataEntries.length === 1 ? 'field' : 'fields'}`,
   );
 
-  let markdownMode = $state<'preview' | 'raw'>('preview');
+  let markdownMode = $state('preview');
 
   function focusOnMount(node: HTMLElement) {
     node.focus({ preventScroll: true });
@@ -100,30 +101,22 @@
 
     <Tabs.Content value="markdown" class="result-panel">
       <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex gap-1 rounded-lg border border-border bg-surface-sunken p-1">
-          <Button
-            type="button"
-            variant={markdownMode === 'preview' ? 'secondary' : 'ghost'}
-            size="sm"
-            onclick={() => {
-              markdownMode = 'preview';
-            }}
-          >
+        <ToggleGroup.Root
+          type="single"
+          variant="outline"
+          size="sm"
+          bind:value={markdownMode}
+          aria-label="Markdown view"
+        >
+          <ToggleGroup.Item value="preview">
             <Eye data-icon="inline-start" />
             Preview
-          </Button>
-          <Button
-            type="button"
-            variant={markdownMode === 'raw' ? 'secondary' : 'ghost'}
-            size="sm"
-            onclick={() => {
-              markdownMode = 'raw';
-            }}
-          >
+          </ToggleGroup.Item>
+          <ToggleGroup.Item value="raw">
             <FileText data-icon="inline-start" />
             Raw
-          </Button>
-        </div>
+          </ToggleGroup.Item>
+        </ToggleGroup.Root>
         <Button
           type="button"
           variant="ghost"

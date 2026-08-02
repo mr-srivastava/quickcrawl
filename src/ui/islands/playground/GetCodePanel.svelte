@@ -2,6 +2,7 @@
   import { Braces, Copy, Terminal } from '@lucide/svelte';
   import { onDestroy } from 'svelte';
   import { Button } from '$playground/ui/button/index.js';
+  import { Separator } from '$playground/ui/separator/index.js';
   import { CopyFeedback } from './lib/copy-feedback.svelte';
 
   let {
@@ -36,17 +37,15 @@
   onDestroy(() => clipboard.destroy());
 </script>
 
-<section
-  class="border-t border-border px-5 py-4 sm:px-7"
-  aria-label="API code snippets"
->
+<section class="px-5 py-4 sm:px-7" aria-label="API code snippets">
+  <Separator class="mb-4" />
   <div class="grid gap-4 lg:grid-cols-2">
     <div>
       <div class="mb-2 flex items-center justify-between gap-3">
         <span
           class="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground"
         >
-          <Terminal class="size-3.5" />
+          <Terminal data-icon="inline-start" />
           curl
         </span>
         <Button
@@ -67,7 +66,7 @@
         <span
           class="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground"
         >
-          <Braces class="size-3.5" />
+          <Braces data-icon="inline-start" />
           fetch
         </span>
         <Button

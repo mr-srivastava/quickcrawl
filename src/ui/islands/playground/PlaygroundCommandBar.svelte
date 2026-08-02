@@ -1,6 +1,10 @@
 <script lang="ts">
-  import { ArrowRight, Code2, LoaderCircle, X } from '@lucide/svelte';
+  import { ArrowRight, Code2, X } from '@lucide/svelte';
   import { Button } from '$playground/ui/button/index.js';
+  import * as Field from '$playground/ui/field/index.js';
+  import * as InputGroup from '$playground/ui/input-group/index.js';
+  import { Separator } from '$playground/ui/separator/index.js';
+  import { Spinner } from '$playground/ui/spinner/index.js';
   import GetCodePanel from './GetCodePanel.svelte';
 
   let {
@@ -46,6 +50,10 @@
     url = next;
     onSelectUrl?.(next);
   }
+
+  function formatUrlLabel(value: string) {
+    return value.replace(/^https?:\/\//, '');
+  }
 </script>
 
 <div class="surface-raised overflow-hidden">
@@ -54,49 +62,57 @@
     class="p-5 sm:p-6"
     onsubmit={handleSubmit}
   >
-    <label class="sr-only" for="url-input">Page URL</label>
-    <p id="url-hint" class="sr-only">
-      Public HTTP and HTTPS pages only. Private network addresses are blocked.
-    </p>
+    <Field.Group>
+      <Field.Field>
+        <Field.Label class="sr-only" for="url-input">Page URL</Field.Label>
+        <Field.Description class="sr-only" id="url-hint">
+          Public HTTP and HTTPS pages only. Private network addresses are blocked.
+        </Field.Description>
 
-    <div class="url-control">
-      <input
-        id="url-input"
-        name="url"
-        type="url"
-        placeholder="https://example.com"
-        required
-        autocomplete="url"
-        aria-describedby="url-hint"
-        disabled={isLoading}
-        bind:value={url}
-        class="input-field"
-      />
-      <button
-        type="submit"
-        disabled={isLoading}
-        class="btn-primary sm:min-w-40"
-      >
-        {#if isLoading}
-          <LoaderCircle class="size-4 animate-spin" />
-          Extracting…
-        {:else}
-          <ArrowRight class="size-4" />
-          Start crawling
-        {/if}
-      </button>
-      {#if isLoading && onCancel}
-        <Button
-          type="button"
-          variant="outline"
-          class="h-12 sm:min-w-24"
-          onclick={onCancel}
+        <InputGroup.Root
+          class="h-auto flex-col gap-2 rounded-xl border-border bg-surface-sunken focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15 sm:flex-row sm:items-stretch sm:gap-1 sm:p-1"
         >
-          <X data-icon="inline-start" />
-          Stop
-        </Button>
-      {/if}
-    </div>
+          <InputGroup.Input
+            id="url-input"
+            name="url"
+            type="url"
+            placeholder="https://example.com"
+            required
+            autocomplete="url"
+            aria-describedby="url-hint"
+            disabled={isLoading}
+            bind:value={url}
+            class="h-12 font-mono"
+          />
+          <InputGroup.Addon align="inline-end" class="flex w-full gap-2 p-0 sm:w-auto">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              class="h-12 w-full sm:min-w-40"
+            >
+              {#if isLoading}
+                <Spinner data-icon="inline-start" aria-hidden="true" />
+                Extracting…
+              {:else}
+                <ArrowRight data-icon="inline-start" />
+                Start crawling
+              {/if}
+            </Button>
+            {#if isLoading && onCancel}
+              <Button
+                type="button"
+                variant="outline"
+                class="h-12 sm:min-w-24"
+                onclick={onCancel}
+              >
+                <X data-icon="inline-start" />
+                Stop
+              </Button>
+            {/if}
+          </InputGroup.Addon>
+        </InputGroup.Root>
+      </Field.Field>
+    </Field.Group>
 
     <div
       class="mt-4 flex flex-wrap items-center gap-2"
@@ -116,19 +132,24 @@
         Get code
       </Button>
 
-      <span class="mx-1 hidden h-4 w-px bg-border sm:inline-block" aria-hidden="true"></span>
+      <Separator
+        orientation="vertical"
+        class="mx-1 hidden h-4 sm:block"
+      />
 
       <span class="font-mono text-[0.68rem] tracking-wide text-muted-foreground uppercase">
         Examples
       </span>
       {#each exampleUrls as exampleUrl (exampleUrl)}
-        <button
+        <Button
           type="button"
-          class="rounded-full bg-surface-sunken px-2.5 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
+          variant="secondary"
+          size="sm"
+          class="h-auto rounded-full px-2.5 py-1 font-mono text-xs"
           onclick={() => selectUrl(exampleUrl)}
         >
-          {exampleUrl.replace(/^https?:\/\//, '')}
-        </button>
+          {formatUrlLabel(exampleUrl)}
+        </Button>
       {/each}
     </div>
 
@@ -142,13 +163,15 @@
           Recent
         </span>
         {#each recentUrls as recentUrl (recentUrl)}
-          <button
+          <Button
             type="button"
-            class="rounded-full border border-border bg-surface-raised px-2.5 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
+            variant="outline"
+            size="sm"
+            class="h-auto rounded-full px-2.5 py-1 font-mono text-xs"
             onclick={() => selectUrl(recentUrl)}
           >
-            {recentUrl.replace(/^https?:\/\//, '')}
-          </button>
+            {formatUrlLabel(recentUrl)}
+          </Button>
         {/each}
       </div>
     {/if}

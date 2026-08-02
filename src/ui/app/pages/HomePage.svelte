@@ -10,6 +10,7 @@
     Tags,
   } from '@lucide/svelte';
   import type { HomePageInit } from '$contracts/page';
+  import { Button } from '$playground/ui/button/index.js';
   import { Input } from '$playground/ui/input/index.js';
 
   let { init }: { init: HomePageInit } = $props();
@@ -69,10 +70,10 @@
         bind:value={heroUrl}
         class="h-12 flex-1 font-mono"
       />
-      <button type="submit" class="btn-primary sm:px-5">
+      <Button type="submit" class="h-12 sm:px-5">
         Try it
-        <ArrowRight class="size-4" />
-      </button>
+        <ArrowRight data-icon="inline-end" />
+      </Button>
     </form>
     <p class="mt-3 text-sm text-ink-muted dark:text-paper-muted-dark">
       Or open the
