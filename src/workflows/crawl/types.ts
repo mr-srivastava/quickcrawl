@@ -30,8 +30,47 @@ export type CrawlError =
   | { type: 'timeout'; timeoutMs: number; stage: string }
   | { type: 'parse_failed'; message: string; stage: string }
   | { type: 'network_error'; message: string; cause?: string }
+  | { type: 'invalid_url'; message: string }
   | { type: 'invalid_html'; message: string }
   | { type: 'unknown'; message: string; cause?: unknown };
+
+export const CrawlErrorSchema: z.ZodType<CrawlError> = z.discriminatedUnion(
+  'type',
+  [
+    z.object({
+      type: z.literal('fetch_failed'),
+      status: z.number(),
+      statusText: z.string(),
+      url: z.string(),
+    }),
+    z.object({
+      type: z.literal('timeout'),
+      timeoutMs: z.number(),
+      stage: z.string(),
+    }),
+    z.object({
+      type: z.literal('parse_failed'),
+      message: z.string(),
+      stage: z.string(),
+    }),
+    z.object({
+      type: z.literal('network_error'),
+      message: z.string(),
+      cause: z.string().optional(),
+    }),
+    z.object({ type: z.literal('invalid_url'), message: z.string() }),
+    z.object({ type: z.literal('invalid_html'), message: z.string() }),
+    z.object({
+      type: z.literal('unknown'),
+      message: z.string(),
+      cause: z.unknown().optional(),
+    }),
+  ],
+);
+
+export function isCrawlError(error: unknown): error is CrawlError {
+  return CrawlErrorSchema.safeParse(error).success;
+}
 
 // --- Result type ---
 
@@ -102,25 +141,9 @@ export type CrawlContext =
   | CompletedContext
   | ErrorContext;
 
-// --- Zod schemas (unchanged for runtime validation) ---
-
-export const CrawlInputSchema = z.object({
-  url: z.string().url(),
-});
-
-export type CrawlInput = z.infer<typeof CrawlInputSchema>;
-
-export const CrawlResultSchema = z.object({
-  markdown: z.string(),
-  title: z.string().optional(),
-  metadata: z.record(z.string(), z.string()).optional(),
-});
-
-/** Crawl result payload type; API can wrap in Result<CrawlResultData> */
-export type CrawlResultData = {
-  markdown: string;
-  title?: string;
-  metadata?: Metadata;
-};
-
-export type CrawlResult = Result<CrawlResultData>;
+export interface CrawlWorkflow {
+  run(
+    initial: InitialContext,
+    options?: import('../../workflow/types').RunOptions,
+  ): Promise<CrawlContext>;
+}

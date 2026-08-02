@@ -3,7 +3,12 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
-export class CacheService<K extends string, V> {
+export interface Cache<K, V> {
+  get(key: K): V | undefined;
+  set(key: K, value: V): void;
+}
+
+export class CacheService<K extends string, V> implements Cache<K, V> {
   private cache = new Map<K, CacheEntry<V>>();
   private order: K[] = [];
 

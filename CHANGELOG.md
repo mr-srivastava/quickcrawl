@@ -8,13 +8,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Comprehensive documentation (API, Architecture, Development guides)
-- Architectural Decision Records (ADR)
-- TODO and roadmap tracking
+
+- Added a dedicated `/playground` workspace route with command-bar crawl UX,
+  Get code snippets, session recent-URL history, and a split output panel.
+- Added semantic surface and status color tokens for light and dark themes.
+- Added API, architecture, development, contribution, and agent documentation.
+- Added architectural decision records.
+- Added roadmap tracking.
+- Added Oxlint and Oxfmt checks, including type-aware TypeScript linting and
+  Tailwind CSS v4 class sorting.
+- Added a Vite browser build and explicit route for the playground asset.
+- Added a 15 KiB gzip budget for the initial playground bundle.
+
+### Changed
+
+- Split marketing home (`/`) from the interactive playground workspace and
+  updated navigation to Home, Playground, and API.
+- Redesigned playground results around Markdown and JSON tabs with elevated
+  command-bar / output-panel layout and restrained accent usage.
+- Moved layout, home, and docs UI into a single Svelte client application
+  (`app.js`) behind a minimal Hono document shell with serialized page init data.
+- Renamed the browser entry bundle from `playground.js` to `app.js` and raised
+  the initial gzip budget to 80 KiB.
+- Standardized validation error responses, masked internal failure details,
+  validated crawl-error variants at runtime, and propagated request
+  cancellation through crawl services.
+- Separated production dependency composition from Hono application and route
+  factories, and made cache storage injectable.
+- Migrated the runtime and package-management workflow from Bun to Node.js and
+  pnpm
+- Replaced the Bun test runner with Vitest
+- Upgraded the build and test toolchain to Vite 8 and TypeScript 7
+- Replaced tsup with Rolldown and raised the Node.js requirement to version 24
+- Replaced the inline playground script with a runtime-validated Svelte 5
+  island composed from locally owned shadcn-svelte components.
+- Split results and Markdown rendering from the initial playground bundle,
+  improved clipboard and focus behavior, and strengthened HTML sanitization
+  coverage.
 
 ## [0.1.0] - 2024
 
 ### Added
+
 - Initial release
 - Workflow-based crawling architecture
 - Five-stage pipeline: Fetch → Extract Metadata → Parse → Clean → Convert to Markdown
@@ -29,17 +64,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-based configuration
 - Bun runtime support
 
-### Technical Details
-- **Runtime**: Bun
-- **Framework**: Hono
-- **HTML Parser**: Cheerio
-- **Markdown**: Turndown + turndown-plugin-gfm
-- **Logging**: Pino
-- **Validation**: Zod
-- **Language**: TypeScript (strict mode)
+### Technical details
+
+- Runtime: Bun
+- Framework: Hono
+- HTML parser: Cheerio
+- Markdown conversion: Turndown and `turndown-plugin-gfm`
+- Logging: Pino
+- Validation: Zod
+- Language: TypeScript in strict mode
 
 ---
 
-## Version History
+## Version history
 
 - **0.1.0** - Initial release with core crawling functionality

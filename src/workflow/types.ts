@@ -4,22 +4,11 @@
  */
 export interface Task<TInput, TOutput = TInput> {
   name: string;
-  run: (ctx: TInput) => Promise<TOutput>;
+  run: (ctx: TInput, signal?: AbortSignal) => Promise<TOutput>;
 }
 
-/**
- * Task with optional metadata about requirements and produced fields.
- * Use for documentation and tooling; run signature is the same as Task.
- */
-export interface TaskWithMetadata<TInput, TOutput = TInput>
-  extends Task<TInput, TOutput> {
-  description?: string;
-  requiredFields?: (keyof TInput)[];
-  producedFields?: (keyof TOutput)[];
-}
-
-/** Options for Workflow.run (timeout and optional progress callback). */
+/** Options shared by workflow implementations. */
 export interface RunOptions {
   timeoutMs?: number;
-  onProgress?: (taskName: string, progress: number) => void;
+  signal?: AbortSignal;
 }

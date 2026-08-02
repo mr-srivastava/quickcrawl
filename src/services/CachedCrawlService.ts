@@ -1,23 +1,22 @@
-import type { CrawlResult, CrawlResultData } from '../workflows/crawl/types';
-import { CacheService } from '../lib/cache';
+import type { CrawlResult, CrawlResultData } from '../contracts/crawl';
+import type { Cache } from '../lib/cache';
 import { createModuleLogger } from '../lib/logger';
-import type { CrawlService } from './CrawlService';
+import type { Crawler, CrawlOptions } from './types';
 
-export const DEFAULT_CACHE_TTL_MS =
-  Number(process.env.CACHE_TTL_MS) || 300_000;
-export const DEFAULT_CACHE_MAX_SIZE =
-  Number(process.env.CACHE_MAX_SIZE) || 100;
+export type { Crawler, CrawlOptions } from './types';
 
-export class CachedCrawlService {
+export class CachedCrawlService implements Crawler {
   private readonly log = createModuleLogger('CachedCrawlService');
-  private readonly cache = new CacheService<string, CrawlResultData>(
-    DEFAULT_CACHE_TTL_MS,
-    DEFAULT_CACHE_MAX_SIZE,
-  );
 
-  constructor(private readonly crawlService: CrawlService) {}
+  constructor(
+    private readonly crawlService: Crawler,
+    private readonly cache: Cache<string, CrawlResultData>,
+  ) {}
 
-  async crawlUrl(url: string): Promise<CrawlResult> {
+  async crawlUrl(
+    url: string,
+    options: CrawlOptions = {},
+  ): Promise<CrawlResult> {
     const cached = this.cache.get(url);
     if (cached) {
       this.log.info({ url }, 'Cache hit');
@@ -25,7 +24,7 @@ export class CachedCrawlService {
     }
 
     this.log.debug({ url }, 'Cache miss');
-    const result = await this.crawlService.crawlUrl(url);
+    const result = await this.crawlService.crawlUrl(url, options);
 
     if (result.success) {
       this.cache.set(url, result.data);

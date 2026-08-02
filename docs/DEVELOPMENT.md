@@ -1,691 +1,189 @@
-# Development Guide
+# Development guide
+
+This guide explains how to set up QuickCrawl locally, run the development
+tooling, test changes, debug the server, and verify a production build. Read
+the [architecture guide](ARCHITECTURE.md) for implementation design and
+extension patterns, and read the [contributing guide](../CONTRIBUTING.md) for
+code and pull request conventions.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) v1.0 or higher
-- Node.js v20+ (for tooling compatibility)
+Install the supported runtime and package manager before you clone the
+repository:
+
+- Node.js 24 or later
+- pnpm 10 or later
 - Git
-- Code editor (VS Code recommended)
 
-## Setup
+The versions declared in `package.json` are authoritative.
 
-### 1. Clone and Install
+## Set up the repository
+
+Follow these steps to create a local development environment:
+
+1. Clone the repository and enter it.
+
+   ```bash
+   git clone <repository-url>
+   cd quickcrawl
+   ```
+
+2. Install the locked dependencies.
+
+   ```bash
+   pnpm install
+   ```
+
+3. Create your local environment file.
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Start the development server.
+
+   ```bash
+   pnpm run dev
+   ```
+
+The application starts at `http://localhost:3000` by default. The development
+command compiles Tailwind CSS, watches the stylesheet, and reloads the Node.js
+server when source files change.
+
+## Configure the application
+
+Copy `.env.example` and change only the values you need. `src/config.ts`
+validates numeric and proxy-related runtime settings.
+
+| Variable                  |       Default | Purpose                                                                         |
+| ------------------------- | ------------: | ------------------------------------------------------------------------------- |
+| `NODE_ENV`                | `development` | Selects the runtime environment.                                                |
+| `LOG_LEVEL`               |        `info` | Sets the Pino log level.                                                        |
+| `PORT`                    |        `3000` | Sets the local HTTP port.                                                       |
+| `RATE_LIMIT_MAX_REQUESTS` |          `10` | Sets the request ceiling for each rate-limit window.                            |
+| `RATE_LIMIT_WINDOW_MS`    |       `60000` | Sets the rate-limit window in milliseconds.                                     |
+| `TRUST_PROXY`             |       `false` | Trusts proxy-provided client addresses when the upstream proxy overwrites them. |
+| `CACHE_TTL_MS`            |      `300000` | Sets cache lifetime in milliseconds.                                            |
+| `CACHE_MAX_SIZE`          |         `100` | Sets the maximum number of cached crawl results.                                |
+
+Don't commit `.env` or production credentials. When you add a variable, update
+`.env.example`, `src/config.ts`, and the user-facing configuration reference.
+
+## Use development commands
+
+Run scripts through pnpm so local and hosted builds use the same toolchain.
+
+| Command                      | Purpose                                                   |
+| ---------------------------- | --------------------------------------------------------- |
+| `pnpm run dev`               | Runs the server, Svelte, and Tailwind watchers.           |
+| `pnpm run dev:client`        | Watches and rebuilds the Svelte client application.       |
+| `pnpm run dev:css`           | Watches and recompiles Tailwind CSS.                      |
+| `pnpm run build:assets`      | Generates the browser JavaScript and stylesheet.          |
+| `pnpm run build:client`      | Generates the Svelte client browser bundle.               |
+| `pnpm run build:css`         | Generates minified `public/styles.css`.                   |
+| `pnpm run format`            | Formats supported repository files with Oxfmt.            |
+| `pnpm run format:check`      | Checks formatting without changing files.                 |
+| `pnpm run lint`              | Runs Oxlint, including type-aware TypeScript rules.       |
+| `pnpm run lint:fix`          | Applies Oxlint's safe automatic fixes.                    |
+| `pnpm run typecheck`         | Runs TypeScript without emitting files.                   |
+| `pnpm test`                  | Runs the Vitest suite once.                               |
+| `pnpm run test:watch`        | Runs Vitest in watch mode.                                |
+| `pnpm run build`             | Generates CSS and bundles the server with Rolldown.       |
+| `pnpm run check:client-size` | Enforces the initial app bundle's 80 KiB gzip limit.      |
+| `pnpm run check`             | Runs all checks, the build, and the client bundle budget. |
+| `pnpm start`                 | Runs `dist/server.js`.                                    |
+| `pnpm run dev:vercel`        | Runs the application through Vercel CLI.                  |
+
+`public/styles.css` and `public/assets/` are generated output. Change
+`src/ui/styles/input.css`, the Hono document shell, or the Svelte application source,
+then run `pnpm run build:assets`. Don't edit generated browser assets manually.
+
+The shadcn-svelte CLI writes component source into
+`src/ui/islands/playground/ui`. Review and commit that source like application
+code. Add a component with `pnpm dlx shadcn-svelte@latest add <component>` and
+keep its imports inside the Svelte application.
+
+## Test changes
+
+Tests are colocated with the implementation as `*.test.ts` and `*.test.tsx`.
+Run the smallest relevant test while you iterate, then run the complete checks
+before you finish.
 
 ```bash
-git clone <your-repo-url>
-cd quickcrawl
-bun install
+pnpm exec vitest run src/workflows/crawl/urlSafety.test.ts
+pnpm run check
 ```
 
-### 2. Configure Environment
+Write deterministic tests that don't require live public websites. Inject or
+mock network and DNS behavior when you test crawling. Cover success, expected
+errors, validation boundaries, and cancellation or timeout behavior when it is
+relevant.
+
+Oxlint uses `.oxlintrc.json`. Its type-aware rules use the TypeScript 7 compiler
+through `oxlint-tsgolint`. Oxfmt uses `.oxfmtrc.json`, skips generated output,
+and sorts Tailwind CSS v4 classes using `src/ui/styles/input.css`.
+
+The [contributing guide](../CONTRIBUTING.md#testing-guidelines) defines the
+repository's test expectations. The [architecture guide](ARCHITECTURE.md)
+describes the boundaries to test when you change the crawl workflow.
+
+## Debug the server
+
+Set `LOG_LEVEL=debug` in `.env`, restart the development server, and reproduce
+the request. QuickCrawl uses structured Pino logs, so filter by fields such as
+the request ID, URL, workflow stage, or module name.
+
+Use the health route to confirm that the HTTP server is running:
 
 ```bash
-cp .env.example .env
+curl http://localhost:3000/health
 ```
 
-Edit `.env` with your preferred settings:
+Use a local crawl request to exercise the complete API path:
+
+```bash
+curl --request POST http://localhost:3000/crawl \
+  --header 'Content-Type: application/json' \
+  --data '{"url":"https://example.com"}'
+```
+
+If port `3000` is occupied, set another positive integer in `.env`:
 
 ```env
-NODE_ENV=development
-LOG_LEVEL=debug           # Use debug for development
-PORT=3000
-RATE_LIMIT_MAX_REQUESTS=100  # Higher limit for development
-RATE_LIMIT_WINDOW_MS=60000
-CACHE_TTL_MS=300000
-CACHE_MAX_SIZE=100
+PORT=3001
 ```
 
-### 3. Start Development Server
+Don't terminate unrelated processes to free the default port.
+
+## Verify a production build
+
+Build and run the bundled server when a change can affect compilation,
+packaging, generated CSS, or runtime startup:
 
 ```bash
-bun run dev
+pnpm run build
+pnpm start
 ```
 
-This compiles Tailwind CSS, watches `src/ui/**/*.tsx` for style changes, and runs the API with auto-reload. Open [http://localhost:3000](http://localhost:3000) for the web UI.
-
-To compile styles once without the full dev stack:
-
-```bash
-bun run build:css
-```
-
-## Project Structure
-
-```
-quickcrawl/
-├── src/
-│   ├── index.ts                    # Server entry point
-│   ├── lib/                        # Shared utilities
-│   │   ├── cache.ts               # LRU cache implementation
-│   │   ├── errors.ts              # Error handling utilities
-│   │   ├── logger.ts              # Pino logger configuration
-│   │   └── rateLimiter.ts         # Rate limiter implementation
-│   ├── middleware/                 # Hono middleware
-│   │   └── rateLimit.ts           # Rate limiting middleware
-│   ├── services/                   # Business logic layer
-│   │   ├── CrawlService.ts        # Core crawl orchestration
-│   │   └── CachedCrawlService.ts  # Caching wrapper
-│   ├── workflow/                   # Generic workflow engine
-│   │   ├── Workflow.ts            # Workflow class
-│   │   ├── types.ts               # Workflow type definitions
-│   │   └── index.ts               # Public exports
-│   └── workflows/                  # Specific workflow implementations
-│       └── crawl/                  # Web crawling workflow
-│           ├── tasks/              # Individual pipeline tasks
-│           │   ├── fetchHtml.ts
-│           │   ├── extractMetadata.ts
-│           │   ├── parseDocument.ts
-│           │   ├── cleanDocument.ts
-│           │   └── convertToMarkdown.ts
-│           ├── guards.ts           # Type guard functions
-│           ├── types.ts            # Workflow context types
-│           ├── constants.ts        # Configuration constants
-│           ├── utils/              # Workflow utilities
-│           ├── __tests__/          # Unit tests
-│           └── createCrawlWorkflow.ts
-├── docs/                           # Documentation
-│   ├── ARCHITECTURE.md
-│   ├── API.md
-│   └── DEVELOPMENT.md
-├── .env.example                    # Environment template
-├── .gitignore                      # Git ignore rules
-├── package.json                    # Dependencies and scripts
-├── tsconfig.json                   # TypeScript configuration
-└── README.md                       # Project overview
-```
-
-## Development Workflow
-
-### Making Changes
-
-1. **Create a feature branch:**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes** with auto-reload running:
-   ```bash
-   bun run dev
-   ```
-
-3. **Test your changes:**
-   ```bash
-   # Manual testing
-   curl -X POST http://localhost:3000/crawl \
-     -H "Content-Type: application/json" \
-     -d '{"url": "https://example.com"}'
-   
-   # Run tests (when implemented)
-   bun test
-   ```
-
-4. **Build to verify:**
-   ```bash
-   bun run build
-   ```
-
-### Adding a New Task
-
-To extend the crawl workflow with a new transformation stage:
-
-#### 1. Define the new stage in types
-
-Edit `src/workflows/crawl/types.ts`:
-
-```typescript
-export type CrawlContext =
-  | { stage: 'initial'; url: string }
-  // ... existing stages ...
-  | { stage: 'my_new_stage'; url: string; /* ... */; myData: MyData }
-  | { stage: 'completed'; /* ... */ };
-```
-
-#### 2. Create the task file
-
-Create `src/workflows/crawl/tasks/myTask.ts`:
-
-```typescript
-import type { Task } from '../../../workflow/types';
-import type { CrawlContext } from '../types';
-import { createModuleLogger } from '../../../lib/logger';
-
-const log = createModuleLogger('myTask');
-
-export const myTask: Task<CrawlContext> = async (ctx) => {
-  // Guard: only process at expected stage
-  if (ctx.stage !== 'cleaned') {
-    return ctx;
-  }
-
-  log.debug({ url: ctx.url }, 'Processing my task');
-
-  try {
-    // Your transformation logic
-    const myData = await processData(ctx.cleanedDocument);
-
-    return {
-      ...ctx,
-      stage: 'my_new_stage',
-      myData,
-    };
-  } catch (error) {
-    log.error({ url: ctx.url, error }, 'Task failed');
-    return {
-      stage: 'error',
-      url: ctx.url,
-      error: error instanceof Error ? error : new Error('Unknown error'),
-    };
-  }
-};
-```
-
-#### 3. Export the task
-
-Add to `src/workflows/crawl/tasks/index.ts`:
-
-```typescript
-export { myTask } from './myTask';
-```
-
-#### 4. Add to workflow
-
-Edit `src/workflows/crawl/createCrawlWorkflow.ts`:
-
-```typescript
-import { myTask } from './tasks/index';
-
-export function createCrawlWorkflow() {
-  return new Workflow([
-    fetchHtml,
-    extractMetadata,
-    parseDocument,
-    cleanDocument,
-    myTask,              // Add your task
-    convertToMarkdown,
-  ]);
-}
-```
-
-#### 5. Create type guard (optional)
-
-Add to `src/workflows/crawl/guards.ts`:
-
-```typescript
-export function hasMyData(
-  ctx: CrawlContext
-): ctx is Extract<CrawlContext, { myData: MyData }> {
-  return 'myData' in ctx;
-}
-```
-
-#### 6. Write tests
-
-Create `src/workflows/crawl/tasks/__tests__/myTask.test.ts`:
-
-```typescript
-import { describe, it, expect } from 'bun:test';
-import { myTask } from '../myTask';
-
-describe('myTask', () => {
-  it('should process cleaned document', async () => {
-    const ctx = {
-      stage: 'cleaned' as const,
-      url: 'https://example.com',
-      html: '<html>...</html>',
-      cleanedDocument: /* mock cheerio */,
-    };
-
-    const result = await myTask(ctx);
-
-    expect(result.stage).toBe('my_new_stage');
-    expect(result.myData).toBeDefined();
-  });
-
-  it('should skip if not at cleaned stage', async () => {
-    const ctx = {
-      stage: 'initial' as const,
-      url: 'https://example.com',
-    };
-
-    const result = await myTask(ctx);
-
-    expect(result).toBe(ctx); // Unchanged
-  });
-});
-```
-
-### Creating a New Workflow
-
-The workflow engine is generic and can be used for any multi-stage process:
-
-#### 1. Define context types
-
-Create `src/workflows/myworkflow/types.ts`:
-
-```typescript
-export type MyContext =
-  | { stage: 'start'; input: string }
-  | { stage: 'processed'; input: string; output: string }
-  | { stage: 'done'; input: string; output: string; result: number }
-  | { stage: 'error'; input: string; error: Error };
-```
-
-#### 2. Create tasks
-
-Create task files in `src/workflows/myworkflow/tasks/`:
-
-```typescript
-import type { Task } from '../../../workflow/types';
-import type { MyContext } from '../types';
-
-export const processTask: Task<MyContext> = async (ctx) => {
-  if (ctx.stage !== 'start') return ctx;
-
-  const output = await process(ctx.input);
-
-  return {
-    ...ctx,
-    stage: 'processed',
-    output,
-  };
-};
-```
-
-#### 3. Create workflow factory
-
-Create `src/workflows/myworkflow/createMyWorkflow.ts`:
-
-```typescript
-import { Workflow } from '../../workflow';
-import type { MyContext } from './types';
-import { processTask, finalizeTask } from './tasks';
-
-type InitialContext = Extract<MyContext, { stage: 'start' }>;
-type FinalContext = Extract<MyContext, { stage: 'done' }>;
-
-export function createMyWorkflow(): Workflow<InitialContext, FinalContext> {
-  return new Workflow([
-    processTask,
-    finalizeTask,
-  ]);
-}
-```
-
-#### 4. Create service
-
-Create `src/services/MyService.ts`:
-
-```typescript
-import type { Workflow } from '../workflow';
-import type { MyContext } from '../workflows/myworkflow/types';
-
-type InitialContext = Extract<MyContext, { stage: 'start' }>;
-type FinalContext = Extract<MyContext, { stage: 'done' }>;
-
-export class MyService {
-  constructor(
-    private workflow: Workflow<InitialContext, FinalContext>
-  ) {}
-
-  async process(input: string) {
-    const ctx = await this.workflow.run({ stage: 'start', input });
-    return ctx.result;
-  }
-}
-```
-
-#### 5. Add API endpoint
-
-Edit `src/index.ts`:
-
-```typescript
-import { createMyWorkflow } from './workflows/myworkflow';
-import { MyService } from './services/MyService';
-
-const myWorkflow = createMyWorkflow();
-const myService = new MyService(myWorkflow);
-
-app.post('/myendpoint', async (c) => {
-  const { input } = await c.req.json();
-  const result = await myService.process(input);
-  return c.json({ result });
-});
-```
-
-## Testing
-
-### Unit Tests
-
-Test individual tasks in isolation:
-
-```typescript
-import { describe, it, expect } from 'bun:test';
-import { fetchHtml } from '../fetchHtml';
-
-describe('fetchHtml', () => {
-  it('should fetch HTML from URL', async () => {
-    const ctx = await fetchHtml({
-      stage: 'initial',
-      url: 'https://example.com'
-    });
-
-    expect(ctx.stage).toBe('fetched');
-    expect(ctx.html).toBeDefined();
-    expect(ctx.html.length).toBeGreaterThan(0);
-  });
-
-  it('should handle fetch errors', async () => {
-    const ctx = await fetchHtml({
-      stage: 'initial',
-      url: 'https://invalid-domain-that-does-not-exist.com'
-    });
-
-    expect(ctx.stage).toBe('error');
-    expect(ctx.error).toBeDefined();
-  });
-});
-```
-
-### Integration Tests
-
-Test complete workflows:
-
-```typescript
-import { describe, it, expect } from 'bun:test';
-import { CrawlService } from '../../services/CrawlService';
-import { createCrawlWorkflow } from '../createCrawlWorkflow';
-
-describe('CrawlService', () => {
-  it('should crawl URL and return markdown', async () => {
-    const service = new CrawlService(createCrawlWorkflow());
-    const result = await service.crawlUrl('https://example.com');
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.markdown).toBeDefined();
-      expect(result.data.title).toBeDefined();
-    }
-  });
-});
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-bun test
-
-# Run specific test file
-bun test src/workflows/crawl/tasks/__tests__/fetchHtml.test.ts
-
-# Run tests in watch mode
-bun test --watch
-
-# Run tests with coverage
-bun test --coverage
-```
-
-## Debugging
-
-### Enable Debug Logging
-
-Set log level in `.env`:
-
-```env
-LOG_LEVEL=debug
-```
-
-This outputs detailed logs including:
-- Request/response details
-- Cache hits/misses
-- Rate limit tracking
-- Workflow stage transitions
-- Error stack traces
-
-### Using VS Code Debugger
-
-Create `.vscode/launch.json`:
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug Server",
-      "runtimeExecutable": "bun",
-      "runtimeArgs": ["--inspect", "src/index.ts"],
-      "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/.env"
-    }
-  ]
-}
-```
-
-Set breakpoints and press F5 to start debugging.
-
-### Logging Best Practices
-
-Use structured logging with context:
-
-```typescript
-import { createModuleLogger } from '../lib/logger';
-
-const log = createModuleLogger('MyModule');
-
-// Good: Structured logging with context
-log.info({ url, duration, size }, 'Request completed');
-
-// Bad: String concatenation
-log.info(`Request completed for ${url}`);
-```
-
-## Code Style
-
-### TypeScript Conventions
-
-**Types vs Interfaces:**
-- Use `type` for unions, primitives, and complex types
-- Use `interface` for object shapes that may be extended (rare in this project)
-- Prefer discriminated unions for state machines
-
-**Naming:**
-- **Types**: PascalCase (`CrawlContext`, `WorkflowTask`, `Result`)
-- **Functions**: camelCase with descriptive verbs (`fetchHtml`, `extractMetadata`)
-- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_TIMEOUT_MS`, `MAX_RETRIES`)
-- **Files**: camelCase for utilities, PascalCase for classes (`CrawlService.ts`)
-- **Variables**: camelCase (`crawlResult`, `htmlContent`)
-
-**Error Handling:**
-- Return discriminated unions (Result type) over throwing in service layer
-- Use try/catch only for truly exceptional cases
-- Log errors with structured context using Pino
-- Always include URL in error logs for crawl operations
-
-**Async/Await:**
-- Always use async/await over raw promises
-- No `.then()` chains
-- Handle errors explicitly with try/catch or Result type
-- Use `Promise.all()` for parallel operations
-
-**Imports:**
-- Group imports: external → internal → types
-- Use absolute imports from src root when beneficial
-- Prefer named exports over default exports
-- Order: React/framework → libraries → local modules → types
-
-**Example:**
-```typescript
-// External
-import { Hono } from 'hono';
-import { z } from 'zod';
-
-// Internal
-import { CrawlService } from './services/CrawlService';
-import { logger } from './lib/logger';
-
-// Types
-import type { CrawlContext } from './workflows/crawl/types';
-```
-
-**Comments:**
-- Use JSDoc for public APIs and complex functions
-- Avoid obvious comments (code should be self-documenting)
-- Explain "why" not "what"
-- Use `TODO:` for future improvements
-
-**Type Safety:**
-- Avoid `any` - use `unknown` instead
-- Use type guards for narrowing
-- Leverage discriminated unions
-- Make impossible states unrepresentable
-
-### Code Organization
-
-- One primary export per file (exceptions: utils, types, barrel exports)
-- Group related functionality in directories
-- Keep files under 200 lines when possible
-- Use barrel exports (`index.ts`) for public APIs
-- Separate concerns: types, logic, presentation
-
-### File Structure Pattern
-
-```typescript
-// 1. Imports (grouped as above)
-// 2. Constants
-// 3. Types (if small, otherwise separate file)
-// 4. Main implementation
-// 5. Exports
-```
-
-### Git Commit Conventions
-
-Use conventional commits format for clear history:
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-```
-
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `refactor`: Code change that neither fixes a bug nor adds a feature
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks (deps, config, etc.)
-- `perf`: Performance improvement
-
-**Examples:**
-```
-feat(crawl): add retry logic for failed requests
-fix(cache): prevent memory leak in LRU eviction
-docs: update API examples with error handling
-refactor(workflow): simplify task composition
-test(services): add CrawlService integration tests
-chore(deps): update dependencies to latest
-```
-
-## Performance Tips
-
-### 1. Use Bun APIs
-
-Bun provides optimized APIs:
-
-```typescript
-// Use Bun's native fetch (faster than node-fetch)
-const response = await fetch(url);
-
-// Use Bun's file I/O
-const file = Bun.file('path/to/file');
-const text = await file.text();
-```
-
-### 2. Optimize Cheerio Usage
-
-```typescript
-// Reuse selectors
-const $ = cheerio.load(html);
-const elements = $('selector');
-
-// Avoid unnecessary DOM traversal
-const text = $('p').first().text(); // Better
-const text = $('p')[0].innerText;   // Slower
-```
-
-### 3. Cache Expensive Operations
-
-```typescript
-// Cache regex compilation
-const URL_REGEX = /https?:\/\/.+/;
-
-// Cache parsed data
-const metadataCache = new Map();
-```
-
-### 4. Use Streaming When Possible
-
-```typescript
-// For large responses
-const stream = await fetch(url).then(r => r.body);
-```
-
-## Common Issues
-
-### Port Already in Use
-
-```bash
-# Find and kill process using port 3000
-lsof -ti:3000 | xargs kill -9
-```
-
-### Module Resolution Issues
-
-Ensure `tsconfig.json` has correct settings:
-
-```json
-{
-  "compilerOptions": {
-    "moduleResolution": "bundler",
-    "module": "ESNext"
-  }
-}
-```
-
-### Type Errors After Adding Task
-
-1. Update `CrawlContext` type union
-2. Add type guard if needed
-3. Update workflow type parameters
-4. Rebuild: `bun run build`
-
-## Building for Production
-
-```bash
-# Build TypeScript
-bun run build
-
-# Test production build
-bun run start
-
-# Check output
-ls -lh dist/
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Ensure build passes
-6. Submit a pull request
-
-## Resources
-
-- [Bun Documentation](https://bun.sh/docs)
-- [Hono Documentation](https://hono.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Cheerio Documentation](https://cheerio.js.org/)
+The build writes runtime output to `dist/`. Vercel runs from the TypeScript
+source and builds the Svelte and Tailwind assets through the command declared
+in `vercel.json`.
+
+## Extend the implementation
+
+Keep design instructions with the architecture they modify:
+
+- Use [crawl workflow](ARCHITECTURE.md#crawl-workflow) to understand the
+  typed crawl stages.
+- Use [extension points](ARCHITECTURE.md#extension-points) before adding a task,
+  workflow, service, or route.
+- Use [architectural decisions](DECISIONS.md) to understand existing technology
+  and pattern choices.
+- Use the [API reference](API.md) when a change affects the public HTTP
+  contract.
+
+## Next steps
+
+Before you submit a change, follow the
+[contributing guide](../CONTRIBUTING.md) and update the canonical documentation
+identified in the [documentation map](INDEX.md).

@@ -1,403 +1,287 @@
 # Architecture
 
-## Overview
+QuickCrawl is a single Node.js application with a Hono HTTP adapter, crawl
+modules, and an explicit crawl workflow. This guide explains the runtime flow,
+module seams, core type contracts, security constraints, and supported
+extension points.
 
-QuickCrawl uses a modular workflow-based architecture that processes web pages through a series of transformation stages. Each stage is type-safe and composable.
+## Runtime flow
 
-## Workflow Pipeline
+A crawl request moves through a small set of layers. Each layer owns one kind
+of behavior and exposes a narrow interface to the next layer.
 
-The crawl workflow consists of five sequential stages:
-
+```text
+HTTP request
+  -> Hono route and input validation
+  -> rate-limit middleware
+  -> CachedCrawlService
+  -> CrawlService
+  -> typed crawl workflow
+  -> structured HTTP response
 ```
-URL → Fetch HTML → Extract Metadata → Parse Document → Clean Document → Convert to Markdown
+
+`src/index.ts` is the production composition root. Its `createProductionApp`
+factory constructs the workflow, crawl services, cache, and rate-limit
+middleware. It passes those adapters to `createApp` in `src/app.ts`, while
+`src/server.ts` starts the default production application.
+
+## Module boundaries
+
+The source tree separates transport, orchestration, workflow processing, and
+shared infrastructure.
+
+| Location               | Responsibility                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `src/app.ts`           | Creates a Hono application from injected dependencies.                                   |
+| `src/index.ts`         | Composes and exports the production application.                                         |
+| `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                               |
+| `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and asset routes.               |
+| `src/contracts/`       | Defines the public HTTP and playground initialization contracts shared by routes and UI. |
+| `src/ui/`              | Renders the Hono JSX document shell and the client-rendered Svelte application.          |
+| `src/services/`        | Coordinates workflows and decorates crawling with caching.                               |
+| `src/workflow/`        | Defines the generic task and run-option contracts.                                       |
+| `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition.                           |
+| `src/middleware/`      | Applies HTTP concerns before route processing.                                           |
+| `src/lib/`             | Provides configuration-adjacent utilities, logging, errors, caching, and rate limiting.  |
+
+Keep HTTP concerns at the application edge. Crawl modules must not depend on
+Hono contexts, and workflow tasks must not format HTTP responses.
+
+## Crawl workflow
+
+The workflow transforms a discriminated `CrawlContext` through explicit stage
+transitions. TypeScript checks that each task receives the output type produced
+by the preceding task.
+
+```text
+initial
+  -> fetched
+  -> metadata_extracted
+  -> parsed
+  -> cleaned
+  -> completed
 ```
 
-### Stage Details
+The stages carry these primary values:
 
-1. **Fetch HTML** (`fetchHtml`)
-   - Downloads the web page using native fetch
-   - Handles redirects and HTTP errors
-   - Extracts initial title from HTML
-   - **Input**: `{ stage: 'initial', url }`
-   - **Output**: `{ stage: 'fetched', url, html, title? }`
+| Stage                | Added value                 |
+| -------------------- | --------------------------- |
+| `initial`            | Validated input URL string  |
+| `fetched`            | HTML and an optional title  |
+| `metadata_extracted` | Page metadata               |
+| `parsed`             | Serialized parsed document  |
+| `cleaned`            | Serialized cleaned document |
+| `completed`          | Markdown output             |
 
-2. **Extract Metadata** (`extractMetadata`)
-   - Parses meta tags, Open Graph, Twitter Cards
-   - Extracts structured metadata (description, images, etc.)
-   - **Input**: `{ stage: 'fetched', ... }`
-   - **Output**: `{ stage: 'metadata_extracted', ..., metadata }`
+`createCrawlWorkflow.ts` calls the tasks in order instead of using a dynamic
+pipeline. This makes incompatible transitions compile-time errors and keeps the
+workflow's public surface limited to one `run` method.
 
-3. **Parse Document** (`parseDocument`)
-   - Loads HTML into Cheerio DOM
-   - Prepares document for manipulation
-   - **Input**: `{ stage: 'metadata_extracted', ... }`
-   - **Output**: `{ stage: 'parsed', ..., document }`
+### Task contract
 
-4. **Clean Document** (`cleanDocument`)
-   - Removes scripts, styles, and unwanted elements
-   - Cleans up navigation, footers, ads
-   - **Input**: `{ stage: 'parsed', ... }`
-   - **Output**: `{ stage: 'cleaned', ..., cleanedDocument }`
-
-5. **Convert to Markdown** (`convertToMarkdown`)
-   - Transforms clean HTML to Markdown using Turndown
-   - Supports GitHub Flavored Markdown
-   - **Input**: `{ stage: 'cleaned', ... }`
-   - **Output**: `{ stage: 'completed', ..., markdown }`
-
-## Type System
-
-### Discriminated Unions
-
-Each workflow stage is represented as a distinct type with guaranteed fields:
+Each task declares one input context and one output context.
 
 ```typescript
-type CrawlContext =
-  | { stage: 'initial'; url: string }
-  | { stage: 'fetched'; url: string; html: string; title?: string }
-  | { stage: 'metadata_extracted'; url: string; html: string; title?: string; metadata: Metadata }
-  | { stage: 'parsed'; url: string; html: string; title?: string; metadata: Metadata; document: CheerioAPI }
-  | { stage: 'cleaned'; url: string; html: string; title?: string; metadata: Metadata; document: CheerioAPI; cleanedDocument: CheerioAPI }
-  | { stage: 'completed'; url: string; html: string; title?: string; metadata: Metadata; document: CheerioAPI; cleanedDocument: CheerioAPI; markdown: string }
-  | { stage: 'error'; url: string; error: Error };
-```
-
-This ensures:
-- **Compile-time safety**: TypeScript knows exactly what fields exist at each stage
-- **No runtime surprises**: Can't access fields that don't exist yet
-- **Clear progression**: Stage transitions are explicit and type-checked
-
-### Type Guards
-
-Type guards allow safe narrowing of context types:
-
-```typescript
-import { isFetched, isCompleted, hasMetadata } from './workflows/crawl/guards';
-
-// Example: Check if HTML was fetched
-if (isFetched(ctx)) {
-  // TypeScript knows ctx.html exists
-  console.log(ctx.html.length);
-}
-
-// Example: Check if workflow completed
-if (isCompleted(ctx)) {
-  // TypeScript knows ctx.markdown exists
-  return ctx.markdown;
-}
-
-// Example: Check if metadata was extracted
-if (hasMetadata(ctx)) {
-  // TypeScript knows ctx.metadata exists
-  console.log(ctx.metadata.description);
+export interface Task<TInput, TOutput> {
+  readonly name: string;
+  run(input: TInput, signal?: AbortSignal): Promise<TOutput>;
 }
 ```
 
-### Result Type
+Tasks can perform I/O or transform data, but they must preserve required context
+fields and return the next stage. I/O tasks must honor the supplied
+`AbortSignal`.
 
-API responses use a discriminated union for type-safe error handling:
+### Cancellation and timeouts
+
+`CrawlService` gives the workflow a 30-second timeout. The workflow combines
+that timeout with an optional caller signal and forwards the resulting signal
+to every task.
+
+The fetch task also applies a 15-second timeout to each fetch attempt and uses
+up to two retries after the initial attempt. A workflow timeout becomes a
+structured `timeout` error.
+
+## Crawl modules
+
+The crawl modules convert workflow state into the stable result consumed by the
+HTTP route.
+
+### `CrawlService`
+
+`CrawlService` accepts a `CrawlWorkflow` adapter and returns a
+`CrawlResult`. It owns workflow timeout selection, completion checks, result
+projection, duration logging, and conversion of unexpected failures into
+structured crawl errors. Its optional `AbortSignal` is forwarded to the
+workflow so callers can cancel active work.
+
+### `CachedCrawlService`
+
+`CachedCrawlService` implements the same `Crawler` interface and decorates
+another crawler with injected cache storage. It caches successful results by
+exact URL, doesn't cache failures, and forwards caller cancellation on cache
+misses. The production composition root supplies the bounded in-memory cache;
+tests can supply deterministic cache adapters.
+
+The cache has configurable time-to-live and capacity values. Its state belongs
+to one Node.js process and isn't shared across instances.
+
+## HTTP boundary
+
+`createApp` assembles the Hono application from an injected `Crawler` and
+rate-limit middleware. `createCrawlRoutes` validates crawl requests, invokes
+the crawler, and maps results to HTTP responses. Response builders in
+`src/lib/errors.ts` keep validation, rate-limit, crawl, and internal error
+envelopes consistent.
+
+`CrawlRequestSchema` performs structural URL validation before the workflow runs.
+The fetch task performs the network-safety validation that requires DNS
+resolution. `src/lib/errors.ts` maps crawl error variants to stable HTTP status
+codes.
+
+Read the [API reference](API.md) for the public request and response contract.
+
+## URL and network safety
+
+User-controlled crawl targets create a server-side request forgery risk. The
+fetch path treats URL safety as a workflow invariant, not just an API input
+check.
+
+Before each request, `assertSafeCrawlUrl` enforces these rules:
+
+- The URL uses HTTP or HTTPS.
+- The URL contains no username or password.
+- The hostname isn't localhost or a localhost subdomain.
+- Every resolved address is public.
+- Literal IP addresses pass the same public-address checks.
+
+The fetch task disables automatic redirect following. It validates each
+redirect destination before issuing the next request and stops after five
+redirects. Changes to URL parsing, DNS handling, redirect behavior, or fetch
+logic require focused security tests.
+
+## Error model
+
+QuickCrawl uses discriminated unions at workflow, service, and API boundaries.
+Expected crawl failures use `CrawlError`, while service results use
+`Result<T, E>`. A shared runtime schema validates unknown thrown values before
+the service or HTTP boundary treats them as a `CrawlError`.
 
 ```typescript
-type Result<T, E> = 
-  | { success: true; data: T }
-  | { success: false; error: E };
+type Result<T, E> = { success: true; data: T } | { success: false; error: E };
 ```
 
-This pattern:
-- Forces explicit error handling
-- Makes success/failure states mutually exclusive
-- Provides type-safe access to data or error
+Callers must narrow on `success` before reading `data` or `error`. Preserve the
+specific error variant while crossing modules so the HTTP adapter can choose
+the correct status code.
 
-**Usage:**
+All layers use structured Pino logging. Add values such as URLs, request IDs,
+stages, and durations as fields instead of interpolating them into messages.
 
-```typescript
-const result = await crawlService.crawlUrl(url);
+## Rate limiting
 
-if (result.success) {
-  // TypeScript knows result.data exists
-  console.log(result.data.markdown);
-} else {
-  // TypeScript knows result.error exists
-  console.error(result.error.message);
-}
-```
+The crawl route applies an in-memory windowed rate limiter before parsing the
+request body. The default configuration permits 10 requests in 60 seconds.
 
-## Services Layer
+Without trusted-proxy mode, one application instance uses a global identity.
+With `TRUST_PROXY=true`, the middleware uses the first `X-Forwarded-For` value.
+Only enable this setting behind an upstream proxy that sanitizes and overwrites
+forwarded headers.
 
-### CrawlService
+Like the cache, rate-limit state is local to one process. Deployments with
+multiple instances don't share counters.
 
-Core service that orchestrates the workflow:
+## UI and styles
 
-```typescript
-class CrawlService {
-  constructor(
-    private workflow: Workflow<InitialContext, FinalContext>,
-    private timeoutMs: number = 30_000
-  )
-  
-  async crawlUrl(url: string): Promise<CrawlResult>
-}
-```
+The browser UI uses a minimal Hono JSX document shell and a single client-rendered
+Svelte 5 application. The shell serializes page initialization data into the
+mount element; `app.js` mounts layout and pages for `/` (marketing home),
+`/playground` (crawl workspace), and `/docs` (API reference). All visible UI is
+implemented in Svelte with locally owned shadcn-svelte components under
+`src/ui/islands/playground/ui`.
 
-**Responsibilities:**
-- Initializes workflow with URL
-- Handles timeout management
-- Converts workflow result to API response
-- Logs crawl metrics (duration, markdown length, etc.)
+The playground uses a command-bar plus output-panel layout: the elevated URL
+control stays visible while idle, loading, success, and error states render in a
+separate output panel. Recent URLs are stored in `sessionStorage` only.
 
-### CachedCrawlService
+Hono and Svelte don't import one another. They communicate through serialized
+plain data defined in `src/contracts/` and the public HTTP contract, so the
+application doesn't require SvelteKit or a separate frontend server.
 
-Wrapper service that adds caching:
+Server routes and the browser application share Valibot schemas in
+`src/contracts/`. Request validation, response parsing, and page initialization
+all use the same schemas and inferred types. Zod remains for workflow error
+schemas and runtime configuration validation.
 
-```typescript
-class CachedCrawlService {
-  constructor(
-    private crawlService: CrawlService,
-    private cache: LRUCache<string, CrawlResult>
-  )
-  
-  async crawlUrl(url: string): Promise<CrawlResult>
-}
-```
+Tailwind source lives in `src/ui/styles/input.css`. Semantic tokens define
+surface layers (`surface-base`, `surface-raised`, `surface-sunken`), accent, and
+status colors (`success`, `info`, `destructive-subtle`) for both light and dark
+themes. Svelte components and generated shadcn-svelte sources use the same
+tokens. `pnpm run build:assets` generates `public/styles.css` and the ignored
+`public/assets/app.js` browser bundle. The `/styles.css` and `/assets/app.js`
+routes disable caching during development and require revalidation in production.
 
-**Features:**
-- LRU cache with configurable TTL and max size
-- Cache key based on URL
-- Transparent caching (same interface as CrawlService)
-- Cache hit/miss logging
+## Extension points
 
-## Workflow Engine
+Extend QuickCrawl through its existing module boundaries. Avoid exposing task
+internals or adding a dynamic workflow abstraction unless the type guarantees
+can be preserved.
 
-### Generic Workflow Class
+### Add a crawl stage
 
-The workflow engine is generic and reusable:
+Add a stage through the typed workflow in this order:
 
-```typescript
-class Workflow<TInitial, TFinal> {
-  constructor(private tasks: Task<any>[])
-  
-  async run(
-    initialContext: TInitial,
-    options?: { timeoutMs?: number }
-  ): Promise<TFinal>
-}
-```
+1. Add the new context variant to `src/workflows/crawl/types.ts`.
+2. Create a task with exact input and output `Extract` types.
+3. Export the task from `src/workflows/crawl/tasks/index.ts`.
+4. Compose the task explicitly in `createCrawlWorkflow.ts`.
+5. Forward the workflow `AbortSignal` to cancellable work.
+6. Test the transition, failure behavior, and cancellation when relevant.
+7. Update this workflow description.
 
-**Features:**
-- Type-safe input/output
-- Sequential task execution
-- Timeout support with `p-timeout`
-- Retry logic with `p-retry`
-- Composable task pipeline
-
-### Task Interface
-
-Each task is a simple async function:
+For example, a task between `cleaned` and a new `analyzed` stage starts with an
+explicit contract:
 
 ```typescript
-type Task<TContext> = (ctx: TContext) => Promise<TContext>;
-```
+type Input = Extract<CrawlContext, { stage: 'cleaned' }>;
+type Output = Extract<CrawlContext, { stage: 'analyzed' }>;
 
-Tasks:
-- Receive context
-- Transform context
-- Return new context
-- Can be pure functions or have side effects
-
-## Error Handling
-
-### Error Types
-
-```typescript
-type CrawlError = {
-  type: 'fetch_error' | 'parse_error' | 'timeout_error' | 'unknown';
-  message: string;
-  cause?: unknown;
+export const analyzeDocument: Task<Input, Output> = {
+  name: 'analyze_document',
+  async run(context, signal) {
+    signal?.throwIfAborted();
+    return {
+      ...context,
+      stage: 'analyzed',
+      analysis: analyze(context.cleanedDocument),
+    };
+  },
 };
 ```
 
-### Error Flow
+### Add an endpoint
 
-1. **Task Level**: Tasks catch and transform errors into error context
-2. **Service Level**: CrawlService catches workflow errors and returns Result
-3. **API Level**: Error handler middleware formats errors for HTTP response
+Keep request parsing and response formatting in a route module. Accept runtime
+dependencies through the route factory, and assemble production adapters in
+`createProductionApp`. Put reusable business behavior in a crawl module, and
+put multistage processing behind a workflow interface. Update the
+[API reference](API.md) in the same change.
 
-### Structured Logging
+### Change infrastructure behavior
 
-All errors are logged with context:
+Extend the existing abstractions when changing caching, rate limiting, logging,
+or configuration. Add or update an architectural decision when the change
+introduces a durable tradeoff or a new system-wide constraint.
 
-```typescript
-logger.error({
-  url,
-  error: err,
-  stage: ctx.stage,
-  duration
-}, 'Crawl failed');
+## Verification
+
+Architecture changes require focused tests and the complete repository checks:
+
+```bash
+pnpm run typecheck
+pnpm test
+pnpm run build
 ```
 
-## Middleware
-
-### Rate Limiting
-
-Token bucket algorithm with configurable limits:
-
-```typescript
-rateLimitMiddleware({
-  maxRequests: 10,      // Max requests per window
-  windowMs: 60_000,     // Time window in ms
-  keyGenerator: (c) => c.req.header('x-forwarded-for') || 'default'
-})
-```
-
-**Features:**
-- Per-IP rate limiting
-- Configurable via environment variables
-- Returns 429 when limit exceeded
-- Includes `Retry-After` header
-
-## Performance Considerations
-
-### Caching Strategy
-
-- **LRU Cache**: Evicts least recently used entries when full
-- **TTL**: Entries expire after configured time
-- **Memory Efficient**: Bounded cache size prevents memory leaks
-
-### Resource Management
-
-- **Timeouts**: Prevents hanging requests (default 30s)
-- **Streaming**: Cheerio loads HTML efficiently
-- **Connection Pooling**: Native fetch handles connection reuse
-
-### Scalability
-
-- **Stateless**: Each request is independent
-- **Horizontal Scaling**: Can run multiple instances behind load balancer
-- **Rate Limiting**: Protects against abuse and resource exhaustion
-
-## Extension Points
-
-### Adding a New Task
-
-Create a task file in `src/workflows/crawl/tasks/`:
-
-```typescript
-import type { Task } from '../../../workflow/types';
-import type { CrawlContext } from '../types';
-
-export const myTask: Task<CrawlContext> = async (ctx) => {
-  // Only process if at expected stage
-  if (ctx.stage !== 'cleaned') return ctx;
-  
-  // Your transformation logic
-  const processed = processDocument(ctx.cleanedDocument);
-  
-  // Return new context with updated stage
-  return {
-    ...ctx,
-    stage: 'my_new_stage',
-    processedData: processed
-  };
-};
-```
-
-Then add to workflow:
-
-```typescript
-export function createCrawlWorkflow() {
-  return new Workflow([
-    fetchHtml,
-    extractMetadata,
-    parseDocument,
-    cleanDocument,
-    myTask,           // Add your task
-    convertToMarkdown,
-  ]);
-}
-```
-
-### Creating a New Workflow
-
-The workflow engine is generic and can be used for any multi-stage process:
-
-```typescript
-import { Workflow } from './workflow';
-
-type MyContext = 
-  | { stage: 'start'; input: string }
-  | { stage: 'processed'; input: string; output: string }
-  | { stage: 'done'; input: string; output: string; result: number };
-
-const workflow = new Workflow<
-  Extract<MyContext, { stage: 'start' }>,
-  Extract<MyContext, { stage: 'done' }>
->([
-  processTask,
-  finalizeTask
-]);
-
-const result = await workflow.run({ stage: 'start', input: 'data' });
-```
-
-## Dependencies
-
-### Core Dependencies
-
-- **Hono**: Fast web framework
-- **Cheerio**: HTML parsing and manipulation
-- **Turndown**: HTML to Markdown conversion
-- **Pino**: Structured logging
-- **Zod**: Runtime validation
-
-### Utility Libraries
-
-- **p-retry**: Retry logic with exponential backoff
-- **p-timeout**: Promise timeout wrapper
-- **p-pipe**: Function composition
-
-## Testing Strategy
-
-### Unit Tests
-
-Test individual tasks in isolation:
-
-```typescript
-describe('fetchHtml', () => {
-  it('should fetch HTML from URL', async () => {
-    const ctx = await fetchHtml({ stage: 'initial', url: 'https://example.com' });
-    expect(ctx.stage).toBe('fetched');
-    expect(ctx.html).toBeDefined();
-  });
-});
-```
-
-### Integration Tests
-
-Test complete workflow:
-
-```typescript
-describe('CrawlService', () => {
-  it('should crawl URL and return markdown', async () => {
-    const service = new CrawlService(createCrawlWorkflow());
-    const result = await service.crawlUrl('https://example.com');
-    expect(result.success).toBe(true);
-    expect(result.data.markdown).toBeDefined();
-  });
-});
-```
-
-### End-to-End Tests
-
-Test API endpoints:
-
-```typescript
-describe('POST /crawl', () => {
-  it('should return markdown for valid URL', async () => {
-    const response = await app.request('/crawl', {
-      method: 'POST',
-      body: JSON.stringify({ url: 'https://example.com' })
-    });
-    expect(response.status).toBe(200);
-  });
-});
-```
+Use the [development guide](DEVELOPMENT.md) for local workflows and the
+[contributing guide](../CONTRIBUTING.md) for submission requirements.

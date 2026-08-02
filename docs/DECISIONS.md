@@ -1,61 +1,74 @@
-# Architectural Decision Records
+# Architectural decision records
 
-This document captures key architectural decisions made during the development of QuickCrawl.
+This document records durable architectural decisions, their rationale, and
+their tradeoffs. Update a record when the implementation changes enough that
+the original decision no longer describes the system.
 
-## ADR-001: Use Bun as Runtime
+## ADR-001: Use Node.js with pnpm
 
-**Date:** 2024  
+**Date:** August 1, 2026
 **Status:** Accepted
 
-**Context:**  
-Need a fast, modern runtime for TypeScript execution with minimal configuration overhead.
+**Context:**
+The project needs a widely supported production runtime and a deterministic,
+space-efficient package manager.
 
-**Decision:**  
-Use Bun instead of Node.js as the primary runtime.
+**Decision:**
+Use Node.js 24 or later as the runtime and pnpm 10 or later as the package
+manager. Use `tsx` during development, Vitest for tests, and Rolldown for
+production bundles.
 
 **Rationale:**
-- Native TypeScript support without ts-node or tsx
-- Significantly faster cold starts and execution
-- Built-in test runner
-- Compatible with Node.js ecosystem (can use npm packages)
-- Simpler development workflow (no separate build step for dev)
+
+- Broad hosting and package compatibility
+- Strict, deterministic dependency installation through `pnpm-lock.yaml`
+- Fast TypeScript execution during development with `tsx`
+- A focused test runner with TypeScript support through Vitest
+- A fast, Rust-based production bundler through Rolldown
+- One package-manager workflow for local development and Vercel
 
 **Consequences:**
+
 - **Positive:**
-  - Faster development iteration
-  - Simpler tooling setup
-  - Better performance in production
+  - Broad ecosystem and deployment support
+  - Efficient dependency storage with pnpm
+  - Consistent local and hosted builds
 - **Negative:**
-  - Smaller community than Node.js
-  - Some packages may have compatibility issues
-  - Deployment requires Bun on server
-  - Less mature ecosystem
+  - TypeScript source requires `tsx` during development or compilation for
+    production
+  - Testing requires a separate test runner
 
 **Alternatives Considered:**
-- Node.js with tsx: More mature but slower
-- Deno: Good TypeScript support but different module system
+
+- Bun: Integrated runtime, package manager, and test runner, but less universal
+  hosting support
+- npm: Bundled with Node.js, but less space-efficient for multi-project setups
+- Deno: Good TypeScript support, but a different module and tooling ecosystem
 
 ---
 
-## ADR-002: Workflow-Based Architecture
+## ADR-002: Use explicit typed workflows
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need a maintainable, testable way to process web pages through multiple transformation stages.
 
-**Decision:**  
-Implement a generic workflow engine with stage-based pipeline architecture.
+**Decision:**
+Represent workflow state with discriminated unions and compose each transition
+explicitly behind a small workflow interface.
 
 **Rationale:**
+
 - Each stage is independently testable
 - Type-safe progression through stages using discriminated unions
-- Easy to add, remove, or reorder stages
+- Explicit ordering makes incompatible adjacent stages fail type checking
 - Clear separation of concerns
-- Reusable workflow engine for future use cases
+- A small public interface hides task composition from callers
 
 **Consequences:**
+
 - **Positive:**
   - Excellent maintainability
   - Easy to extend with new stages
@@ -67,30 +80,36 @@ Implement a generic workflow engine with stage-based pipeline architecture.
   - Slightly more complex for simple use cases
 
 **Alternatives Considered:**
+
 - Monolithic function: Simpler but harder to test and maintain
-- Class-based pipeline: More OOP but less functional
+- Generic dynamic pipeline: More reusable, but it weakens adjacent-stage type
+  guarantees
+- Class-based pipeline: More object-oriented structure with little benefit for
+  the current sequential flow
 
 ---
 
-## ADR-003: Hono as Web Framework
+## ADR-003: Use Hono as the web framework
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need a lightweight, fast web framework for the API server.
 
-**Decision:**  
+**Decision:**
 Use Hono instead of Express or Fastify.
 
 **Rationale:**
+
 - Extremely lightweight and fast
-- Works seamlessly with Bun
+- Includes an official Node.js server adapter
 - Modern API design (similar to Express but cleaner)
 - Built-in TypeScript support
 - Edge-runtime compatible (future-proof)
 
 **Consequences:**
+
 - **Positive:**
   - Minimal overhead
   - Excellent performance
@@ -102,23 +121,25 @@ Use Hono instead of Express or Fastify.
   - Less community resources
 
 **Alternatives Considered:**
+
 - Express: More mature but heavier and slower
 - Fastify: Fast but more complex configuration
 
 ---
 
-## ADR-004: Discriminated Unions for Type Safety
+## ADR-004: Use discriminated unions for type safety
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need to ensure type safety across workflow stages and prevent accessing fields that don't exist yet.
 
-**Decision:**  
+**Decision:**
 Use discriminated unions with a `stage` discriminator for workflow context types.
 
 **Rationale:**
+
 - Compile-time guarantees about available fields
 - TypeScript can narrow types based on stage
 - Impossible to access fields that don't exist yet
@@ -126,6 +147,7 @@ Use discriminated unions with a `stage` discriminator for workflow context types
 - Prevents entire classes of runtime errors
 
 **Consequences:**
+
 - **Positive:**
   - Excellent type safety
   - Catches errors at compile time
@@ -137,23 +159,26 @@ Use discriminated unions with a `stage` discriminator for workflow context types
   - Learning curve for contributors
 
 **Alternatives Considered:**
+
 - Optional fields: Less safe, can access undefined values
 - Separate types per stage: More verbose, harder to compose
 
 ---
 
-## ADR-005: Result Type for Error Handling
+## ADR-005: Use result types for error handling
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need consistent, type-safe error handling across the API.
 
-**Decision:**  
-Use Result<T, E> pattern (discriminated union of Success | Failure) instead of throwing exceptions.
+**Decision:**
+Use a `Result<T, E>` discriminated union at service and API boundaries instead
+of relying only on thrown exceptions.
 
 **Rationale:**
+
 - Forces explicit error handling
 - Type-safe access to data or error
 - Clear API contracts
@@ -161,6 +186,7 @@ Use Result<T, E> pattern (discriminated union of Success | Failure) instead of t
 - Functional programming approach
 
 **Consequences:**
+
 - **Positive:**
   - No unhandled exceptions
   - Explicit error handling in API
@@ -172,31 +198,35 @@ Use Result<T, E> pattern (discriminated union of Success | Failure) instead of t
   - Different from typical JavaScript patterns
 
 **Alternatives Considered:**
+
 - Throwing exceptions: Standard but can be missed
 - Error-first callbacks: Outdated pattern
 - Promise rejection: Less type-safe
 
 ---
 
-## ADR-006: LRU Cache for Performance
+## ADR-006: Use a bounded in-memory cache
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need to reduce redundant requests to the same URLs without unbounded memory growth.
 
-**Decision:**  
-Implement LRU (Least Recently Used) cache with configurable TTL and max size.
+**Decision:**
+Implement an in-memory cache with configurable expiration and capacity. Evict
+the oldest stored or updated key when the cache reaches capacity.
 
 **Rationale:**
+
 - Bounded memory usage (max size limit)
 - Automatic eviction of stale entries (TTL)
-- Evicts least recently used when full
+- Evicts the oldest stored or updated entry when full
 - Simple to implement and understand
 - Configurable via environment variables
 
 **Consequences:**
+
 - **Positive:**
   - Significant performance improvement for repeated URLs
   - Predictable memory usage
@@ -204,34 +234,38 @@ Implement LRU (Least Recently Used) cache with configurable TTL and max size.
 - **Negative:**
   - Stale data possible (within TTL)
   - Memory overhead for cache storage
-  - Not distributed (single-instance only)
+  - Reads don't refresh eviction order
+  - State isn't distributed across application instances
 
 **Alternatives Considered:**
+
 - No caching: Simple but slow for repeated requests
 - Redis: Distributed but adds complexity
 - Simple Map: No eviction, unbounded memory
 
 ---
 
-## ADR-007: Cheerio for HTML Parsing
+## ADR-007: Use Cheerio for HTML parsing
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
-Need to parse and manipulate HTML efficiently in Node.js/Bun environment.
+**Context:**
+Need to parse and manipulate HTML efficiently in a Node.js environment.
 
-**Decision:**  
+**Decision:**
 Use Cheerio for HTML parsing and manipulation.
 
 **Rationale:**
+
 - jQuery-like API (familiar to many developers)
 - Fast and lightweight
-- Works in Node.js/Bun (no browser required)
+- Works in Node.js (no browser required)
 - Good for server-side HTML manipulation
 - Mature and well-maintained
 
 **Consequences:**
+
 - **Positive:**
   - Familiar API
   - Excellent performance
@@ -243,24 +277,26 @@ Use Cheerio for HTML parsing and manipulation.
   - Limited to static HTML
 
 **Alternatives Considered:**
+
 - JSDOM: Full DOM but much slower
 - Playwright/Puppeteer: Can execute JS but heavy and slow
 - Native parsing: Too low-level
 
 ---
 
-## ADR-008: Turndown for Markdown Conversion
+## ADR-008: Use Turndown for Markdown conversion
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need to convert cleaned HTML to clean, readable Markdown.
 
-**Decision:**  
+**Decision:**
 Use Turndown with GitHub Flavored Markdown plugin.
 
 **Rationale:**
+
 - Mature and well-tested
 - Supports GitHub Flavored Markdown
 - Configurable output
@@ -268,6 +304,7 @@ Use Turndown with GitHub Flavored Markdown plugin.
 - Active maintenance
 
 **Consequences:**
+
 - **Positive:**
   - Clean Markdown output
   - GFM support (tables, strikethrough, etc.)
@@ -277,31 +314,34 @@ Use Turndown with GitHub Flavored Markdown plugin.
   - Limited customization options
 
 **Alternatives Considered:**
+
 - html-to-md: Less mature
 - Custom conversion: Too much work, error-prone
 - Pandoc: Requires external binary
 
 ---
 
-## ADR-009: Pino for Structured Logging
+## ADR-009: Use Pino for structured logging
 
-**Date:** 2024  
+**Date:** 2024
 **Status:** Accepted
 
-**Context:**  
+**Context:**
 Need fast, structured logging with minimal performance impact.
 
-**Decision:**  
+**Decision:**
 Use Pino for structured logging with JSON output.
 
 **Rationale:**
+
 - Extremely fast (fastest Node.js logger)
 - Structured JSON logging
 - Child loggers for context
-- Good Bun compatibility
+- Good Node.js compatibility
 - Production-ready
 
 **Consequences:**
+
 - **Positive:**
   - Minimal performance impact
   - Structured logs easy to parse
@@ -311,15 +351,110 @@ Use Pino for structured logging with JSON output.
   - Requires log parsing tools for analysis
 
 **Alternatives Considered:**
+
 - Winston: Slower, more complex
 - Console.log: Not structured, no levels
 - Bunyan: Similar but less maintained
 
 ---
 
-## Future Considerations
+## ADR-010: Use Oxlint and Oxfmt for code quality
 
-### Potential Future Decisions
+**Date:** August 1, 2026
+**Status:** Accepted
+
+**Context:**
+The project needs consistent formatting and correctness-focused static analysis
+for TypeScript, TSX, tests, documentation, and configuration files.
+
+**Decision:**
+Use Oxlint for linting and Oxfmt for formatting. Enable selected type-aware
+TypeScript rules, fail CI on warnings, and use Oxfmt's Tailwind CSS v4 class
+sorting. Keep TypeScript type checking as a separate required check.
+
+**Rationale:**
+
+- Native TypeScript, TSX, Node.js, import, and Vitest rule coverage
+- Type-aware linting aligned with the project's TypeScript 7 toolchain
+- Built-in Tailwind CSS v4 class sorting for Hono JSX
+- Fast local and CI feedback with a small configuration surface
+- No existing ESLint, Prettier, or plugin configuration to migrate
+
+**Consequences:**
+
+- **Positive:**
+  - One formatter covers source, documentation, styles, and configuration
+  - Linting catches asynchronous TypeScript errors beyond syntax checks
+  - Contributors can run every required check through `pnpm run check`
+- **Negative:**
+  - Oxlint's JavaScript plugin compatibility and type-aware mode are newer than
+    the equivalent ESLint ecosystem
+  - Unsupported third-party lint rules may require adding ESLint in the future
+
+**Alternatives Considered:**
+
+- ESLint with Prettier: Mature and extensible, but requires more dependencies and
+  configuration for the current needs
+- Biome: Integrated linting and formatting, but doesn't match the selected
+  TypeScript 7 type-aware workflow and Tailwind setup as directly
+- No repository tooling: Minimal setup, but leaves formatting and static-analysis
+  behavior inconsistent across contributors
+
+---
+
+## ADR-011: Use a Svelte client application behind a Hono document shell
+
+**Date:** August 2, 2026
+**Status:** Accepted (amended August 2, 2026)
+
+**Context:**
+The browser UI needs typed request state, accessible interactive components,
+and runtime validation without introducing SvelteKit or a separate frontend
+application. The layout, pages, and playground should share one component
+system.
+
+**Decision:**
+Keep a minimal Hono JSX document shell and mount one client-rendered Svelte 5
+application for all visible UI. Compose locally owned shadcn-svelte source, build
+the client with Vite as `app.js`, and serve it through Hono. Serialize page
+initialization data from the shell into the mount element. Use client rendering
+rather than Svelte server rendering or hydration.
+
+**Rationale:**
+
+- One shadcn-svelte design system for layout, pages, and playground
+- Replaces duplicated Hono JSX components and selector-based DOM contracts
+- Provides accessible, locally maintainable interface primitives
+- Preserves the existing API server, page routes, and Tailwind design tokens
+- Keeps Hono responsible only for HTML transport and server-side config injection
+
+**Consequences:**
+
+- **Positive:**
+  - Browser requests and initialization data have runtime-validated contracts
+  - All UI components receive Svelte type checking and focused UI tests
+  - Hono continues to serve one application without SvelteKit
+- **Negative:**
+  - Development and production builds have separate browser and server targets
+  - Contributors must distinguish the Hono shell from Svelte component boundaries
+  - The browser downloads Svelte, components, Markdown, and sanitization code
+  - Static page content is not present in the initial HTML without JavaScript
+
+**Alternatives considered:**
+
+- Typed vanilla TypeScript: Smaller runtime, but retains manual state rendering
+  and accessible widget implementation
+- React with shadcn/ui: Larger runtime and broader migration pressure
+- Astro: Provides native island orchestration, but would replace the current
+  presentation framework rather than extend it
+- Hono JSX for static pages with a playground-only island: Avoids a larger
+  client bundle but duplicates component styling between TSX and Svelte
+
+---
+
+## Future considerations
+
+### Potential future decisions
 
 1. **Distributed Caching**: Consider Redis if running multiple instances
 2. **Database Storage**: Add persistent storage for crawl history
@@ -331,7 +466,7 @@ Use Pino for structured logging with JSON output.
 
 ---
 
-## Decision Process
+## Decision process
 
 When making new architectural decisions:
 

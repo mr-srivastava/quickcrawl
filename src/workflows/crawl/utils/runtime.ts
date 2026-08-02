@@ -1,4 +1,5 @@
-import type { CrawlContext, CrawlError } from '../types';
+import { normalizeCrawlError } from '../errors';
+import type { CrawlContext } from '../types';
 import type { RemoveUndefined } from './types';
 
 /**
@@ -16,31 +17,6 @@ export function removeUndefined<T extends Record<string, unknown>>(
 }
 
 /**
- * Converts unknown thrown value to a CrawlError for consistent error handling.
- */
-function toCrawlError(error: unknown, stage: string): CrawlError {
-  if (error instanceof Error) {
-    if (error.message.includes('fetch')) {
-      return {
-        type: 'network_error',
-        message: error.message,
-        cause: error.cause?.toString(),
-      };
-    }
-    return {
-      type: 'unknown',
-      message: error.message,
-      cause: error,
-    };
-  }
-  return {
-    type: 'unknown',
-    message: String(error),
-    cause: error,
-  };
-}
-
-/**
  * Creates an error-stage context from a URL, thrown error, and optional partial data.
  */
 export function createErrorContext(
@@ -49,11 +25,10 @@ export function createErrorContext(
   stage: string,
   partialData?: Partial<Extract<CrawlContext, { stage: 'completed' }>>,
 ): Extract<CrawlContext, { stage: 'error' }> {
-  const crawlError = toCrawlError(error, stage);
   return {
     stage: 'error',
     url,
-    error: crawlError,
+    error: normalizeCrawlError(error, { stage }),
     partialData,
   };
 }

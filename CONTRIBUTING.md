@@ -1,300 +1,178 @@
 # Contributing to QuickCrawl
 
-Thank you for your interest in contributing to QuickCrawl! This document provides guidelines and information for contributors.
+QuickCrawl welcomes focused bug fixes, tests, documentation improvements, and
+well-scoped features. This guide defines the contribution process and repository
+conventions. Use the [development guide](docs/DEVELOPMENT.md) for local setup,
+commands, testing, and debugging.
 
-## Getting Started
+## Before you start
 
-1. **Read the documentation:**
-   - [README](README.md) - Project overview
-   - [Development Guide](docs/DEVELOPMENT.md) - Setup and workflows
-   - [Architecture](docs/ARCHITECTURE.md) - Technical design
-   - [Decisions](docs/DECISIONS.md) - Why we made certain choices
+Review the existing context before you invest in a change:
 
-2. **Set up your development environment:**
-   ```bash
-   git clone <your-fork-url>
-   cd quickcrawl
-   bun install
-   cp .env.example .env
-   bun run dev
-   ```
+1. Search open issues and pull requests for related work.
+2. Check the [roadmap](TODO.md) for planned work and known issues.
+3. Read the relevant section of the
+   [architecture guide](docs/ARCHITECTURE.md).
+4. Review the [architectural decisions](docs/DECISIONS.md) for existing
+   constraints and tradeoffs.
+5. Discuss substantial features or architectural changes in an issue before
+   implementation.
 
-3. **Check the TODO list:**
-   - See [TODO.md](TODO.md) for planned features and improvements
-   - Look for issues labeled "good first issue" on GitHub
+## Report a bug
 
-## How to Contribute
+A useful bug report makes the behavior reproducible. Include:
 
-### Reporting Bugs
+- A clear title and concise description
+- Steps to reproduce the problem
+- Expected and actual behavior
+- Node.js and pnpm versions
+- Operating system and deployment environment
+- Relevant logs or error messages with secrets removed
 
-1. **Check existing issues** to avoid duplicates
-2. **Use a clear title** that describes the bug
-3. **Provide details:**
-   - Steps to reproduce
-   - Expected behavior
-   - Actual behavior
-   - Environment (OS, Bun version, etc.)
-   - Relevant logs or error messages
+Don't include credentials, private URLs, access tokens, or sensitive crawled
+content.
 
-### Suggesting Features
+## Propose a feature
 
-1. **Check TODO.md** to see if it's already planned
-2. **Open an issue** with:
-   - Clear description of the feature
-   - Use cases and benefits
-   - Potential implementation approach (optional)
+Describe the problem before the solution. Include the intended users, concrete
+use cases, expected behavior, and relevant constraints. An implementation
+outline is helpful when the proposal affects workflow stages, URL safety,
+public API behavior, or deployment architecture.
 
-### Submitting Code
+## Submit a change
 
-#### Before You Start
+Keep each pull request focused on one coherent outcome. Follow this workflow:
 
-1. **Open an issue** to discuss significant changes
-2. **Check existing PRs** to avoid duplicate work
-3. **Review the architecture** to understand the design
+1. Create a branch for the change.
+2. Implement the smallest complete solution.
+3. Add or update tests for behavioral changes.
+4. Update the canonical documentation identified in
+   [the documentation map](docs/INDEX.md).
+5. Run the required verification commands.
+6. Review the diff for unrelated or generated changes.
+7. Open a pull request with a clear summary and verification notes.
 
-#### Development Workflow
-
-1. **Create a feature branch:**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes:**
-   - Follow the [code style guidelines](#code-style)
-   - Add tests for new functionality
-   - Update documentation as needed
-
-3. **Test your changes:**
-   ```bash
-   bun run dev        # Manual testing
-   bun test           # Run tests (when implemented)
-   bun run build      # Verify build works
-   ```
-
-4. **Commit your changes:**
-   ```bash
-   git add .
-   git commit -m "feat(scope): description"
-   ```
-   See [Commit Conventions](#commit-conventions) below
-
-5. **Push and create a PR:**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-   Then open a Pull Request on GitHub
-
-## Code Style
-
-### TypeScript Guidelines
-
-- **Use strict mode** - All code must pass TypeScript strict checks
-- **Prefer `type` over `interface`** for unions and complex types
-- **Use discriminated unions** for state machines
-- **Avoid `any`** - Use `unknown` or proper types
-- **Use type guards** for narrowing types
-
-### Naming Conventions
-
-- **Types**: PascalCase (`CrawlContext`, `Result`)
-- **Functions**: camelCase (`fetchHtml`, `extractMetadata`)
-- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_TIMEOUT_MS`)
-- **Files**: camelCase for utilities, PascalCase for classes
-
-### Code Organization
-
-- One primary export per file
-- Group imports: external → internal → types
-- Keep files under 200 lines when possible
-- Use meaningful variable names (no single letters except in loops)
-
-### Example
-
-```typescript
-// Good
-import { Hono } from 'hono';
-import { CrawlService } from './services/CrawlService';
-import type { CrawlContext } from './workflows/crawl/types';
-
-const DEFAULT_TIMEOUT_MS = 30_000;
-
-export async function crawlUrl(url: string): Promise<Result<CrawlData, CrawlError>> {
-  // Implementation
-}
-
-// Bad
-import type { CrawlContext } from './workflows/crawl/types';
-import { CrawlService } from './services/CrawlService';
-import { Hono } from 'hono';
-
-const timeout = 30000;
-
-export async function crawl(u: string): Promise<any> {
-  // Implementation
-}
-```
-
-## Commit Conventions
-
-We use [Conventional Commits](https://www.conventionalcommits.org/) for clear commit history:
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer]
-```
-
-### Types
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `refactor`: Code refactoring (no behavior change)
-- `test`: Adding or updating tests
-- `chore`: Maintenance (deps, config, etc.)
-- `perf`: Performance improvement
-
-### Scopes
-
-- `crawl`: Crawling workflow
-- `api`: API endpoints
-- `cache`: Caching logic
-- `docs`: Documentation
-- `deps`: Dependencies
-
-### Examples
+Run these checks before submission:
 
 ```bash
-feat(crawl): add retry logic for failed requests
-fix(cache): prevent memory leak in LRU eviction
-docs: update API examples with error handling
-refactor(workflow): simplify task composition
-test(services): add CrawlService integration tests
-chore(deps): update dependencies to latest
-perf(crawl): optimize HTML parsing
+pnpm run check
 ```
 
-## Testing Guidelines
+The aggregate check verifies formatting, lint rules, types, tests, and the
+production build. Run `pnpm run format` and `pnpm run lint:fix` to apply safe
+automatic fixes while you work.
 
-### Writing Tests
+## Code conventions
 
-- Write tests for all new features
-- Test both success and error cases
-- Use descriptive test names
-- Keep tests focused and isolated
+Match the surrounding TypeScript and keep the compiler in strict mode. Apply
+these repository conventions:
 
-### Test Structure
+- Prefer precise types and discriminated unions.
+- Use `unknown` instead of `any` when the input type isn't known.
+- Use `import type` for type-only imports.
+- Respect `verbatimModuleSyntax`.
+- Use type guards to narrow workflow and result variants.
+- Keep HTTP concerns at the route boundary.
+- Keep reusable business behavior in services.
+- Keep crawl-stage transformations in workflow tasks.
+- Use structured Pino logging instead of `console.log`.
+- Prefer existing utilities and patterns before adding abstractions.
 
-```typescript
-import { describe, it, expect } from 'bun:test';
+Use these naming conventions:
 
-describe('fetchHtml', () => {
-  it('should fetch HTML from valid URL', async () => {
-    // Arrange
-    const ctx = { stage: 'initial' as const, url: 'https://example.com' };
-    
-    // Act
-    const result = await fetchHtml(ctx);
-    
-    // Assert
-    expect(result.stage).toBe('fetched');
-    expect(result.html).toBeDefined();
-  });
+| Element                       | Convention       | Example                            |
+| ----------------------------- | ---------------- | ---------------------------------- |
+| Types and classes             | PascalCase       | `CrawlContext`, `CrawlService`     |
+| Functions and variables       | camelCase        | `extractMetadata`, `crawlResult`   |
+| Constants                     | Upper snake case | `DEFAULT_TIMEOUT_MS`               |
+| Utility and task files        | camelCase        | `urlSafety.ts`, `fetchHtml.ts`     |
+| Class and JSX component files | PascalCase       | `CrawlService.ts`, `PageShell.tsx` |
 
-  it('should handle network errors', async () => {
-    const ctx = { stage: 'initial' as const, url: 'https://invalid-url' };
-    const result = await fetchHtml(ctx);
-    expect(result.stage).toBe('error');
-  });
-});
+Keep imports grouped as external dependencies, internal modules, and type-only
+imports. Use Oxfmt for repository formatting and Oxlint for correctness-focused
+static analysis. Don't reformat generated `public/styles.css` or
+`public/assets/` files manually.
+
+## Security requirements
+
+Crawling arbitrary URLs creates a server-side request forgery risk. Treat the
+URL-safety rules as required behavior:
+
+- Validate every initial URL and redirect destination.
+- Permit only HTTP and HTTPS.
+- Reject URL credentials and non-public network addresses.
+- Preserve request cancellation, fetch timeouts, redirect bounds, and retry
+  bounds.
+- Add focused security tests for changes to URL parsing, DNS resolution,
+  redirects, proxy identity, or fetching.
+
+Never commit `.env` files, credentials, tokens, private URLs, or captured
+production data.
+
+## Testing guidelines
+
+Tests are colocated with source files as `*.test.ts` and `*.test.tsx`. Add tests
+at the narrowest useful boundary and cover:
+
+- Successful behavior
+- Expected errors
+- Validation and boundary cases
+- Cancellation and timeout behavior when relevant
+- Security cases for network-facing changes
+- Cache and rate-limit behavior when those modules change
+
+Keep tests deterministic. Don't depend on live public websites or external DNS
+when behavior can be injected or mocked. Run a focused Vitest file while you
+iterate:
+
+```bash
+pnpm exec vitest run src/workflows/crawl/urlSafety.test.ts
 ```
 
-## Documentation Guidelines
+## Documentation guidelines
 
-### When to Update Docs
+The [documentation map](docs/INDEX.md) assigns one canonical document to each
+topic. Update that owner in the same change as the behavior, and link to it from
+other pages instead of copying detailed instructions.
 
-- **README.md**: Major features, installation changes
-- **API.md**: New endpoints, changed responses
-- **ARCHITECTURE.md**: Architectural changes
-- **DEVELOPMENT.md**: New tools, changed workflows
-- **DECISIONS.md**: Significant technical decisions
+Use direct language, sentence-case headings, descriptive links, and examples
+that match the current implementation. Wrap prose at 80 characters where
+practical. Don't manually edit generated browser assets; regenerate them with
+`pnpm run build:assets` when UI source changes.
 
-### Documentation Style
+## Commit conventions
 
-- Use clear, concise language
-- Include code examples
-- Add links to related documentation
-- Keep it up to date with code changes
+Use Conventional Commits when creating commits:
 
-## Pull Request Guidelines
-
-### PR Title
-
-Use the same format as commit messages:
-
-```
-feat(crawl): add retry logic for failed requests
+```text
+<type>(<scope>): <description>
 ```
 
-### PR Description
+Common types include `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, and
+`perf`. Use a concise imperative description, for example:
 
-Include:
+```text
+fix(crawl): reject private redirect targets
+docs(api): clarify rate-limit behavior
+test(cache): cover expired entries
+```
 
-1. **What**: Brief description of changes
-2. **Why**: Motivation and context
-3. **How**: Implementation approach (if complex)
-4. **Testing**: How you tested the changes
-5. **Screenshots**: For UI changes (if applicable)
+## Pull request expectations
 
-### PR Checklist
+Use the commit format for the pull request title. In the description, explain:
 
-Before submitting, ensure:
+- What changed and why
+- Which behavior or risk the change addresses
+- How you verified the result
+- Which documentation changed
+- Any follow-up work or known limitation
 
-- [ ] Code follows style guidelines
-- [ ] Tests added for new functionality
-- [ ] All tests pass
-- [ ] Documentation updated
-- [ ] Build succeeds (`bun run build`)
-- [ ] Commit messages follow conventions
-- [ ] No unnecessary files included
+Reviewers evaluate correctness, scope, tests, security, type safety,
+documentation, and compatibility with the existing architecture. Address
+feedback with focused updates, and keep unrelated cleanup in a separate change.
 
-## Review Process
+## Next steps
 
-1. **Automated checks** run on PR submission
-2. **Maintainer review** - May request changes
-3. **Address feedback** - Make requested changes
-4. **Approval** - PR is approved
-5. **Merge** - Maintainer merges the PR
-
-## Code of Conduct
-
-### Our Standards
-
-- Be respectful and inclusive
-- Accept constructive criticism gracefully
-- Focus on what's best for the project
-- Show empathy towards others
-
-### Unacceptable Behavior
-
-- Harassment or discriminatory language
-- Trolling or insulting comments
-- Personal or political attacks
-- Publishing others' private information
-
-## Questions?
-
-- **General questions**: Open a GitHub Discussion
-- **Bug reports**: Open a GitHub Issue
-- **Feature requests**: Open a GitHub Issue
-- **Security issues**: Email maintainers directly
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the MIT License.
-
----
-
-Thank you for contributing to QuickCrawl! 🎉
+Set up the repository with the [development guide](docs/DEVELOPMENT.md), then
+use the [architecture guide](docs/ARCHITECTURE.md) to find the correct extension
+point for your change.

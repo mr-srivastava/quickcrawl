@@ -1,112 +1,75 @@
-# TODO & Roadmap
+# Roadmap
 
-## In Progress
+This roadmap tracks possible future work and known technical debt. It isn't a
+release commitment; priorities can change as usage and deployment needs become
+clearer.
 
-- [ ] Documentation improvements
+## Current focus
 
-## Next Up (High Priority)
+The current priority is to stabilize documentation, security behavior, and
+deployment verification.
 
-### Features
-- [ ] Add retry logic with exponential backoff for failed requests
-- [ ] Implement robots.txt respect
-- [ ] Add sitemap.xml parsing and crawling
-- [ ] Support for custom user agents
+- [ ] Add continuous integration for type checks, tests, and production builds.
+- [ ] Add coverage reporting and identify untested workflow tasks.
+- [ ] Add end-to-end route tests that mock external network behavior.
+- [ ] Document and test the supported Vercel deployment path.
 
-### Testing
-- [ ] Add unit tests for all workflow tasks
-- [ ] Add integration tests for CrawlService
-- [ ] Add E2E tests for API endpoints
-- [ ] Set up test coverage reporting
+## Crawl capabilities
 
-### DevOps
-- [ ] Add Docker support
-- [ ] Create docker-compose for local development
-- [ ] Add CI/CD pipeline (GitHub Actions)
-- [ ] Set up automated testing
+These items extend what QuickCrawl can fetch or extract.
 
-## Planned Features
+- [ ] Respect `robots.txt` according to a documented policy.
+- [ ] Add sitemap discovery and parsing.
+- [ ] Support configurable user-agent strings.
+- [ ] Add batch crawling with explicit concurrency and capacity controls.
+- [ ] Add bounded recursive crawling.
+- [ ] Support targeted extraction with CSS selectors.
+- [ ] Evaluate browser rendering for JavaScript-dependent pages.
 
-### Crawling Enhancements
-- [ ] Batch crawling endpoint (multiple URLs at once)
-- [ ] Recursive crawling with depth limit
-- [ ] Custom CSS selectors for targeted extraction
-- [ ] Support for pagination detection
-- [ ] Handle JavaScript-rendered content (Playwright integration)
+## API and output
 
-### API Improvements
-- [ ] Webhook notifications for completed crawls
-- [ ] Streaming response for large pages
-- [ ] GraphQL API option
-- [ ] WebSocket support for real-time updates
+These items extend the public API or available result formats.
 
-### Output Formats
-- [ ] PDF export option
-- [ ] HTML export (cleaned)
-- [ ] JSON structured data export
-- [ ] Plain text export
+- [ ] Add API-key authentication and per-key rate limiting.
+- [ ] Add asynchronous crawl jobs and completion notifications.
+- [ ] Evaluate streaming for large Markdown responses.
+- [ ] Add cleaned HTML and structured JSON output formats.
+- [ ] Define a versioning policy before introducing breaking API changes.
 
-### Performance
-- [ ] Distributed caching with Redis
-- [ ] Queue system for background processing
-- [ ] Horizontal scaling support
-- [ ] Connection pooling optimization
+## Operations
 
-### Security & Auth
-- [ ] API key authentication
-- [ ] Rate limiting per API key
-- [ ] IP whitelist/blacklist
-- [ ] Request signing
+These items improve deployment, observability, and multi-instance behavior.
 
-### Monitoring & Observability
-- [ ] Prometheus metrics endpoint
-- [ ] OpenTelemetry integration
-- [ ] Health check endpoint with detailed status (basic `GET /health` done)
-- [ ] Performance monitoring dashboard
+- [ ] Add a container image and documented container workflow.
+- [ ] Add metrics and tracing with an agreed observability standard.
+- [ ] Evaluate shared caching and rate limiting for multi-instance deployments.
+- [ ] Add persistent crawl history only after defining retention and privacy
+      requirements.
+- [ ] Add background queues if batch or scheduled crawling requires them.
 
-## Ideas (Future Consideration)
+## Technical debt
 
-- [ ] Browser extension for easy crawling
-- [ ] CLI tool for command-line usage
-- [ ] Plugin system for custom extractors
-- [ ] AI-powered content summarization
-- [ ] Screenshot capture option
-- [ ] Archive.org integration
-- [ ] RSS feed generation from crawled content
-- [ ] Scheduled crawling (cron-like)
-- [ ] Diff detection (notify on content changes)
-- [ ] Language detection and translation
+These items address known implementation limitations.
 
-## Completed ✓
+- [ ] Rename or revise the cache implementation so its documented eviction
+      semantics match its ordered insertion behavior.
+- [ ] Centralize response schemas for runtime validation and API documentation.
+- [ ] Review whether `NODE_ENV` and `LOG_LEVEL` belong in the validated runtime
+      configuration schema.
+- [ ] Test DNS rebinding assumptions and document the residual risk.
+- [ ] Decide whether CORS must remain open for every route.
 
-- [x] Web UI with crawl playground (`GET /`)
-- [x] In-app API docs page (`GET /docs`)
-- [x] JSON health endpoint (`GET /health`)
-- [x] Basic crawl workflow
-- [x] Markdown conversion with Turndown
-- [x] Metadata extraction (Open Graph, Twitter Cards)
-- [x] Rate limiting middleware
-- [x] LRU caching
-- [x] Structured logging with Pino
-- [x] Type-safe workflow architecture
-- [x] API documentation
-- [x] Development guide
-- [x] Architecture documentation
+## Completed foundations
 
-## Known Issues
+QuickCrawl already includes these foundations:
 
-- None currently
-
-## Technical Debt
-
-- Consider adding database for crawl history
-- Evaluate need for distributed rate limiting
-- Review error handling consistency across tasks
-- Consider adding request/response validation middleware
-
----
-
-## Notes
-
-- Priority order may change based on user feedback
-- Features marked with ⚠️ require significant architectural changes
-- Check GitHub Issues for community-requested features
+- [x] Typed crawl stages and explicit task composition
+- [x] HTTP and HTTPS URL validation
+- [x] Public-address checks for initial and redirected targets
+- [x] Bounded retries, redirects, and request timeouts
+- [x] Metadata extraction and Markdown conversion
+- [x] In-memory caching and rate limiting
+- [x] Structured logging
+- [x] Browser playground, browser API reference, and health endpoint
+- [x] Unit and service-level test coverage for core modules
+- [x] Node.js, pnpm, Vitest, and Rolldown toolchain

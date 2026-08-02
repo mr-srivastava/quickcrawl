@@ -1,6 +1,5 @@
 {
-  "bunVersion": "1.x",
   "outputDirectory": ".",
-  "installCommand": "bun install",
-  "buildCommand": "bun run build:css"
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build:assets"
 }

@@ -1,6 +1,8 @@
 import type { Context, Next } from 'hono';
-import { rateLimiter, getRateLimitConfig } from '../lib/rateLimiter';
+import { rateLimiter } from '../lib/rateLimiter';
 import { createModuleLogger } from '../lib/logger';
+import { getRateLimitConfig, TRUST_PROXY } from '../config';
+import { rateLimitErrorResponse } from '../lib/errors';
 
 const logger = createModuleLogger('rateLimit');
 
@@ -8,17 +10,16 @@ export function rateLimitMiddleware() {
   const { maxRequests, windowMs } = getRateLimitConfig();
 
   return async (c: Context, next: Next) => {
-    const forwarded = c.req.header('x-forwarded-for');
-    const realIp = c.req.header('x-real-ip');
-    const identifier = forwarded?.split(',')[0]?.trim() ?? realIp ?? 'unknown';
+    const identifier = TRUST_PROXY
+      ? c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+      : 'global';
 
-    const allowed = rateLimiter.checkLimit(identifier, maxRequests, windowMs);
+    const result = rateLimiter.checkLimit(identifier, maxRequests, windowMs);
 
-    if (!allowed) {
+    if (!result.allowed) {
       logger.warn({ identifier, maxRequests, windowMs }, 'Rate limit exceeded');
-      const retryAfter = Math.ceil(windowMs / 1000);
-      c.header('Retry-After', String(retryAfter));
-      return c.json({ error: 'Rate limit exceeded' }, 429);
+      c.header('Retry-After', String(result.retryAfterSeconds));
+      return rateLimitErrorResponse(c);
     }
 
     await next();
