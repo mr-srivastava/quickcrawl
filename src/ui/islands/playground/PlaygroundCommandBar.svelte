@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ArrowRight, Code2 } from '@lucide/svelte';
-  import { Button } from '$playground/ui/button/index.js';
+  import { Button, buttonVariants } from '$playground/ui/button/index.js';
+  import * as Collapsible from '$playground/ui/collapsible/index.js';
   import * as Field from '$playground/ui/field/index.js';
   import * as InputGroup from '$playground/ui/input-group/index.js';
   import { Separator } from '$playground/ui/separator/index.js';
@@ -95,6 +96,7 @@
 </script>
 
 <div class="surface-raised overflow-hidden">
+  <Collapsible.Root bind:open={showCode}>
   <form
     id="playground-form"
     class="p-5 sm:p-6"
@@ -186,18 +188,12 @@
       role="group"
       aria-label="Playground actions"
     >
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        aria-expanded={showCode}
-        onclick={() => {
-          showCode = !showCode;
-        }}
+      <Collapsible.Trigger
+        class={buttonVariants({ variant: 'ghost', size: 'sm' })}
       >
         <Code2 data-icon="inline-start" />
         Get code
-      </Button>
+      </Collapsible.Trigger>
 
       <Separator
         orientation="vertical"
@@ -248,7 +244,8 @@
     {/if}
   </form>
 
-  {#if showCode}
+  <Collapsible.Content>
     <GetCodePanel {baseUrl} {endpoint} {url} />
-  {/if}
+  </Collapsible.Content>
+  </Collapsible.Root>
 </div>
