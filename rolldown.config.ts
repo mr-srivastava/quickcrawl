@@ -1,16 +1,4 @@
-import { defineConfig } from 'rolldown';
+import indexConfig from './rolldown.index.config';
+import serverConfig from './rolldown.server.config';
 
-export default defineConfig({
-  input: {
-    index: 'src/index.ts',
-    server: 'src/server.ts',
-  },
-  external: /^[^./]/,
-  platform: 'node',
-  output: {
-    cleanDir: true,
-    dir: 'dist',
-    format: 'esm',
-    sourcemap: true,
-  },
-});
+export default [indexConfig, serverConfig];

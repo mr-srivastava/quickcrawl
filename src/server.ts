@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server';
-import app from './index';
+import app from './index.js';
 import { logger } from './lib/logger';
 import { DEFAULT_PORT } from './config';
 
