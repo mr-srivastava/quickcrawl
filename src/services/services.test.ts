@@ -4,7 +4,7 @@ import { CrawlService } from './CrawlService';
 import type { CrawlWorkflow } from '../workflows/crawl/types';
 import { CacheService } from '../lib/cache';
 import type { Cache } from '../lib/cache';
-import type { CrawlResultData } from '../workflows/crawl/types';
+import type { CrawlResultData } from '../contracts/crawl';
 
 describe('crawl services', () => {
   test('CrawlService preserves typed workflow errors', async () => {
@@ -109,7 +109,11 @@ describe('crawl services', () => {
 
     expect(result).toEqual({
       success: false,
-      error: { type: 'unknown', message: 'Unknown error' },
+      error: {
+        type: 'unknown',
+        message: '[object Object]',
+        cause: { type: 'timeout' },
+      },
     });
   });
 });

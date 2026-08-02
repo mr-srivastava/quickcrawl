@@ -3,6 +3,12 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "paths": {
+      "$contracts": ["./src/contracts"],
+      "$contracts/*": ["./src/contracts/*"],
+      "$playground": ["./src/ui/islands/playground"],
+      "$playground/*": ["./src/ui/islands/playground/*"]
+    },
     "strict": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,

@@ -73,26 +73,35 @@ Don't commit `.env` or production credentials. When you add a variable, update
 
 Run scripts through pnpm so local and hosted builds use the same toolchain.
 
-| Command                 | Purpose                                                |
-| ----------------------- | ------------------------------------------------------ |
-| `pnpm run dev`          | Runs the server and Tailwind watcher.                  |
-| `pnpm run dev:css`      | Watches and recompiles Tailwind CSS.                   |
-| `pnpm run build:css`    | Generates minified `public/styles.css`.                |
-| `pnpm run format`       | Formats supported repository files with Oxfmt.         |
-| `pnpm run format:check` | Checks formatting without changing files.              |
-| `pnpm run lint`         | Runs Oxlint, including type-aware TypeScript rules.    |
-| `pnpm run lint:fix`     | Applies Oxlint's safe automatic fixes.                 |
-| `pnpm run typecheck`    | Runs TypeScript without emitting files.                |
-| `pnpm test`             | Runs the Vitest suite once.                            |
-| `pnpm run test:watch`   | Runs Vitest in watch mode.                             |
-| `pnpm run build`        | Generates CSS and bundles the server with Rolldown.    |
-| `pnpm run check`        | Runs formatting, linting, types, tests, and the build. |
-| `pnpm start`            | Runs `dist/server.js`.                                 |
-| `pnpm run dev:vercel`   | Runs the application through Vercel CLI.               |
+| Command                      | Purpose                                                   |
+| ---------------------------- | --------------------------------------------------------- |
+| `pnpm run dev`               | Runs the server, Svelte, and Tailwind watchers.           |
+| `pnpm run dev:client`        | Watches and rebuilds the Svelte playground.               |
+| `pnpm run dev:css`           | Watches and recompiles Tailwind CSS.                      |
+| `pnpm run build:assets`      | Generates the browser JavaScript and stylesheet.          |
+| `pnpm run build:client`      | Generates the Svelte playground browser bundle.           |
+| `pnpm run build:css`         | Generates minified `public/styles.css`.                   |
+| `pnpm run format`            | Formats supported repository files with Oxfmt.            |
+| `pnpm run format:check`      | Checks formatting without changing files.                 |
+| `pnpm run lint`              | Runs Oxlint, including type-aware TypeScript rules.       |
+| `pnpm run lint:fix`          | Applies Oxlint's safe automatic fixes.                    |
+| `pnpm run typecheck`         | Runs TypeScript without emitting files.                   |
+| `pnpm test`                  | Runs the Vitest suite once.                               |
+| `pnpm run test:watch`        | Runs Vitest in watch mode.                                |
+| `pnpm run build`             | Generates CSS and bundles the server with Rolldown.       |
+| `pnpm run check:client-size` | Enforces the initial playground's 15 KiB gzip limit.      |
+| `pnpm run check`             | Runs all checks, the build, and the client bundle budget. |
+| `pnpm start`                 | Runs `dist/server.js`.                                    |
+| `pnpm run dev:vercel`        | Runs the application through Vercel CLI.                  |
 
-`public/styles.css` is generated output. Change `src/ui/styles/input.css` or the
-classes in `src/ui/`, then run `pnpm run build:css` instead of editing the
-generated file manually.
+`public/styles.css` and `public/assets/` are generated output. Change
+`src/ui/styles/input.css`, the Hono JSX pages, or the Svelte playground source,
+then run `pnpm run build:assets`. Don't edit generated browser assets manually.
+
+The shadcn-svelte CLI writes component source into
+`src/ui/islands/playground/ui`. Review and commit that source like application
+code. Add a component with `pnpm dlx shadcn-svelte@latest add <component>` and
+keep its imports inside the Svelte island.
 
 ## Test changes
 
@@ -157,7 +166,8 @@ pnpm start
 ```
 
 The build writes runtime output to `dist/`. Vercel runs from the TypeScript
-source and builds CSS through the command declared in `vercel.json`.
+source and builds the Svelte and Tailwind assets through the command declared
+in `vercel.json`.
 
 ## Extend the implementation
 

@@ -67,17 +67,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser for:
 - Open the [browser API reference](http://localhost:3000/docs).
 - Call `GET /health` to check server status.
 
-### Build styles
+### Build browser assets
 
-The web UI uses [Tailwind CSS v4](https://tailwindcss.com/). Source styles live
-in `src/ui/styles/input.css`; the CLI generates `public/styles.css`.
+The web UI uses Hono JSX for page rendering and a Svelte playground island for
+interactive behavior. The island composes locally owned shadcn-svelte source
+components. Tailwind source lives in `src/ui/styles/input.css`.
 
 ```bash
-pnpm run build:css   # One-off compile (also runs before build)
-pnpm run dev:css     # Watch mode (included in pnpm run dev)
+pnpm run build:assets # Build the playground JavaScript and stylesheet
+pnpm run build:client # Build only the playground JavaScript
+pnpm run build:css    # Build only the stylesheet
 ```
 
-`pnpm run dev` builds CSS, starts the Tailwind watcher, and runs the API server.
+`pnpm run dev` builds both browser assets, starts their watchers, and runs the
+API server.
 
 ### Deploy to Vercel
 
@@ -90,7 +93,9 @@ vc dev      # Local dev matching Vercel (optional; or use pnpm run dev)
 vc deploy   # Deploy to Vercel
 ```
 
-Environment variables can be set in the Vercel project settings.
+Vercel installs dependencies and runs `pnpm run build:assets` before serving
+the application. Environment variables can be set in the Vercel project
+settings.
 
 ## Call the API
 

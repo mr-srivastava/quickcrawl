@@ -26,6 +26,17 @@ The docs route returns a condensed HTML API reference for browser users.
 The stylesheet route returns the generated UI stylesheet. It returns `503` with
 a CSS comment when `public/styles.css` hasn't been built.
 
+### `GET /assets/:filename`
+
+The playground asset routes return generated browser JavaScript and source maps
+from `public/assets/`. The entry bundle is `playground.js`; Vite may emit
+additional chunk files that the entry bundle imports at runtime.
+
+`GET /assets/playground.js` returns `503` with a JavaScript comment when
+`pnpm run build:client` hasn't generated the bundle. Missing chunk files return
+`404`. Both browser asset URLs include the application version so deployments
+can revalidate changed output.
+
 ## Health endpoint
 
 Use the health endpoint for local checks and deployment probes.
@@ -111,7 +122,7 @@ Known fields include:
 
 An invalid request body returns `422 Unprocessable Entity`. This includes
 malformed JSON and JSON that doesn't match the request schema. The `details`
-array contains Zod validation issues when schema validation runs and is empty
+array contains Valibot validation issues when schema validation runs and is empty
 when the JSON itself can't be parsed.
 
 ```json

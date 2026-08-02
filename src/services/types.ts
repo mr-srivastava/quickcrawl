@@ -1,4 +1,4 @@
-import type { CrawlResult } from '../workflows/crawl/types';
+import type { CrawlResult } from '../contracts/crawl';
 
 export interface CrawlOptions {
   signal?: AbortSignal;

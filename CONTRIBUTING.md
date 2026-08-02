@@ -90,7 +90,8 @@ Use these naming conventions:
 
 Keep imports grouped as external dependencies, internal modules, and type-only
 imports. Use Oxfmt for repository formatting and Oxlint for correctness-focused
-static analysis. Don't reformat generated `public/styles.css` manually.
+static analysis. Don't reformat generated `public/styles.css` or
+`public/assets/` files manually.
 
 ## Security requirements
 
@@ -136,8 +137,8 @@ other pages instead of copying detailed instructions.
 
 Use direct language, sentence-case headings, descriptive links, and examples
 that match the current implementation. Wrap prose at 80 characters where
-practical. Don't manually edit generated `public/styles.css`; regenerate it
-with `pnpm run build:css` when UI styles change.
+practical. Don't manually edit generated browser assets; regenerate them with
+`pnpm run build:assets` when UI source changes.
 
 ## Commit conventions
 

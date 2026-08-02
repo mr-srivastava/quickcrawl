@@ -1,4 +1,4 @@
-import type { CrawlResult, CrawlResultData } from '../workflows/crawl/types';
+import type { CrawlResult, CrawlResultData } from '../contracts/crawl';
 import type { Cache } from '../lib/cache';
 import { createModuleLogger } from '../lib/logger';
 import type { Crawler, CrawlOptions } from './types';

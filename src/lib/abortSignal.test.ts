@@ -19,7 +19,7 @@ describe('anyAbortSignal', () => {
     const first = new AbortController();
     const second = new AbortController();
     const combined = anyAbortSignal([first.signal, second.signal]);
-    const onAbort = vi.fn();
+    const onAbort = vi.fn<() => void>();
     combined.addEventListener('abort', onAbort);
 
     expect(combined.aborted).toBe(false);

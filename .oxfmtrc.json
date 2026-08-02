@@ -2,7 +2,12 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "printWidth": 80,
   "singleQuote": true,
-  "ignorePatterns": ["dist/**", "coverage/**", "public/styles.css"],
+  "ignorePatterns": [
+    "dist/**",
+    "coverage/**",
+    "public/assets/**",
+    "public/styles.css"
+  ],
   "sortTailwindcss": {
     "stylesheet": "./src/ui/styles/input.css",
     "functions": ["cn"]

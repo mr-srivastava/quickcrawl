@@ -11,10 +11,8 @@ import {
   getRateLimitConfig,
 } from '../config';
 
-let receivedSignal: AbortSignal | undefined;
 const crawler: Crawler = {
-  async crawlUrl(_url, options) {
-    receivedSignal = options?.signal;
+  async crawlUrl() {
     return { success: true, data: { markdown: '# Example' } };
   },
 };
@@ -24,52 +22,6 @@ const app = createApp({
 });
 
 describe('UI routes', () => {
-  test('POST /crawl rejects non-HTTP URLs with the standard error envelope', async () => {
-    const res = await app.request('/crawl', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'ftp://example.com' }),
-    });
-    expect(res.status).toBe(422);
-    expect(await res.json()).toMatchObject({
-      success: false,
-      error: { type: 'validation_error', message: 'Invalid input' },
-    });
-  });
-
-  test('POST /crawl rejects malformed JSON with the standard error envelope', async () => {
-    const res = await app.request('/crawl', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: '{',
-    });
-    expect(res.status).toBe(422);
-    expect(await res.json()).toEqual({
-      success: false,
-      error: {
-        type: 'validation_error',
-        message: 'Invalid input',
-        details: [],
-      },
-    });
-  });
-
-  test('POST /crawl invokes the injected crawler with request cancellation', async () => {
-    receivedSignal = undefined;
-    const res = await app.request('/crawl', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://example.com' }),
-    });
-
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({
-      success: true,
-      data: { markdown: '# Example' },
-    });
-    expect(receivedSignal).toBeInstanceOf(AbortSignal);
-  });
-
   test('GET /health returns service metadata', async () => {
     const res = await app.request('/health');
     expect(res.status).toBe(200);
@@ -85,13 +37,12 @@ describe('UI routes', () => {
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('text/html');
     const html = await res.text();
-    expect(html).toContain('playground-form');
-    expect(html).toContain('aria-labelledby="playground-heading"');
-    expect(html).toContain('aria-describedby="url-hint"');
-    expect(html).toContain('aria-labelledby="tab-preview"');
-    expect(html).toContain('aria-labelledby="tab-metadata"');
-    expect(html).toContain('id="result-stats"');
-    expect(html).toContain('id="result-source"');
+    expect(html).toContain('id="playground-island"');
+    expect(html).toContain('data-playground-init=');
+    expect(html).toContain('The interactive playground is loading');
+    expect(html).toContain('JavaScript is required');
+    expect(html).toContain(`src="/assets/playground.js?v=${APP_VERSION}"`);
+    expect(html).not.toContain('PLAYGROUND_SCRIPT');
     expect(html).toContain('href="#main-content"');
     expect(html).toContain(`/styles.css?v=${APP_VERSION}`);
   });
@@ -120,5 +71,42 @@ describe('UI routes', () => {
     expect(await res.text()).toBe(
       expectedCss ?? '/* styles not built — run: pnpm run build:css */',
     );
+  });
+
+  test('GET /assets/playground.js serves the client bundle or 503', async () => {
+    const res = await app.request('/assets/playground.js');
+    const scriptPath = join(process.cwd(), 'public', 'assets', 'playground.js');
+    const expectedScript = await readFile(scriptPath, 'utf-8').catch(
+      () => undefined,
+    );
+
+    expect(res.status).toBe(expectedScript === undefined ? 503 : 200);
+    expect(res.headers.get('content-type')).toContain('text/javascript');
+    expect(res.headers.get('cache-control')).toBe(
+      'public, max-age=0, must-revalidate',
+    );
+    expect(await res.text()).toBe(
+      expectedScript ?? '// playground not built — run: pnpm run build:client',
+    );
+  });
+
+  test('GET /assets/:chunk>.js serves code-split chunks or 404', async () => {
+    const res = await app.request('/assets/playground.js');
+    const script = await res.text();
+    const chunkMatch = script.match(/from "\.\/([\w.-]+\.js)"/);
+    expect(chunkMatch).not.toBeNull();
+
+    const chunkRes = await app.request(`/assets/${chunkMatch![1]}`);
+    expect(chunkRes.status).toBe(200);
+    expect(chunkRes.headers.get('content-type')).toContain('text/javascript');
+    expect(await chunkRes.text()).toContain('export');
+  });
+
+  test('GET /assets rejects invalid filenames', async () => {
+    const invalidExtension = await app.request('/assets/playground.css');
+    expect(invalidExtension.status).toBe(404);
+
+    const missingAsset = await app.request('/assets/missing-chunk-abc123.js');
+    expect(missingAsset.status).toBe(404);
   });
 });

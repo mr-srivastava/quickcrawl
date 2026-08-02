@@ -141,33 +141,6 @@ export type CrawlContext =
   | CompletedContext
   | ErrorContext;
 
-// --- Zod schemas (unchanged for runtime validation) ---
-
-export const CrawlInputSchema = z.object({
-  url: z
-    .url()
-    .refine((value) => ['http:', 'https:'].includes(new URL(value).protocol), {
-      message: 'URL must use HTTP or HTTPS',
-    }),
-});
-
-export type CrawlInput = z.infer<typeof CrawlInputSchema>;
-
-export const CrawlResultSchema = z.object({
-  markdown: z.string(),
-  title: z.string().optional(),
-  metadata: z.record(z.string(), z.string()).optional(),
-});
-
-/** Crawl result payload type; API can wrap in Result<CrawlResultData> */
-export type CrawlResultData = {
-  markdown: string;
-  title?: string;
-  metadata?: Metadata;
-};
-
-export type CrawlResult = Result<CrawlResultData>;
-
 export interface CrawlWorkflow {
   run(
     initial: InitialContext,

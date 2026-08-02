@@ -30,18 +30,19 @@ middleware. It passes those adapters to `createApp` in `src/app.ts`, while
 The source tree separates transport, orchestration, workflow processing, and
 shared infrastructure.
 
-| Location               | Responsibility                                                                          |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| `src/app.ts`           | Creates a Hono application from injected dependencies.                                  |
-| `src/index.ts`         | Composes and exports the production application.                                        |
-| `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                              |
-| `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and stylesheet routes.         |
-| `src/ui/`              | Renders Hono JSX and provides browser-side playground behavior.                         |
-| `src/services/`        | Coordinates workflows and decorates crawling with caching.                              |
-| `src/workflow/`        | Defines the generic task and run-option contracts.                                      |
-| `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition.                          |
-| `src/middleware/`      | Applies HTTP concerns before route processing.                                          |
-| `src/lib/`             | Provides configuration-adjacent utilities, logging, errors, caching, and rate limiting. |
+| Location               | Responsibility                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `src/app.ts`           | Creates a Hono application from injected dependencies.                                   |
+| `src/index.ts`         | Composes and exports the production application.                                         |
+| `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                               |
+| `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and asset routes.               |
+| `src/contracts/`       | Defines the public HTTP and playground initialization contracts shared by routes and UI. |
+| `src/ui/`              | Renders Hono JSX pages and contains the client-rendered Svelte playground island.        |
+| `src/services/`        | Coordinates workflows and decorates crawling with caching.                               |
+| `src/workflow/`        | Defines the generic task and run-option contracts.                                       |
+| `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition.                           |
+| `src/middleware/`      | Applies HTTP concerns before route processing.                                           |
+| `src/lib/`             | Provides configuration-adjacent utilities, logging, errors, caching, and rate limiting.  |
 
 Keep HTTP concerns at the application edge. Crawl modules must not depend on
 Hono contexts, and workflow tasks must not format HTTP responses.
@@ -133,7 +134,7 @@ the crawler, and maps results to HTTP responses. Response builders in
 `src/lib/errors.ts` keep validation, rate-limit, crawl, and internal error
 envelopes consistent.
 
-`CrawlInputSchema` performs structural URL validation before the workflow runs.
+`CrawlRequestSchema` performs structural URL validation before the workflow runs.
 The fetch task performs the network-safety validation that requires DNS
 resolution. `src/lib/errors.ts` maps crawl error variants to stable HTTP status
 codes.
@@ -192,13 +193,29 @@ multiple instances don't share counters.
 
 ## UI and styles
 
-The browser UI uses Hono JSX and is served by the API application. It doesn't
-require a separate frontend server.
+The browser UI uses Hono JSX for the document shell and static pages. The home
+page renders a stable playground host with initialization data and useful
+fallback content. A Svelte 5 client island mounts into that host and owns the
+form, request state, result tabs, copying, and Markdown preview. The island
+validates its initialization data and every `/crawl` response at runtime.
 
-Tailwind source lives in `src/ui/styles/input.css`, and JSX components contain
-the utility classes that Tailwind scans. `pnpm run build:css` generates
-`public/styles.css`. The `/styles.css` route disables browser caching during
-development and uses long-lived immutable caching in production.
+The island composes locally owned shadcn-svelte source under
+`src/ui/islands/playground/ui`. Hono JSX and Svelte components don't import one
+another. They communicate through serialized plain data defined in
+`src/contracts/` and the public HTTP contract, so the application doesn't
+require SvelteKit or a separate frontend server.
+
+Server routes and the browser island share Valibot schemas in
+`src/contracts/`. Request validation, response parsing, and playground
+initialization all use the same schemas and inferred types. Zod remains for
+workflow error schemas and runtime configuration validation.
+
+Tailwind source lives in `src/ui/styles/input.css`. Hono JSX, Svelte components,
+and generated shadcn-svelte sources use the same QuickCrawl semantic color
+tokens. `pnpm run build:assets` generates `public/styles.css` and the ignored
+`public/assets/playground.js` browser bundle. The `/styles.css` and
+`/assets/playground.js` routes disable caching during development and require
+revalidation in production.
 
 ## Extension points
 

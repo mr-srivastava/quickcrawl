@@ -17,7 +17,7 @@ export class ApiError extends Error {
 
 export function validationErrorResponse(
   c: Context,
-  details: z.core.$ZodIssue[],
+  details: unknown,
 ): Response {
   return c.json(
     {

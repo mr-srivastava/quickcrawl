@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced the Bun test runner with Vitest
 - Upgraded the build and test toolchain to Vite 8 and TypeScript 7
 - Replaced tsup with Rolldown and raised the Node.js requirement to version 24
+- Replaced the inline playground script with a runtime-validated Svelte 5
+  island composed from locally owned shadcn-svelte components.
+- Split results and Markdown rendering from the initial playground bundle,
+  improved clipboard and focus behavior, and strengthened HTML sanitization
+  coverage.
 
 ### Added
 
@@ -27,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added roadmap tracking.
 - Added Oxlint and Oxfmt checks, including type-aware TypeScript linting and
   Tailwind CSS v4 class sorting.
+- Added a Vite browser build and explicit route for the playground asset.
+- Added a 15 KiB gzip budget for the initial playground bundle.
 
 ## [0.1.0] - 2024
 

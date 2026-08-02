@@ -1,7 +1,9 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-@source '../**/*.tsx';
+@source '../**/*.{ts,tsx,svelte}';
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
 
 @theme {
   --font-display: 'Manrope', system-ui, sans-serif;
@@ -31,6 +33,41 @@
   --color-danger-bg: #fef2f2;
   --color-danger-dark: #fca5a5;
   --color-danger-bg-dark: #450a0a;
+
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-paper-elevated);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-paper-elevated);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-accent-soft);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-paper);
+  --color-muted-foreground: var(--color-ink-muted);
+  --color-accent-foreground: #ffffff;
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: #ffffff;
+  --color-input: var(--color-border);
+  --color-ring: var(--color-accent);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: var(--color-paper-dark);
+    --color-foreground: var(--color-paper-on-dark);
+    --color-card: var(--color-paper-dark-elevated);
+    --color-card-foreground: var(--color-paper-on-dark);
+    --color-popover: var(--color-paper-dark-elevated);
+    --color-popover-foreground: var(--color-paper-on-dark);
+    --color-secondary: var(--color-border-dark);
+    --color-secondary-foreground: var(--color-paper-on-dark);
+    --color-muted: var(--color-paper-dark);
+    --color-muted-foreground: var(--color-paper-muted-dark);
+    --color-input: var(--color-border-dark);
+  }
 }
 
 @layer base {

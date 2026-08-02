@@ -4,7 +4,7 @@ import { CacheService } from './lib/cache';
 import { rateLimitMiddleware } from './middleware/rateLimit';
 import { CrawlService } from './services/CrawlService';
 import { CachedCrawlService } from './services/CachedCrawlService';
-import type { CrawlResultData } from './workflows/crawl';
+import type { CrawlResultData } from './contracts/crawl';
 import { createCrawlWorkflow } from './workflows/crawl';
 
 export function createProductionApp() {

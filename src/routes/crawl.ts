@@ -2,7 +2,8 @@ import { Hono, type MiddlewareHandler } from 'hono';
 import { errorHandler, validationErrorResponse } from '../lib/errors';
 import { createModuleLogger } from '../lib/logger';
 import type { Crawler } from '../services/types';
-import { CrawlInputSchema } from '../workflows/crawl';
+import { CrawlRequestSchema } from '../contracts/crawl';
+import * as v from 'valibot';
 
 export interface CrawlRoutesDependencies {
   crawler: Crawler;
@@ -32,13 +33,13 @@ export function createCrawlRoutes({
         return validationErrorResponse(c, []);
       }
 
-      const parsed = CrawlInputSchema.safeParse(body);
+      const parsed = v.safeParse(CrawlRequestSchema, body);
       if (!parsed.success) {
-        requestLogger.warn({ issues: parsed.error.issues }, 'Invalid input');
-        return validationErrorResponse(c, parsed.error.issues);
+        requestLogger.warn({ issues: parsed.issues }, 'Invalid input');
+        return validationErrorResponse(c, parsed.issues);
       }
 
-      const { url } = parsed.data;
+      const { url } = parsed.output;
       requestLogger.info({ url }, 'Crawl request received');
 
       const result = await crawler.crawlUrl(url, {

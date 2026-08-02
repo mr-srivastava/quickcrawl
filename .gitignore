@@ -33,6 +33,7 @@ coverage/
 
 # cache
 .cache/
+.svelte-check/
 .temp/
 tmp/
 
@@ -41,6 +42,7 @@ tmp/
 
 # build
 dist/
+public/assets/
 *.tsbuildinfo
 
 # crawl data (optional - customize based on your needs)

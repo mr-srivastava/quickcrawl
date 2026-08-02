@@ -1,5 +1,5 @@
 {
   "outputDirectory": ".",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm run build:css"
+  "buildCommand": "pnpm run build:assets"
 }

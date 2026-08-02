@@ -9,40 +9,22 @@ import {
   Tags,
 } from 'lucide';
 import { getRateLimitConfig } from '../config';
-import { PLAYGROUND_SCRIPT } from './client/playgroundScript';
+import type { PlaygroundInit } from '../contracts/playground';
 import { Icon } from './components/Icon';
-import { Playground } from './components/Playground';
-import { APP_TAGLINE } from './constants';
+import { PlaygroundIsland } from './components/PlaygroundIsland';
+import { APP_TAGLINE, APP_VERSION, EXAMPLE_URLS } from './constants';
 import { Layout } from './Layout';
 
-const MARKED_SRI =
-  'sha384-b5hg04N6F0rvyz1a/GVoPPY0JcqGTARCmEuFCqwQKX3zq7LsxhV+n+6Ykh2pQOCH';
-const DOMPURIFY_SRI =
-  'sha384-eEu5CTj3qGvu9PdJuS+YlkNi7d2XxQROAFYOr59zgObtlcux1ae1Il3u7jvdCSWu';
+const PLAYGROUND_INIT: PlaygroundInit = {
+  endpoint: '/crawl',
+  exampleUrls: [...EXAMPLE_URLS],
+};
 
 export function HomePage() {
   const rateLimit = getRateLimitConfig();
 
   return (
-    <Layout
-      title="Try it"
-      activeNav="home"
-      wide
-      extraHead={
-        <>
-          <script
-            src="https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js"
-            integrity={MARKED_SRI}
-            crossorigin="anonymous"
-          />
-          <script
-            src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"
-            integrity={DOMPURIFY_SRI}
-            crossorigin="anonymous"
-          />
-        </>
-      }
-    >
+    <Layout title="Try it" activeNav="home" wide>
       <section class="hero-grid animate-fade-up" aria-labelledby="hero-title">
         <div class="py-3 lg:py-8">
           <p class="eyebrow">
@@ -105,7 +87,7 @@ export function HomePage() {
       </section>
 
       <div id="playground" class="animate-fade-up-delay-1 scroll-mt-24">
-        <Playground />
+        <PlaygroundIsland init={PLAYGROUND_INIT} />
       </div>
 
       <aside
@@ -130,7 +112,7 @@ export function HomePage() {
         </span>
       </aside>
 
-      <script dangerouslySetInnerHTML={{ __html: PLAYGROUND_SCRIPT }} />
+      <script type="module" src={`/assets/playground.js?v=${APP_VERSION}`} />
     </Layout>
   );
 }

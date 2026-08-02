@@ -19,5 +19,10 @@
   "options": {
     "typeAware": true
   },
-  "ignorePatterns": ["dist/**", "coverage/**", "public/styles.css"]
+  "ignorePatterns": [
+    "dist/**",
+    "coverage/**",
+    "public/assets/**",
+    "public/styles.css"
+  ]
 }

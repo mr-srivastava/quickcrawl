@@ -402,6 +402,54 @@ sorting. Keep TypeScript type checking as a separate required check.
 
 ---
 
+## ADR-011: Use a Svelte island for the crawl playground
+
+**Date:** August 2, 2026
+**Status:** Accepted
+
+**Context:**
+The browser playground needs typed request state, accessible interactive
+components, and runtime validation without replacing the lightweight Hono JSX
+document shell or introducing a separate frontend application.
+
+**Decision:**
+Keep Hono JSX for page rendering and mount one client-rendered Svelte 5 island
+for the complete playground. Compose locally owned shadcn-svelte source, build
+the island with Vite, and serve its generated module through Hono. Use client
+rendering rather than Svelte server rendering or hydration.
+
+**Rationale:**
+
+- Limits the client framework to the only stateful page region
+- Replaces the untyped inline program and selector-based DOM contract
+- Provides accessible, locally maintainable interface primitives
+- Preserves the existing API server, page routes, and Tailwind design tokens
+- Leaves static pages free of a client-side framework runtime
+
+**Consequences:**
+
+- **Positive:**
+  - Browser requests and initialization data have runtime-validated contracts
+  - Playground components receive Svelte type checking and focused UI tests
+  - Hono continues to serve one application without SvelteKit
+- **Negative:**
+  - Development and production builds have separate browser and server targets
+  - Contributors must distinguish Hono JSX from Svelte component boundaries
+  - The browser downloads the Svelte, component, Markdown, and sanitization code
+
+**Alternatives considered:**
+
+- Typed vanilla TypeScript: Smaller runtime, but retains manual state rendering
+  and accessible widget implementation
+- React with shadcn/ui: Larger runtime and broader migration pressure for one
+  interactive region
+- Astro: Provides native island orchestration, but would replace the current
+  presentation framework rather than extend it
+- Full Svelte application: Simplifies one rendering model but unnecessarily
+  moves static Hono pages into a client-oriented toolchain
+
+---
+
 ## Future considerations
 
 ### Potential future decisions
