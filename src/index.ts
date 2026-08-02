@@ -1,4 +1,4 @@
-import { createApp } from './app';
+import { createApp } from './lib/createApp';
 import { DEFAULT_CACHE_MAX_SIZE, DEFAULT_CACHE_TTL_MS } from './config';
 import { CacheService } from './lib/cache';
 import { rateLimitMiddleware } from './middleware/rateLimit';

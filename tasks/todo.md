@@ -53,7 +53,7 @@ Verify the task with route tests and the compiler.
 
 The implementation is expected to change these files.
 
-- `src/app.ts`
+- `src/lib/createApp.ts`
 - `src/index.ts`
 
 **Estimated scope:** Small

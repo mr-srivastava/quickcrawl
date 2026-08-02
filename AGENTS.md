@@ -39,7 +39,7 @@ Run focused Vitest tests while iterating when appropriate.
 
 ## Repository structure
 
-- `src/app.ts` — injectable Hono application factory
+- `src/lib/createApp.ts` — injectable Hono application factory
 - `src/index.ts` — production dependency composition
 - `src/server.ts` — local Node.js server entry point
 - `src/config.ts` — validated runtime configuration and application metadata

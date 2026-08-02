@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { createApp } from '../app';
+import { createApp } from '../lib/createApp';
 import type { Crawler } from '../services/types';
 
 let receivedSignal: AbortSignal | undefined;

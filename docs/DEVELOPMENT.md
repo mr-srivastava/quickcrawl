@@ -165,9 +165,9 @@ pnpm run build
 pnpm start
 ```
 
-The build writes runtime output to `dist/`. Vercel runs from the TypeScript
-source and builds the Svelte and Tailwind assets through the command declared
-in `vercel.json`.
+The build writes runtime output to `dist/`. Vercel uses that bundle as the
+server entry (`dist/index.js`) and builds browser assets to `public/` through
+the command declared in `vercel.json`.
 
 ## Extend the implementation
 

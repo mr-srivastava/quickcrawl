@@ -1,8 +1,8 @@
 import { Hono, type MiddlewareHandler } from 'hono';
 import { cors } from 'hono/cors';
-import { createCrawlRoutes } from './routes/crawl';
-import { uiRoutes } from './routes/ui';
-import type { Crawler } from './services/types';
+import { createCrawlRoutes } from '../routes/crawl';
+import { uiRoutes } from '../routes/ui';
+import type { Crawler } from '../services/types';
 
 export interface AppDependencies {
   crawler: Crawler;

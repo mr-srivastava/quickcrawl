@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createApp } from '../app';
+import { createApp } from '../lib/createApp';
 import type { Crawler } from '../services/types';
 import {
   APP_NAME,

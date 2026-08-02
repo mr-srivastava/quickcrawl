@@ -22,7 +22,7 @@ HTTP request
 
 `src/index.ts` is the production composition root. Its `createProductionApp`
 factory constructs the workflow, crawl services, cache, and rate-limit
-middleware. It passes those adapters to `createApp` in `src/app.ts`, while
+middleware. It passes those adapters to `createApp` in `src/lib/createApp.ts`, while
 `src/server.ts` starts the default production application.
 
 ## Module boundaries
@@ -32,7 +32,7 @@ shared infrastructure.
 
 | Location               | Responsibility                                                                           |
 | ---------------------- | ---------------------------------------------------------------------------------------- |
-| `src/app.ts`           | Creates a Hono application from injected dependencies.                                   |
+| `src/lib/createApp.ts` | Creates a Hono application from injected dependencies.                                   |
 | `src/index.ts`         | Composes and exports the production application.                                         |
 | `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                               |
 | `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and asset routes.               |

@@ -86,18 +86,17 @@ API server.
 
 ### Deploy to Vercel
 
-The app runs on Vercel from source using Node.js. Vercel installs dependencies
-with pnpm and runs `pnpm run build:css` before deployment (see `vercel.json`).
-Use [Vercel CLI](https://vercel.com/docs/cli) for local parity:
+The app runs on Vercel using the Rolldown bundle in `dist/`. Vercel installs
+dependencies with pnpm and runs `pnpm run build` before deployment (see
+`vercel.json`). Use [Vercel CLI](https://vercel.com/docs/cli) for local parity:
 
 ```bash
 vc dev      # Local dev matching Vercel (optional; or use pnpm run dev)
 vc deploy   # Deploy to Vercel
 ```
 
-Vercel installs dependencies and runs `pnpm run build:assets` before serving
-the application. Environment variables can be set in the Vercel project
-settings.
+Vercel serves the bundled server from `dist/index.js` and reads browser assets
+from `public/`. Environment variables can be set in the Vercel project settings.
 
 ## Call the API
 
