@@ -2,6 +2,7 @@ import pRetry from 'p-retry';
 import type { CrawlContext } from '../types';
 import type { Task } from '../../../workflow/types';
 import { TASK_NAMES } from '../constants';
+import { anyAbortSignal } from '../../../lib/abortSignal';
 import { createModuleLogger } from '../../../lib/logger';
 import { assertSafeCrawlUrl } from '../urlSafety';
 import { isCrawlError } from '../types';
@@ -92,9 +93,10 @@ async function fetchFollowingSafeRedirects(
   let currentUrl = initialUrl;
   for (let redirects = 0; redirects <= 5; redirects += 1) {
     const safeUrl = await assertSafeCrawlUrl(currentUrl);
+    const timeoutSignal = AbortSignal.timeout(FETCH_TIMEOUT_MS);
     const requestSignal = signal
-      ? AbortSignal.any([signal, AbortSignal.timeout(FETCH_TIMEOUT_MS)])
-      : AbortSignal.timeout(FETCH_TIMEOUT_MS);
+      ? anyAbortSignal([signal, timeoutSignal])
+      : timeoutSignal;
     const response = await fetch(safeUrl, {
       signal: requestSignal,
       redirect: 'manual',

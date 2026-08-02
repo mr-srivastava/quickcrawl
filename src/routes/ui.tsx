@@ -17,7 +17,7 @@ uiRoutes.get('/styles.css', async (c) => {
       'Cache-Control':
         process.env.NODE_ENV === 'development'
           ? 'no-cache'
-          : 'public, max-age=31536000, immutable',
+          : 'public, max-age=0, must-revalidate',
     });
   } catch {
     return c.text('/* styles not built — run: pnpm run build:css */', 503, {

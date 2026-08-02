@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   Braces,
+  CheckCircle2,
   Copy,
   Eye,
   FileText,
@@ -14,21 +15,31 @@ import { Icon } from './Icon';
 export function Playground() {
   return (
     <section
-      class="card-editorial p-5 sm:p-8"
+      class="card-editorial overflow-hidden"
       aria-labelledby="playground-heading"
     >
       <h2 id="playground-heading" class="sr-only">
         Crawl playground
       </h2>
-      <form id="playground-form">
-        <label
-          class="mb-3 flex items-center gap-2 font-display text-sm font-medium text-ink dark:text-paper-on-dark"
-          for="url-input"
-        >
-          <Icon icon={Link2} size={16} class="text-accent" />
-          Paste a URL
-        </label>
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+      <div class="border-b border-border px-5 py-4 sm:px-7 dark:border-border-dark">
+        <p class="m-0 font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase dark:text-paper-muted-dark">
+          Interactive extractor
+        </p>
+      </div>
+      <form id="playground-form" class="p-5 sm:p-7">
+        <div class="mb-3 flex items-end justify-between gap-4">
+          <label
+            class="flex items-center gap-2 font-display text-base font-semibold text-ink dark:text-paper-on-dark"
+            for="url-input"
+          >
+            <Icon icon={Link2} size={16} class="text-accent" />
+            Page URL
+          </label>
+          <span class="hidden font-mono text-xs text-ink-faint sm:block dark:text-paper-muted-dark">
+            POST /crawl
+          </span>
+        </div>
+        <div class="url-control">
           <input
             type="url"
             id="url-input"
@@ -41,7 +52,7 @@ export function Playground() {
           />
           <button type="submit" id="crawl-btn" class="btn-primary">
             <Icon icon={ArrowRight} size={18} />
-            Extract
+            Crawl page
           </button>
         </div>
         <p
@@ -52,11 +63,11 @@ export function Playground() {
           blocked.
         </p>
         <div
-          class="mt-4 flex flex-wrap items-center gap-2"
+          class="mt-5 flex flex-wrap items-center gap-2"
           role="group"
           aria-label="Example URLs"
         >
-          <span class="inline-flex items-center gap-1 font-mono text-xs tracking-wider text-ink-faint uppercase dark:text-paper-muted-dark">
+          <span class="mr-1 inline-flex items-center gap-1 font-mono text-xs tracking-wider text-ink-faint uppercase dark:text-paper-muted-dark">
             <Icon icon={Link2} size={12} />
             Examples
           </span>
@@ -88,13 +99,6 @@ export function Playground() {
         </div>
       </div>
 
-      <p
-        id="playground-status"
-        class="mt-6 font-mono text-sm text-ink-muted dark:text-paper-muted-dark"
-        hidden
-        role="status"
-      />
-
       <div
         id="playground-error"
         class="mt-6 rounded-md border border-danger/30 bg-danger-bg px-4 py-3 font-sans text-sm text-danger dark:border-danger-dark/30 dark:bg-danger-bg-dark dark:text-danger-dark"
@@ -104,22 +108,49 @@ export function Playground() {
 
       <div
         id="playground-results"
-        class="mt-8 border-t border-border pt-8 dark:border-border-dark"
+        class="result-workspace"
         hidden
         tabindex={-1}
       >
-        <p class="mb-5 font-display text-lg text-ink dark:text-paper-on-dark">
-          <span class="text-ink-muted dark:text-paper-muted-dark">
-            Title ·{' '}
-          </span>
-          <span id="result-title" class="font-medium" />
-        </p>
+        <header class="result-header">
+          <div class="flex min-w-0 items-start gap-3">
+            <span class="result-success-icon">
+              <Icon icon={CheckCircle2} size={19} />
+            </span>
+            <div class="min-w-0">
+              <p
+                id="playground-status"
+                class="m-0 text-sm font-semibold text-ink dark:text-paper-on-dark"
+                hidden
+                role="status"
+              />
+              <p
+                id="result-source"
+                class="mt-1 truncate font-mono text-xs text-ink-muted dark:text-paper-muted-dark"
+              />
+            </div>
+          </div>
+          <span
+            id="result-stats"
+            class="result-receipt"
+            aria-label="Extraction statistics"
+          />
+        </header>
 
-        <div
-          class="flex flex-wrap gap-0 border-b border-border dark:border-border-dark"
-          role="tablist"
-          aria-label="Result views"
-        >
+        <div class="result-title-row">
+          <div class="min-w-0">
+            <p class="mb-1 font-mono text-[0.68rem] font-medium tracking-[0.14em] text-ink-faint uppercase dark:text-paper-muted-dark">
+              Extracted document
+            </p>
+            <h3
+              id="result-title"
+              class="m-0 truncate font-display text-xl font-semibold tracking-tight text-ink sm:text-2xl dark:text-paper-on-dark"
+            />
+          </div>
+          <span class="result-format">Markdown</span>
+        </div>
+
+        <div class="result-tabs" role="tablist" aria-label="Result views">
           <button
             id="tab-preview"
             type="button"
@@ -176,7 +207,7 @@ export function Playground() {
 
         <div
           id="panel-preview"
-          class="tab-panel"
+          class="tab-panel result-panel"
           data-panel="preview"
           role="tabpanel"
           aria-labelledby="tab-preview"
@@ -189,14 +220,17 @@ export function Playground() {
 
         <div
           id="panel-markdown"
-          class="tab-panel"
+          class="tab-panel result-panel"
           data-panel="markdown"
           role="tabpanel"
           aria-labelledby="tab-markdown"
           tabindex={0}
           hidden
         >
-          <div class="mb-2 flex justify-end">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <span class="font-mono text-xs text-ink-faint dark:text-paper-muted-dark">
+              Raw Markdown
+            </span>
             <button type="button" class="btn-ghost" data-copy="markdown-raw">
               <Icon icon={Copy} size={14} />
               Copy markdown
@@ -210,7 +244,7 @@ export function Playground() {
 
         <div
           id="panel-metadata"
-          class="tab-panel"
+          class="tab-panel result-panel"
           data-panel="metadata"
           role="tabpanel"
           aria-labelledby="tab-metadata"
@@ -241,14 +275,17 @@ export function Playground() {
 
         <div
           id="panel-json"
-          class="tab-panel"
+          class="tab-panel result-panel"
           data-panel="json"
           role="tabpanel"
           aria-labelledby="tab-json"
           tabindex={0}
           hidden
         >
-          <div class="mb-2 flex justify-end">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <span class="font-mono text-xs text-ink-faint dark:text-paper-muted-dark">
+              API response
+            </span>
             <button type="button" class="btn-ghost" data-copy="json-raw">
               <Icon icon={Copy} size={14} />
               Copy JSON

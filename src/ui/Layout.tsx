@@ -1,6 +1,6 @@
 import type { Child } from 'hono/jsx';
 import { BookOpen, Sparkles } from 'lucide';
-import { APP_NAME } from './constants';
+import { APP_NAME, APP_VERSION } from './constants';
 import { cn } from './cn';
 import { FontLinks } from './FontLinks';
 import { Icon } from './components/Icon';
@@ -40,7 +40,7 @@ export function Layout({
           content="Fetch web pages and convert them to clean Markdown with metadata extraction."
         />
         <FontLinks />
-        <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href={`/styles.css?v=${APP_VERSION}`} />
         {extraHead}
       </head>
       <body class="body-bg flex min-h-screen flex-col">
@@ -50,11 +50,11 @@ export function Layout({
         >
           Skip to main content
         </a>
-        <header class="sticky top-0 z-20 border-b border-border/80 bg-paper-elevated/85 backdrop-blur-md dark:border-border-dark/80 dark:bg-paper-dark-elevated/85">
+        <header class="sticky top-0 z-20 border-b border-border/80 bg-paper-elevated/88 backdrop-blur-xl dark:border-border-dark/80 dark:bg-paper-dark-elevated/88">
           <div
             class={cn(
-              'mx-auto flex h-16 items-center justify-between px-5',
-              wide ? 'max-w-5xl' : 'max-w-4xl',
+              'mx-auto flex h-16 items-center justify-between px-5 sm:px-7',
+              wide ? 'max-w-6xl' : 'max-w-4xl',
             )}
           >
             <a href="/" class="group flex items-center gap-2.5 no-underline">
@@ -86,14 +86,16 @@ export function Layout({
         <main
           id="main-content"
           class={cn(
-            'mx-auto w-full flex-1 px-5 py-10',
-            wide ? 'max-w-5xl' : 'max-w-4xl',
+            'mx-auto w-full flex-1 px-5 py-8 sm:px-7 sm:py-12',
+            wide ? 'max-w-6xl' : 'max-w-4xl',
           )}
         >
           {children}
         </main>
         <footer class="border-t border-border/80 bg-paper-elevated/60 py-6 dark:border-border-dark/80 dark:bg-paper-dark-elevated/60">
-          <div class={cn('mx-auto px-5', wide ? 'max-w-5xl' : 'max-w-4xl')}>
+          <div
+            class={cn('mx-auto px-5 sm:px-7', wide ? 'max-w-6xl' : 'max-w-4xl')}
+          >
             <p class="m-0 flex flex-wrap items-center gap-1 font-sans text-sm text-ink-muted dark:text-paper-muted-dark">
               Rate limited to protect the service.{' '}
               <a

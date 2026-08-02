@@ -132,6 +132,7 @@ export const PLAYGROUND_SCRIPT = `
 
       const data = body.data;
       document.getElementById('result-title').textContent = data.title || '(no title)';
+      document.getElementById('result-source').textContent = url;
 
       const md = data.markdown || '';
       document.getElementById('markdown-raw').textContent = md;
@@ -139,6 +140,12 @@ export const PLAYGROUND_SCRIPT = `
 
       const metaEl = document.getElementById('metadata-body');
       metaEl.innerHTML = '';
+      const metadataCount = data.metadata && typeof data.metadata === 'object'
+        ? Object.keys(data.metadata).length
+        : 0;
+      const wordCount = md.trim() ? md.trim().split(/\\s+/).length : 0;
+      document.getElementById('result-stats').textContent =
+        wordCount.toLocaleString() + ' words · ' + metadataCount + ' metadata fields';
       if (data.metadata && typeof data.metadata === 'object') {
         Object.entries(data.metadata).forEach(function (entry) {
           const row = document.createElement('tr');
@@ -171,7 +178,7 @@ export const PLAYGROUND_SCRIPT = `
       resultsEl.hidden = false;
       resultsEl.classList.add('results-reveal');
       showPanel(activeTab);
-      statusEl.textContent = 'Extraction complete. Result views are ready below.';
+      statusEl.textContent = 'Extraction complete';
       statusEl.hidden = false;
       resultsEl.focus({ preventScroll: true });
     } catch (err) {

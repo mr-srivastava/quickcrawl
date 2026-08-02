@@ -90,7 +90,10 @@ describe('UI routes', () => {
     expect(html).toContain('aria-describedby="url-hint"');
     expect(html).toContain('aria-labelledby="tab-preview"');
     expect(html).toContain('aria-labelledby="tab-metadata"');
+    expect(html).toContain('id="result-stats"');
+    expect(html).toContain('id="result-source"');
     expect(html).toContain('href="#main-content"');
+    expect(html).toContain(`/styles.css?v=${APP_VERSION}`);
   });
 
   test('GET /docs returns HTML', async () => {
@@ -111,6 +114,9 @@ describe('UI routes', () => {
 
     expect(res.status).toBe(expectedCss === undefined ? 503 : 200);
     expect(res.headers.get('content-type')).toContain('text/css');
+    expect(res.headers.get('cache-control')).toBe(
+      'public, max-age=0, must-revalidate',
+    );
     expect(await res.text()).toBe(
       expectedCss ?? '/* styles not built — run: pnpm run build:css */',
     );
