@@ -80,12 +80,12 @@ these repository conventions:
 
 Use these naming conventions:
 
-| Element                       | Convention       | Example                           |
-| ----------------------------- | ---------------- | --------------------------------- |
-| Types and classes             | PascalCase       | `CrawlContext`, `CrawlService`    |
-| Functions and variables       | camelCase        | `extractMetadata`, `crawlResult`  |
-| Constants                     | Upper snake case | `DEFAULT_TIMEOUT_MS`              |
-| Utility and task files        | camelCase        | `urlSafety.ts`, `fetchHtml.ts`    |
+| Element                       | Convention       | Example                            |
+| ----------------------------- | ---------------- | ---------------------------------- |
+| Types and classes             | PascalCase       | `CrawlContext`, `CrawlService`     |
+| Functions and variables       | camelCase        | `extractMetadata`, `crawlResult`   |
+| Constants                     | Upper snake case | `DEFAULT_TIMEOUT_MS`               |
+| Utility and task files        | camelCase        | `urlSafety.ts`, `fetchHtml.ts`     |
 | Class and JSX component files | PascalCase       | `CrawlService.ts`, `PageShell.tsx` |
 
 Keep imports grouped as external dependencies, internal modules, and type-only

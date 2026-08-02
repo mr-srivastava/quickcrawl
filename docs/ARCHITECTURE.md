@@ -37,7 +37,7 @@ shared infrastructure.
 | `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                               |
 | `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and asset routes.               |
 | `src/contracts/`       | Defines the public HTTP and playground initialization contracts shared by routes and UI. |
-| `src/ui/`              | Renders the Hono JSX document shell and the client-rendered Svelte application. |
+| `src/ui/`              | Renders the Hono JSX document shell and the client-rendered Svelte application.          |
 | `src/services/`        | Coordinates workflows and decorates crawling with caching.                               |
 | `src/workflow/`        | Defines the generic task and run-option contracts.                                       |
 | `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition.                           |
@@ -195,9 +195,14 @@ multiple instances don't share counters.
 
 The browser UI uses a minimal Hono JSX document shell and a single client-rendered
 Svelte 5 application. The shell serializes page initialization data into the
-mount element; `app.js` mounts layout, pages, and the crawl playground. All
-visible UI is implemented in Svelte with locally owned shadcn-svelte components
-under `src/ui/islands/playground/ui`.
+mount element; `app.js` mounts layout and pages for `/` (marketing home),
+`/playground` (crawl workspace), and `/docs` (API reference). All visible UI is
+implemented in Svelte with locally owned shadcn-svelte components under
+`src/ui/islands/playground/ui`.
+
+The playground uses a command-bar plus output-panel layout: the elevated URL
+control stays visible while idle, loading, success, and error states render in a
+separate output panel. Recent URLs are stored in `sessionStorage` only.
 
 Hono and Svelte don't import one another. They communicate through serialized
 plain data defined in `src/contracts/` and the public HTTP contract, so the
@@ -208,9 +213,11 @@ Server routes and the browser application share Valibot schemas in
 all use the same schemas and inferred types. Zod remains for workflow error
 schemas and runtime configuration validation.
 
-Tailwind source lives in `src/ui/styles/input.css`. Svelte components and
-generated shadcn-svelte sources use the same QuickCrawl semantic color tokens.
-`pnpm run build:assets` generates `public/styles.css` and the ignored
+Tailwind source lives in `src/ui/styles/input.css`. Semantic tokens define
+surface layers (`surface-base`, `surface-raised`, `surface-sunken`), accent, and
+status colors (`success`, `info`, `destructive-subtle`) for both light and dark
+themes. Svelte components and generated shadcn-svelte sources use the same
+tokens. `pnpm run build:assets` generates `public/styles.css` and the ignored
 `public/assets/app.js` browser bundle. The `/styles.css` and `/assets/app.js`
 routes disable caching during development and require revalidation in production.
 

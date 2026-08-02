@@ -10,12 +10,12 @@ export function FontLinks() {
       />
       <meta
         name="theme-color"
-        content="#f3f6fa"
+        content="#f8f9fb"
         media="(prefers-color-scheme: light)"
       />
       <meta
         name="theme-color"
-        content="#0b0f14"
+        content="#0e1218"
         media="(prefers-color-scheme: dark)"
       />
     </>

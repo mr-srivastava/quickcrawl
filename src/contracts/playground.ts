@@ -27,7 +27,10 @@ export function parsePlaygroundInit(
   value: string | undefined,
 ): PlaygroundInit | undefined {
   try {
-    const parsed = v.safeParse(PlaygroundInitSchema, JSON.parse(value ?? 'null'));
+    const parsed = v.safeParse(
+      PlaygroundInitSchema,
+      JSON.parse(value ?? 'null'),
+    );
     return parsed.success ? parsed.output : undefined;
   } catch {
     return undefined;

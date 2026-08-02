@@ -15,11 +15,13 @@ export {
   DocsPageInitSchema,
   HomePageInitSchema,
   PageInitSchema,
+  PlaygroundPageInitSchema,
   parsePageInit,
   serializePageInit,
   type DocsPageInit,
   type HomePageInit,
   type PageInit,
+  type PlaygroundPageInit,
 } from './page';
 export {
   PlaygroundInitSchema,

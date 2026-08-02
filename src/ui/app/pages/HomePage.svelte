@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    ArrowDown,
+    ArrowRight,
     ArrowRightLeft,
     Check,
     Database,
@@ -10,9 +10,11 @@
     Tags,
   } from '@lucide/svelte';
   import type { HomePageInit } from '$contracts/page';
-  import Playground from '$playground/Playground.svelte';
+  import { Input } from '$playground/ui/input/index.js';
 
   let { init }: { init: HomePageInit } = $props();
+
+  let heroUrl = $state('');
 
   const pipelineSteps = [
     ['01', 'Fetch', 'Safe public request'],
@@ -21,6 +23,17 @@
   ] as const;
 
   const rateLimitWindowSec = $derived(init.rateLimit.windowMs / 1000);
+
+  function playgroundHref(url?: string) {
+    const trimmed = url?.trim() ?? '';
+    if (trimmed === '') return '/playground';
+    return `/playground?url=${encodeURIComponent(trimmed)}`;
+  }
+
+  function handleHeroSubmit(event: SubmitEvent) {
+    event.preventDefault();
+    window.location.assign(playgroundHref(heroUrl));
+  }
 </script>
 
 <section class="hero-grid animate-fade-up" aria-labelledby="hero-title">
@@ -41,18 +54,36 @@
       Point QuickCrawl at any public page. Get readable Markdown and structured
       metadata back—without the navigation, ads, or noise.
     </p>
-    <a
-      href="#playground"
-      class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent no-underline hover:underline"
+
+    <form
+      class="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-stretch"
+      onsubmit={handleHeroSubmit}
     >
-      Try a URL
-      <ArrowDown class="size-4" />
-    </a>
+      <Input
+        id="hero-url"
+        name="url"
+        type="url"
+        placeholder="https://example.com"
+        autocomplete="url"
+        aria-label="Page URL"
+        bind:value={heroUrl}
+        class="h-12 flex-1 font-mono"
+      />
+      <button type="submit" class="btn-primary sm:px-5">
+        Try it
+        <ArrowRight class="size-4" />
+      </button>
+    </form>
+    <p class="mt-3 text-sm text-ink-muted dark:text-paper-muted-dark">
+      Or open the
+      <a href="/playground" class="link-accent">playground</a>
+      to crawl live.
+    </p>
   </div>
 
   <div class="pipeline-card" aria-label="Crawl pipeline">
     <div
-      class="flex items-center justify-between border-b border-border px-5 py-4 dark:border-border-dark"
+      class="flex items-center justify-between border-b border-border px-5 py-4"
     >
       <span
         class="font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase dark:text-paper-muted-dark"
@@ -80,25 +111,21 @@
               {description}
             </span>
           </span>
-          <Check class="size-4 text-accent" />
+          <Check class="size-4 text-success" />
         </li>
       {/each}
     </ol>
     <div
-      class="flex items-center gap-2 border-t border-border px-5 py-3 text-xs text-ink-muted dark:border-border-dark dark:text-paper-muted-dark"
+      class="flex items-center gap-2 border-t border-border px-5 py-3 text-xs text-ink-muted dark:text-paper-muted-dark"
     >
-      <ShieldCheck class="size-4 text-accent" />
+      <ShieldCheck class="size-4 text-info" />
       Private and reserved networks stay blocked
     </div>
   </div>
 </section>
 
-<div id="playground" class="animate-fade-up-delay-1 scroll-mt-24">
-  <Playground init={init.playground} />
-</div>
-
 <aside
-  class="animate-fade-up-delay-3 mt-5 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4 dark:border-border-dark dark:bg-border-dark"
+  class="animate-fade-up-delay-1 mt-5 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
   aria-label="QuickCrawl capabilities"
 >
   <span class="feature-pill">

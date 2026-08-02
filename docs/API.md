@@ -1,6 +1,6 @@
 # API reference
 
-QuickCrawl exposes a JSON crawl endpoint, a health endpoint, and two browser
+QuickCrawl exposes a JSON crawl endpoint, a health endpoint, and three browser
 pages. This reference describes the HTTP contract implemented by
 `src/index.ts` and `src/routes/ui.tsx`.
 
@@ -9,13 +9,19 @@ deployed QuickCrawl URL in production.
 
 ## Browser pages
 
-QuickCrawl serves its playground and browser documentation from the same Hono
-application as the API.
+QuickCrawl serves its marketing home page, playground, and browser documentation
+from the same Hono application as the API.
 
 ### `GET /`
 
-The root route returns the HTML playground. Open it in a browser to submit a URL
-and inspect the resulting Markdown, metadata, and JSON.
+The root route returns the marketing home page with a short introduction and a
+call to action into the playground.
+
+### `GET /playground`
+
+The playground route returns the interactive crawl workspace. Open it in a
+browser to submit a URL and inspect Markdown and JSON output. Optional
+`?url=` prefills the command bar.
 
 ### `GET /docs`
 

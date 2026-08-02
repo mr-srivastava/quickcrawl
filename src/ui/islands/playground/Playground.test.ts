@@ -34,6 +34,7 @@ function successResponse(data: {
 
 afterEach(() => {
   cleanup();
+  sessionStorage.clear();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -53,21 +54,25 @@ describe('Playground', () => {
         ),
       ),
     );
-    const { container } = render(Playground, { props: { init } });
+    const { container } = render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
 
     await user.click(screen.getByRole('button', { name: 'example.com' }));
     expect(screen.getByLabelText('Page URL')).toHaveValue(
       'https://example.com',
     );
-    await user.click(screen.getByRole('button', { name: 'Crawl page' }));
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
 
-    expect(await screen.findByText('Extraction complete')).toBeVisible();
+    expect(
+      await screen.findByText('Success', {}, { timeout: 5000 }),
+    ).toBeVisible();
     expect(screen.getByText('Example title')).toBeVisible();
     expect(screen.getByText('4 words · 1 metadata field')).toBeVisible();
     expect(screen.getByRole('region', { name: 'Crawl result' })).toHaveFocus();
 
-    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
-    expect(screen.getByText('Example description')).toBeVisible();
+    await user.click(screen.getByRole('tab', { name: 'JSON' }));
+    expect(screen.getByText('Metadata (1)')).toBeVisible();
     expect(await axe(container)).toHaveNoViolations();
   });
 
@@ -83,10 +88,12 @@ describe('Playground', () => {
           }),
       ),
     );
-    render(Playground, { props: { init } });
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
 
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
-    await user.click(screen.getByRole('button', { name: 'Crawl page' }));
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
     expect(screen.getByRole('button', { name: 'Extracting…' })).toBeDisabled();
     expect(screen.getByLabelText('Extracting page content')).toBeVisible();
 
@@ -103,7 +110,9 @@ describe('Playground', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Network request failed',
     );
-    expect(screen.getByRole('button', { name: 'Crawl page' })).toBeEnabled();
+    expect(
+      screen.getByRole('button', { name: 'Start crawling' }),
+    ).toBeEnabled();
   });
 
   test('shows no-title and empty-metadata states', async () => {
@@ -112,13 +121,17 @@ describe('Playground', () => {
       'fetch',
       vi.fn(() => Promise.resolve(successResponse({ markdown: '' }))),
     );
-    render(Playground, { props: { init } });
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
 
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
-    await user.click(screen.getByRole('button', { name: 'Crawl page' }));
-    expect(await screen.findByText('(no title)')).toBeVisible();
-    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
-    expect(screen.getByText('No metadata extracted')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
+    expect(
+      await screen.findByText('(no title)', {}, { timeout: 5000 }),
+    ).toBeVisible();
+    await user.click(screen.getByRole('tab', { name: 'JSON' }));
+    expect(screen.queryByText(/Metadata \(/)).toBeNull();
   });
 
   test('supports tab keyboard navigation and copy feedback', async () => {
@@ -134,15 +147,22 @@ describe('Playground', () => {
       'fetch',
       vi.fn(() => Promise.resolve(successResponse({ markdown: '# Example' }))),
     );
-    render(Playground, { props: { init } });
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
 
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
-    await user.click(screen.getByRole('button', { name: 'Crawl page' }));
-    const previewTab = await screen.findByRole('tab', { name: 'Preview' });
-    previewTab.focus();
-    await fireEvent.keyDown(previewTab, { key: 'ArrowRight' });
-    expect(screen.getByRole('tab', { name: 'Markdown' })).toHaveFocus();
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
+    const markdownTab = await screen.findByRole(
+      'tab',
+      { name: 'Markdown' },
+      { timeout: 5000 },
+    );
+    markdownTab.focus();
+    await fireEvent.keyDown(markdownTab, { key: 'ArrowRight' });
+    expect(screen.getByRole('tab', { name: 'JSON' })).toHaveFocus();
     await user.click(screen.getByRole('tab', { name: 'Markdown' }));
+    await user.click(screen.getByRole('button', { name: 'Raw' }));
     await user.click(screen.getByRole('button', { name: 'Copy markdown' }));
     await waitFor(() => expect(writeText).toHaveBeenCalledWith('# Example'));
     expect(screen.getByRole('button', { name: 'Copied' })).toBeVisible();
@@ -158,10 +178,12 @@ describe('Playground', () => {
         return new Promise<Response>(() => undefined);
       }),
     );
-    const view = render(Playground, { props: { init } });
+    const view = render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
 
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
-    await user.click(screen.getByRole('button', { name: 'Crawl page' }));
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
     expect(requestSignal?.aborted).toBe(false);
     view.unmount();
     expect(requestSignal?.aborted).toBe(true);
@@ -181,15 +203,92 @@ describe('Playground', () => {
       'fetch',
       vi.fn(() => Promise.resolve(successResponse({ markdown: '# Example' }))),
     );
-    render(Playground, { props: { init } });
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
 
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
-    await user.click(screen.getByRole('button', { name: 'Crawl page' }));
-    await user.click(await screen.findByRole('tab', { name: 'Markdown' }));
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'Raw' }, { timeout: 5000 }),
+    );
     await user.click(screen.getByRole('button', { name: 'Copy markdown' }));
     expect(screen.getByRole('button', { name: 'Copy markdown' })).toBeVisible();
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Your browser could not access the clipboard',
+    );
+  });
+
+  test('toggles Get code snippets for the current URL', async () => {
+    const user = userEvent.setup();
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
+
+    await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
+    await user.click(screen.getByRole('button', { name: 'Get code' }));
+    expect(screen.getByLabelText('API code snippets')).toBeVisible();
+    expect(
+      screen.getByText(/curl -X POST http:\/\/localhost:3000\/crawl/),
+    ).toBeVisible();
+    expect(screen.getByText(/"https:\/\/example.com"/)).toBeVisible();
+  });
+
+  test('stores successful URLs in recent history chips', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve(
+          successResponse({ markdown: '# Example', title: 'Example' }),
+        ),
+      ),
+    );
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
+
+    await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
+    expect(
+      await screen.findByText('Success', {}, { timeout: 5000 }),
+    ).toBeVisible();
+
+    const recentGroup = screen.getByRole('group', { name: 'Recent URLs' });
+    expect(recentGroup).toBeVisible();
+    expect(recentGroup).toHaveTextContent('example.com');
+  });
+
+  test('auto-starts crawling when initialUrl is provided', async () => {
+    const fetchMock = vi.fn(() =>
+      Promise.resolve(
+        successResponse({ markdown: '# Auto', title: 'Auto title' }),
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(Playground, {
+      props: {
+        init,
+        baseUrl: 'http://localhost:3000',
+        initialUrl: 'https://example.com',
+      },
+    });
+
+    expect(screen.getByLabelText('Page URL')).toHaveValue(
+      'https://example.com',
+    );
+    expect(
+      await screen.findByText('Success', {}, { timeout: 5000 }),
+    ).toBeVisible();
+    expect(screen.getByText('Auto title')).toBeVisible();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/crawl',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ url: 'https://example.com' }),
+      }),
     );
   });
 });

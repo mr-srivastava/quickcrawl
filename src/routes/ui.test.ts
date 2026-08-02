@@ -39,7 +39,9 @@ describe('UI routes', () => {
     const html = await res.text();
     expect(html).toContain('id="app-root"');
     expect(html).toContain('data-page-init=');
-    expect(html).toContain('JavaScript is required for the QuickCrawl interface');
+    expect(html).toContain(
+      'JavaScript is required for the QuickCrawl interface',
+    );
     expect(html).toContain(`src="/assets/app.js?v=${APP_VERSION}"`);
     expect(html).not.toContain('PLAYGROUND_SCRIPT');
     expect(html).not.toContain('id="playground-island"');
@@ -57,6 +59,18 @@ describe('UI routes', () => {
     expect(html).toContain(String(getRateLimitConfig().maxRequests));
     expect(html).toContain(String(DEFAULT_CACHE_TTL_MS));
     expect(html).toContain(String(DEFAULT_CACHE_MAX_SIZE));
+    expect(html).toContain(`src="/assets/app.js?v=${APP_VERSION}"`);
+  });
+
+  test('GET /playground returns HTML shell with playground init', async () => {
+    const res = await app.request('/playground');
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/html');
+    const html = await res.text();
+    expect(html).toContain('id="app-root"');
+    expect(html).toContain('data-page-init=');
+    expect(html).toContain('page&quot;:&quot;playground');
+    expect(html).toContain('/crawl');
     expect(html).toContain(`src="/assets/app.js?v=${APP_VERSION}"`);
   });
 

@@ -63,7 +63,9 @@ The server starts at `http://localhost:3000`.
 
 Open [http://localhost:3000](http://localhost:3000) in your browser for:
 
-- Use the playground to enter a URL and preview Markdown, metadata, and JSON.
+- Browse the marketing home page and jump into the playground.
+- Use the [playground](http://localhost:3000/playground) to enter a URL and
+  preview Markdown and JSON.
 - Open the [browser API reference](http://localhost:3000/docs).
 - Call `GET /health` to check server status.
 

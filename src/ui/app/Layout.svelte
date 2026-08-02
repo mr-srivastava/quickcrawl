@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BookOpen, Sparkles } from '@lucide/svelte';
+  import { BookOpen, Home, Sparkles } from '@lucide/svelte';
   import type { PageInit } from '$contracts/page';
   import { Button } from '$playground/ui/button/index.js';
   import Logo from './Logo.svelte';
@@ -12,7 +12,13 @@
     children: import('svelte').Snippet;
   } = $props();
 
-  const activeNav = $derived(init.page === 'home' ? 'home' : 'docs');
+  const activeNav = $derived(
+    init.page === 'home'
+      ? 'home'
+      : init.page === 'playground'
+        ? 'playground'
+        : 'docs',
+  );
 </script>
 
 <a
@@ -22,7 +28,7 @@
   Skip to main content
 </a>
 <header
-  class="sticky top-0 z-20 border-b border-border/80 bg-paper-elevated/88 backdrop-blur-xl dark:border-border-dark/80 dark:bg-paper-dark-elevated/88"
+  class="sticky top-0 z-20 border-b border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.04)]"
 >
   <div
     class="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-7"
@@ -42,8 +48,17 @@
         size="sm"
         aria-current={activeNav === 'home' ? 'page' : undefined}
       >
+        <Home data-icon="inline-start" />
+        Home
+      </Button>
+      <Button
+        href="/playground"
+        variant={activeNav === 'playground' ? 'secondary' : 'ghost'}
+        size="sm"
+        aria-current={activeNav === 'playground' ? 'page' : undefined}
+      >
         <Sparkles data-icon="inline-start" />
-        Try it
+        Playground
       </Button>
       <Button
         href="/docs"
@@ -64,7 +79,7 @@
   {@render children()}
 </main>
 <footer
-  class="border-t border-border/80 bg-paper-elevated/60 py-6 dark:border-border-dark/80 dark:bg-paper-dark-elevated/60"
+  class="border-t border-border bg-surface-raised/80 py-6"
 >
   <div class="mx-auto max-w-6xl px-5 sm:px-7">
     <p

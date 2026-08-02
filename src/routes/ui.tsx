@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { DocsShell } from '../ui/shell/docs';
 import { HomeShell } from '../ui/shell/home';
+import { PlaygroundShell } from '../ui/shell/playground';
 import { APP_NAME, APP_VERSION } from '../config';
 import { clearStylesCache, getStylesCss } from '../lib/styles';
 import {
@@ -75,6 +76,10 @@ uiRoutes.get('/health', (c) => {
 
 uiRoutes.get('/', (c) => {
   return c.html(<HomeShell />);
+});
+
+uiRoutes.get('/playground', (c) => {
+  return c.html(<PlaygroundShell />);
 });
 
 uiRoutes.get('/docs', (c) => {

@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a dedicated `/playground` workspace route with command-bar crawl UX,
+  Get code snippets, session recent-URL history, and a split output panel.
+- Added semantic surface and status color tokens for light and dark themes.
+- Added API, architecture, development, contribution, and agent documentation.
+- Added architectural decision records.
+- Added roadmap tracking.
+- Added Oxlint and Oxfmt checks, including type-aware TypeScript linting and
+  Tailwind CSS v4 class sorting.
+- Added a Vite browser build and explicit route for the playground asset.
+- Added a 15 KiB gzip budget for the initial playground bundle.
+
 ### Changed
 
+- Split marketing home (`/`) from the interactive playground workspace and
+  updated navigation to Home, Playground, and API.
+- Redesigned playground results around Markdown and JSON tabs with elevated
+  command-bar / output-panel layout and restrained accent usage.
 - Moved layout, home, and docs UI into a single Svelte client application
   (`app.js`) behind a minimal Hono document shell with serialized page init data.
 - Renamed the browser entry bundle from `playground.js` to `app.js` and raised
@@ -28,16 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Split results and Markdown rendering from the initial playground bundle,
   improved clipboard and focus behavior, and strengthened HTML sanitization
   coverage.
-
-### Added
-
-- Added API, architecture, development, contribution, and agent documentation.
-- Added architectural decision records.
-- Added roadmap tracking.
-- Added Oxlint and Oxfmt checks, including type-aware TypeScript linting and
-  Tailwind CSS v4 class sorting.
-- Added a Vite browser build and explicit route for the playground asset.
-- Added a 15 KiB gzip budget for the initial playground bundle.
 
 ## [0.1.0] - 2024
 
