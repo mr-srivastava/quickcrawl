@@ -1,48 +1,25 @@
 <script lang="ts">
   import { AlertCircle } from '@lucide/svelte';
-  import { onDestroy } from 'svelte';
   import * as Alert from '$playground/ui/alert/index.js';
-  import { Button } from '$playground/ui/button/index.js';
   import * as Empty from '$playground/ui/empty/index.js';
   import { Spinner } from '$playground/ui/spinner/index.js';
+  import { LOADING_STAGES, type LoadingStage } from './lib/loading-stages';
   import type PlaygroundResults from './PlaygroundResults.svelte';
   import type { CrawlSuccess, PlaygroundState } from './types';
 
   let {
     state: panelState,
+    loadingStage = 'Fetch',
+    loadingStageIndex = 0,
     sanitizedPreviewHtml = '',
     ResultsComponent,
-    onCancel,
   }: {
     state: PlaygroundState;
+    loadingStage?: LoadingStage;
+    loadingStageIndex?: number;
     sanitizedPreviewHtml?: string;
     ResultsComponent?: typeof PlaygroundResults;
-    onCancel?: () => void;
   } = $props();
-
-  const stages = ['Fetch', 'Clean', 'Convert'] as const;
-  let stageIndex = $state(0);
-  let stageTimer: number | undefined;
-
-  $effect(() => {
-    if (panelState.type !== 'loading') {
-      if (stageTimer !== undefined) {
-        window.clearInterval(stageTimer);
-        stageTimer = undefined;
-      }
-      stageIndex = 0;
-      return;
-    }
-
-    stageIndex = 0;
-    stageTimer = window.setInterval(() => {
-      stageIndex = (stageIndex + 1) % stages.length;
-    }, 900);
-  });
-
-  onDestroy(() => {
-    if (stageTimer !== undefined) window.clearInterval(stageTimer);
-  });
 
   const panelClass = $derived(
     panelState.type === 'idle'
@@ -75,29 +52,24 @@
       <Spinner class="size-8 text-info" aria-hidden="true" />
       <div class="text-center">
         <p class="m-0 text-sm font-semibold text-info-foreground">
-          {stages[stageIndex]}…
+          {loadingStage}…
         </p>
         <p class="mt-1 font-mono text-xs text-muted-foreground">
           Extracting page content
         </p>
       </div>
       <ol class="m-0 flex list-none gap-2 p-0" aria-hidden="true">
-        {#each stages as stage, index (stage)}
+        {#each LOADING_STAGES as stage, index (stage)}
           <li
             class="rounded-full px-2.5 py-1 font-mono text-[0.68rem] uppercase transition-colors"
-            class:bg-surface-raised={index === stageIndex}
-            class:text-foreground={index === stageIndex}
-            class:text-muted-foreground={index !== stageIndex}
+            class:bg-surface-raised={index === loadingStageIndex}
+            class:text-foreground={index === loadingStageIndex}
+            class:text-muted-foreground={index !== loadingStageIndex}
           >
             {stage}
           </li>
         {/each}
       </ol>
-      {#if onCancel}
-        <Button type="button" variant="outline" size="sm" onclick={onCancel}>
-          Stop
-        </Button>
-      {/if}
     </div>
   {:else if panelState.type === 'error'}
     <div class="p-5 sm:p-7">

@@ -20,12 +20,12 @@
     Reference
   </p>
   <h1
-    class="mb-4 flex items-center gap-3 font-display text-4xl font-semibold tracking-tight text-ink dark:text-paper-on-dark"
+    class="mb-4 flex items-center gap-3 font-display text-4xl font-semibold tracking-tight text-ink"
   >
     <BookOpen class="size-8 text-foreground" />
     API
   </h1>
-  <p class="mb-8 max-w-2xl text-lg text-ink-muted dark:text-paper-muted-dark">
+  <p class="mb-8 max-w-2xl text-lg text-ink-muted">
     Integrate QuickCrawl via HTTP. Try the live extractor in the
     <a href="/playground" class="link-accent">playground</a>.
   </p>
@@ -46,7 +46,7 @@
   </Card.Root>
 
   <h2
-    class="mt-0 flex items-center gap-2 border-t-0 pt-0 font-display text-xl font-semibold text-ink dark:text-paper-on-dark"
+    class="mt-0 flex items-center gap-2 border-t-0 pt-0 font-display text-xl font-semibold text-ink"
   >
     <Activity class="size-5 text-foreground" />
     GET /health
@@ -57,7 +57,7 @@
   <pre class="code-block my-3">{init.healthExample}</pre>
 
   <h2
-    class="mt-10 flex items-center gap-2 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:text-paper-on-dark"
+    class="mt-10 flex items-center gap-2 border-t border-border pt-8 font-display text-xl font-semibold text-ink"
   >
     <Globe class="size-5 text-foreground" />
     POST /crawl
@@ -124,7 +124,7 @@
   </p>
 
   <h2
-    class="mt-10 flex items-center gap-2 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:text-paper-on-dark"
+    class="mt-10 flex items-center gap-2 border-t border-border pt-8 font-display text-xl font-semibold text-ink"
   >
     <Terminal class="size-5 text-foreground" />
     Example
@@ -134,7 +134,7 @@
   -d '{"url": "https://example.com"}'`}</pre>
 
   <h2
-    class="mt-10 flex items-center gap-2 border-t border-border pt-8 font-display text-xl font-semibold text-ink dark:text-paper-on-dark"
+    class="mt-10 flex items-center gap-2 border-t border-border pt-8 font-display text-xl font-semibold text-ink"
   >
     <Settings class="size-5 text-foreground" />
     Environment

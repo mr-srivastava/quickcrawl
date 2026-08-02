@@ -2,6 +2,7 @@
   import { onDestroy } from 'svelte';
   import { crawlPage } from './api';
   import { loadRecentUrls, rememberUrl } from './lib/history';
+  import { LOADING_STAGES } from './lib/loading-stages';
   import PlaygroundCommandBar from './PlaygroundCommandBar.svelte';
   import PlaygroundOutputPanel from './PlaygroundOutputPanel.svelte';
   import type PlaygroundResults from './PlaygroundResults.svelte';
@@ -23,6 +24,26 @@
   let recentUrls = $state<string[]>(loadRecentUrls());
   let activeController: AbortController | undefined;
   let autoStarted = false;
+  let loadingStageIndex = $state(0);
+  let stageTimer: number | undefined;
+
+  const loadingStage = $derived(LOADING_STAGES[loadingStageIndex]);
+
+  $effect(() => {
+    if (state.type !== 'loading') {
+      if (stageTimer !== undefined) {
+        window.clearInterval(stageTimer);
+        stageTimer = undefined;
+      }
+      loadingStageIndex = 0;
+      return;
+    }
+
+    loadingStageIndex = 0;
+    stageTimer = window.setInterval(() => {
+      loadingStageIndex = (loadingStageIndex + 1) % LOADING_STAGES.length;
+    }, 900);
+  });
 
   function cancel() {
     activeController?.abort();
@@ -72,7 +93,10 @@
     void submit(url);
   });
 
-  onDestroy(() => activeController?.abort());
+  onDestroy(() => {
+    if (stageTimer !== undefined) window.clearInterval(stageTimer);
+    activeController?.abort();
+  });
 </script>
 
 <div class="flex flex-col gap-5">
@@ -80,6 +104,7 @@
     exampleUrls={init.exampleUrls}
     {recentUrls}
     isLoading={state.type === 'loading'}
+    {loadingStage}
     baseUrl={baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')}
     endpoint={init.endpoint}
     {initialUrl}
@@ -88,8 +113,9 @@
   />
   <PlaygroundOutputPanel
     {state}
+    {loadingStage}
+    loadingStageIndex={loadingStageIndex}
     {sanitizedPreviewHtml}
     {ResultsComponent}
-    onCancel={cancel}
   />
 </div>

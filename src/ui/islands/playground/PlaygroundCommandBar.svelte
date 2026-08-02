@@ -1,16 +1,18 @@
 <script lang="ts">
-  import { ArrowRight, Code2, X } from '@lucide/svelte';
+  import { ArrowRight, Code2 } from '@lucide/svelte';
   import { Button } from '$playground/ui/button/index.js';
   import * as Field from '$playground/ui/field/index.js';
   import * as InputGroup from '$playground/ui/input-group/index.js';
   import { Separator } from '$playground/ui/separator/index.js';
   import { Spinner } from '$playground/ui/spinner/index.js';
+  import type { LoadingStage } from './lib/loading-stages';
   import GetCodePanel from './GetCodePanel.svelte';
 
   let {
     exampleUrls,
     recentUrls = [],
     isLoading,
+    loadingStage = 'Fetch',
     baseUrl,
     endpoint,
     initialUrl = '',
@@ -21,6 +23,7 @@
     exampleUrls: string[];
     recentUrls?: string[];
     isLoading: boolean;
+    loadingStage?: LoadingStage;
     baseUrl: string;
     endpoint: string;
     initialUrl?: string;
@@ -85,28 +88,32 @@
             class="h-12 font-mono"
           />
           <InputGroup.Addon align="inline-end" class="flex w-full gap-2 p-0 sm:w-auto">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              class="h-12 w-full sm:min-w-40"
-            >
-              {#if isLoading}
-                <Spinner data-icon="inline-start" aria-hidden="true" />
-                Extracting…
-              {:else}
+            {#if isLoading}
+              <div
+                class="inline-flex h-12 w-full flex-1 items-center justify-center gap-2 rounded-lg bg-info-subtle px-4 text-sm font-medium text-info-foreground sm:w-auto sm:min-w-40"
+                role="status"
+                aria-live="polite"
+              >
+                <Spinner class="size-4 text-info" aria-hidden="true" />
+                {loadingStage}…
+              </div>
+              {#if onCancel}
+                <Button
+                  type="button"
+                  variant="outline"
+                  class="h-12 sm:min-w-24"
+                  onclick={onCancel}
+                >
+                  Stop
+                </Button>
+              {/if}
+            {:else}
+              <Button
+                type="submit"
+                class="h-12 w-full sm:min-w-40"
+              >
                 <ArrowRight data-icon="inline-start" />
                 Start crawling
-              {/if}
-            </Button>
-            {#if isLoading && onCancel}
-              <Button
-                type="button"
-                variant="outline"
-                class="h-12 sm:min-w-24"
-                onclick={onCancel}
-              >
-                <X data-icon="inline-start" />
-                Stop
               </Button>
             {/if}
           </InputGroup.Addon>

@@ -8,16 +8,7 @@ export function FontLinks() {
         href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
         rel="stylesheet"
       />
-      <meta
-        name="theme-color"
-        content="#f8f9fb"
-        media="(prefers-color-scheme: light)"
-      />
-      <meta
-        name="theme-color"
-        content="#0e1218"
-        media="(prefers-color-scheme: dark)"
-      />
+      <meta name="theme-color" content="#f8f9fb" />
     </>
   );
 }

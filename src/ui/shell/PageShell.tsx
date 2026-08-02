@@ -34,7 +34,7 @@ export function PageShell({ init }: PageShellProps) {
         >
           <noscript>
             <div class="mx-auto max-w-4xl px-5 py-12 text-center">
-              <p class="text-sm font-semibold text-ink dark:text-paper-on-dark">
+              <p class="text-sm font-semibold text-ink">
                 JavaScript is required for the QuickCrawl interface.
               </p>
             </div>

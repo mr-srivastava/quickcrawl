@@ -94,7 +94,8 @@ describe('Playground', () => {
 
     await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
     await user.click(screen.getByRole('button', { name: 'Start crawling' }));
-    expect(screen.getByRole('button', { name: 'Extracting…' })).toBeDisabled();
+    expect(screen.getByRole('status')).toHaveTextContent('Fetch…');
+    expect(screen.getByRole('button', { name: 'Stop' })).toBeEnabled();
     expect(screen.getByLabelText('Extracting page content')).toBeVisible();
 
     resolveResponse?.(

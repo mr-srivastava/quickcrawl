@@ -45,12 +45,12 @@
     </p>
     <h1
       id="hero-title"
-      class="max-w-3xl font-display text-4xl leading-[0.98] font-semibold tracking-[-0.045em] text-balance text-ink sm:text-6xl dark:text-paper-on-dark"
+      class="max-w-3xl font-display text-4xl leading-[0.98] font-semibold tracking-[-0.045em] text-balance text-ink sm:text-6xl"
     >
       {init.tagline}
     </h1>
     <p
-      class="mt-5 max-w-xl text-base leading-relaxed text-ink-muted sm:text-lg dark:text-paper-muted-dark"
+      class="mt-5 max-w-xl text-base leading-relaxed text-ink-muted sm:text-lg"
     >
       Point QuickCrawl at any public page. Get readable Markdown and structured
       metadata back—without the navigation, ads, or noise.
@@ -75,7 +75,7 @@
         <ArrowRight data-icon="inline-end" />
       </Button>
     </form>
-    <p class="mt-3 text-sm text-ink-muted dark:text-paper-muted-dark">
+    <p class="mt-3 text-sm text-ink-muted">
       Or open the
       <a href="/playground" class="link-accent">playground</a>
       to crawl live.
@@ -87,7 +87,7 @@
       class="flex items-center justify-between border-b border-border px-5 py-4"
     >
       <span
-        class="font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase dark:text-paper-muted-dark"
+        class="font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase"
       >
         Crawl pipeline
       </span>
@@ -102,12 +102,12 @@
           <span class="pipeline-number">{step}</span>
           <span class="min-w-0 flex-1">
             <strong
-              class="block text-sm font-semibold text-ink dark:text-paper-on-dark"
+              class="block text-sm font-semibold text-ink"
             >
               {label}
             </strong>
             <span
-              class="block text-sm text-ink-muted dark:text-paper-muted-dark"
+              class="block text-sm text-ink-muted"
             >
               {description}
             </span>
@@ -117,7 +117,7 @@
       {/each}
     </ol>
     <div
-      class="flex items-center gap-2 border-t border-border px-5 py-3 text-xs text-ink-muted dark:text-paper-muted-dark"
+      class="flex items-center gap-2 border-t border-border px-5 py-3 text-xs text-ink-muted"
     >
       <ShieldCheck class="size-4 text-info" />
       Private and reserved networks stay blocked

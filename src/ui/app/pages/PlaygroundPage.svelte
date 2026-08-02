@@ -21,11 +21,11 @@
 <div class="mx-auto max-w-5xl animate-fade-up">
   <header class="mb-8">
     <h1
-      class="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl dark:text-paper-on-dark"
+      class="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
     >
       Playground
     </h1>
-    <p class="mt-2 max-w-2xl text-base text-ink-muted dark:text-paper-muted-dark">
+    <p class="mt-2 max-w-2xl text-base text-ink-muted">
       Crawl a public URL and inspect Markdown and JSON output. API, docs, and
       playground — all in one place.
     </p>
@@ -39,7 +39,7 @@
 
   <details class="pipeline-card mt-8">
     <summary
-      class="cursor-pointer list-none px-5 py-4 font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase dark:text-paper-muted-dark [&::-webkit-details-marker]:hidden"
+      class="cursor-pointer list-none px-5 py-4 font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase [&::-webkit-details-marker]:hidden"
     >
       How it works
     </summary>
@@ -49,11 +49,11 @@
           <span class="pipeline-number">{step}</span>
           <span class="min-w-0 flex-1">
             <strong
-              class="block text-sm font-semibold text-ink dark:text-paper-on-dark"
+              class="block text-sm font-semibold text-ink"
             >
               {label}
             </strong>
-            <span class="block text-sm text-ink-muted dark:text-paper-muted-dark">
+            <span class="block text-sm text-ink-muted">
               {description}
             </span>
           </span>

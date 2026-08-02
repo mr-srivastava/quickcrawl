@@ -3,14 +3,12 @@
 
 @source '../**/*.{ts,tsx,svelte}';
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
-
 @theme {
   --font-display: 'Manrope', system-ui, sans-serif;
   --font-sans: 'Manrope', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-  /* Surface layers — light */
+  /* Surface layers */
   --color-surface-base: #f8f9fb;
   --color-surface-raised: #ffffff;
   --color-surface-sunken: #eef2f6;
@@ -18,15 +16,10 @@
   /* Legacy aliases mapped to surface layers */
   --color-paper: var(--color-surface-base);
   --color-paper-elevated: var(--color-surface-raised);
-  --color-paper-dark: #0e1218;
-  --color-paper-dark-elevated: #161c24;
 
   --color-ink: #101923;
   --color-ink-muted: #5a6778;
   --color-ink-faint: #8490a0;
-
-  --color-paper-on-dark: #f2f6fa;
-  --color-paper-muted-dark: #9aa8b7;
 
   --color-accent: #1473e6;
   --color-accent-hover: #0c5fc2;
@@ -34,14 +27,11 @@
   --color-accent-subtle: #e8f2fc;
 
   --color-border: #dce3eb;
-  --color-border-dark: #2a3544;
 
   --color-danger: #b91c1c;
   --color-danger-bg: #fef2f2;
-  --color-danger-dark: #fca5a5;
-  --color-danger-bg-dark: #3b1212;
 
-  /* Semantic status colors — light */
+  /* Semantic status colors */
   --color-success: #15803d;
   --color-success-subtle: #ecfdf3;
   --color-success-foreground: #14532d;
@@ -71,50 +61,10 @@
   --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-surface-base: #0e1218;
-    --color-surface-raised: #161c24;
-    --color-surface-sunken: #1c2430;
-
-    --color-paper: var(--color-surface-base);
-    --color-paper-elevated: var(--color-surface-raised);
-    --color-paper-dark: var(--color-surface-base);
-    --color-paper-dark-elevated: var(--color-surface-raised);
-
-    --color-accent: #3b8ef0;
-    --color-accent-hover: #5ba0f5;
-    --color-accent-soft: #1a2d42;
-    --color-accent-subtle: #1a2d42;
-
-    --color-border: #2a3544;
-    --color-border-dark: #2a3544;
-
-    --color-success: #4ade80;
-    --color-success-subtle: #052e16;
-    --color-success-foreground: #bbf7d0;
-    --color-info: #94a3b8;
-    --color-info-subtle: #1e293b;
-    --color-info-foreground: #cbd5e1;
-    --color-destructive-subtle: #3b1212;
-
-    --color-background: var(--color-surface-base);
-    --color-foreground: var(--color-paper-on-dark);
-    --color-card: var(--color-surface-raised);
-    --color-card-foreground: var(--color-paper-on-dark);
-    --color-popover: var(--color-surface-raised);
-    --color-popover-foreground: var(--color-paper-on-dark);
-    --color-secondary: var(--color-accent-subtle);
-    --color-secondary-foreground: var(--color-paper-on-dark);
-    --color-muted: var(--color-surface-sunken);
-    --color-muted-foreground: var(--color-paper-muted-dark);
-    --color-input: var(--color-border-dark);
-  }
-}
-
 @layer base {
   html {
     @apply antialiased;
+    color-scheme: light;
   }
 
   body {
@@ -133,17 +83,6 @@
     linear-gradient(rgb(16 25 35 / 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgb(16 25 35 / 0.035) 1px, transparent 1px);
   background-size: 48px 48px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .body-bg {
-    background-color: var(--color-surface-base);
-    background-image:
-      linear-gradient(rgb(242 246 250 / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(242 246 250 / 0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    @apply text-paper-on-dark;
-  }
 }
 
 /* Motion */
@@ -208,19 +147,19 @@
   }
 
   .btn-ghost {
-    @apply inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-border bg-surface-raised/60 px-3 py-1.5 font-mono text-xs text-ink-muted transition-colors hover:border-accent/40 hover:text-accent dark:text-paper-muted-dark dark:hover:text-accent;
+    @apply inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-border bg-surface-raised/60 px-3 py-1.5 font-mono text-xs text-ink-muted transition-colors hover:border-accent/40 hover:text-accent;
   }
 
   .input-field {
-    @apply min-h-12 min-w-0 flex-1 border-0 bg-transparent px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-faint focus:ring-0 focus:outline-none dark:text-paper-on-dark dark:placeholder:text-paper-muted-dark/60;
+    @apply min-h-12 min-w-0 flex-1 border-0 bg-transparent px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-faint focus:ring-0 focus:outline-none;
   }
 
   .card-editorial {
-    @apply rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.03),0_12px_40px_rgb(16_25_35/0.06)] dark:shadow-[0_16px_48px_rgb(0_0_0/0.35)];
+    @apply rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.03),0_12px_40px_rgb(16_25_35/0.06)];
   }
 
   .surface-raised {
-    @apply rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.03),0_12px_40px_rgb(16_25_35/0.06)] dark:shadow-[0_16px_48px_rgb(0_0_0/0.35)];
+    @apply rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.03),0_12px_40px_rgb(16_25_35/0.06)];
   }
 
   .nav-link {
@@ -232,11 +171,11 @@
   }
 
   .nav-link-inactive {
-    @apply text-ink-muted hover:bg-surface-sunken hover:text-ink dark:text-paper-muted-dark dark:hover:text-paper-on-dark;
+    @apply text-ink-muted hover:bg-surface-sunken hover:text-ink;
   }
 
   .tab {
-    @apply inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-transparent px-3 py-2 font-sans text-sm text-ink-muted transition-all duration-200 hover:bg-surface-sunken hover:text-ink dark:text-paper-muted-dark dark:hover:text-paper-on-dark;
+    @apply inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-transparent px-3 py-2 font-sans text-sm text-ink-muted transition-all duration-200 hover:bg-surface-sunken hover:text-ink;
   }
 
   .icon-spin {
@@ -266,7 +205,7 @@
   }
 
   .document-sheet {
-    @apply mx-auto max-w-3xl rounded-lg border border-border bg-surface-raised px-6 py-8 shadow-[0_1px_2px_rgb(16_25_35/0.04),0_12px_30px_rgb(16_25_35/0.05)] sm:px-10 sm:py-12 dark:shadow-[0_16px_40px_rgb(0_0_0/0.2)];
+    @apply mx-auto max-w-3xl rounded-lg border border-border bg-surface-raised px-6 py-8 shadow-[0_1px_2px_rgb(16_25_35/0.04),0_12px_30px_rgb(16_25_35/0.05)] sm:px-10 sm:py-12;
   }
 
   .skeleton-line {
@@ -281,28 +220,16 @@
     animation: shimmer 1.4s ease-in-out infinite;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .skeleton-line {
-      background: linear-gradient(
-        90deg,
-        var(--color-border-dark) 0%,
-        var(--color-surface-raised) 50%,
-        var(--color-border-dark) 100%
-      );
-      background-size: 200% 100%;
-    }
-  }
-
   .link-accent {
     @apply font-medium text-accent no-underline transition-colors hover:text-accent-hover hover:underline;
   }
 
   .feature-pill {
-    @apply inline-flex min-h-14 items-center gap-2 bg-surface-raised px-4 py-3 font-sans text-sm text-ink-muted dark:text-paper-muted-dark;
+    @apply inline-flex min-h-14 items-center gap-2 bg-surface-raised px-4 py-3 font-sans text-sm text-ink-muted;
   }
 
   .eyebrow {
-    @apply mb-4 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-[0.18em] text-ink-muted uppercase dark:text-paper-muted-dark;
+    @apply mb-4 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-[0.18em] text-ink-muted uppercase;
   }
 
   .hero-grid {
@@ -310,11 +237,11 @@
   }
 
   .pipeline-card {
-    @apply overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_12px_40px_rgb(16_25_35/0.05)] dark:shadow-[0_16px_48px_rgb(0_0_0/0.3)];
+    @apply overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_12px_40px_rgb(16_25_35/0.05)];
   }
 
   .status-badge {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-sunken px-2.5 py-1 font-mono text-[0.68rem] font-medium text-ink-muted uppercase dark:text-paper-muted-dark;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-sunken px-2.5 py-1 font-mono text-[0.68rem] font-medium text-ink-muted uppercase;
   }
 
   .status-dot {
@@ -338,7 +265,7 @@
   }
 
   .output-panel {
-    @apply overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.03),0_12px_40px_rgb(16_25_35/0.06)] outline-none dark:shadow-[0_16px_48px_rgb(0_0_0/0.35)];
+    @apply overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgb(16_25_35/0.03),0_12px_40px_rgb(16_25_35/0.06)] outline-none;
   }
 
   .output-panel-idle {
@@ -370,7 +297,7 @@
   }
 
   .result-receipt {
-    @apply inline-flex w-fit rounded-md border border-border bg-surface-sunken px-3 py-2 font-mono text-[0.7rem] text-ink-muted dark:text-paper-muted-dark;
+    @apply inline-flex w-fit rounded-md border border-border bg-surface-sunken px-3 py-2 font-mono text-[0.7rem] text-ink-muted;
   }
 
   .result-title-row {
@@ -378,7 +305,7 @@
   }
 
   .result-format {
-    @apply hidden shrink-0 rounded-full bg-surface-sunken px-3 py-1.5 font-mono text-[0.68rem] font-medium tracking-wide text-ink-muted uppercase sm:inline-flex dark:text-paper-muted-dark;
+    @apply hidden shrink-0 rounded-full bg-surface-sunken px-3 py-1.5 font-mono text-[0.68rem] font-medium tracking-wide text-ink-muted uppercase sm:inline-flex;
   }
 
   .result-tabs {
@@ -406,7 +333,7 @@
 }
 
 .markdown-preview {
-  @apply prose prose-lg max-w-none font-sans dark:prose-invert prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink dark:prose-headings:text-paper-on-dark prose-p:text-ink/90 dark:prose-p:text-paper-on-dark/90 prose-a:text-accent prose-a:no-underline hover:prose-a:underline dark:prose-a:text-accent prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none;
+  @apply prose prose-lg max-w-none font-sans prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink prose-p:text-ink/90 prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none;
 }
 
 #metadata-body td,
@@ -415,9 +342,9 @@
 }
 
 #metadata-body th {
-  @apply w-[30%] bg-surface-sunken font-display text-sm font-medium text-ink dark:text-paper-on-dark;
+  @apply w-[30%] bg-surface-sunken font-display text-sm font-medium text-ink;
 }
 
 #metadata-body td {
-  @apply font-mono text-xs break-words text-ink-muted dark:text-paper-muted-dark;
+  @apply font-mono text-xs break-words text-ink-muted;
 }

@@ -36,7 +36,7 @@
     <a href="/" class="group flex items-center gap-2.5 no-underline">
       <Logo class="transition-transform duration-300 group-hover:scale-105" />
       <span
-        class="font-display text-xl font-semibold tracking-tight text-ink dark:text-paper-on-dark"
+        class="font-display text-xl font-semibold tracking-tight text-ink"
       >
         {init.appName}
       </span>
@@ -83,7 +83,7 @@
 >
   <div class="mx-auto max-w-6xl px-5 sm:px-7">
     <p
-      class="m-0 flex flex-wrap items-center gap-1 font-sans text-sm text-ink-muted dark:text-paper-muted-dark"
+      class="m-0 flex flex-wrap items-center gap-1 font-sans text-sm text-ink-muted"
     >
       Rate limited to protect the service.
       <Button href="/docs" variant="link" class="h-auto p-0 text-accent">
