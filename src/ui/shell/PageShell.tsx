@@ -23,6 +23,7 @@ export function PageShell({ init }: PageShellProps) {
           name="description"
           content="Fetch web pages and convert them to clean Markdown with metadata extraction."
         />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <FontLinks />
         <link rel="stylesheet" href={`/styles.css?v=${APP_VERSION}`} />
       </head>

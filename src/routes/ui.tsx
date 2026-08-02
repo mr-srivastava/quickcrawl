@@ -3,6 +3,7 @@ import { DocsShell } from '../ui/shell/docs';
 import { HomeShell } from '../ui/shell/home';
 import { PlaygroundShell } from '../ui/shell/playground';
 import { APP_NAME, APP_VERSION } from '../config';
+import { getFaviconIco } from '../lib/favicon';
 import { clearStylesCache, getStylesCss } from '../lib/styles';
 import {
   clearUiAssetsCache,
@@ -11,6 +12,14 @@ import {
 } from '../lib/uiAssets';
 
 export const uiRoutes = new Hono();
+
+uiRoutes.get('/favicon.ico', async (c) => {
+  const favicon = await getFaviconIco();
+  return c.body(favicon, 200, {
+    'Content-Type': 'image/x-icon',
+    'Cache-Control': 'public, max-age=86400, immutable',
+  });
+});
 
 uiRoutes.get('/styles.css', async (c) => {
   if (process.env.NODE_ENV === 'development') {

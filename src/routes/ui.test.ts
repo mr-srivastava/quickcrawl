@@ -46,6 +46,8 @@ describe('UI routes', () => {
     expect(html).not.toContain('PLAYGROUND_SCRIPT');
     expect(html).not.toContain('id="playground-island"');
     expect(html).toContain(`/styles.css?v=${APP_VERSION}`);
+    expect(html).toContain('rel="icon"');
+    expect(html).toContain('/favicon.ico');
   });
 
   test('GET /docs returns HTML shell with serialized docs init', async () => {
@@ -72,6 +74,21 @@ describe('UI routes', () => {
     expect(html).toContain('page&quot;:&quot;playground');
     expect(html).toContain('/crawl');
     expect(html).toContain(`src="/assets/app.js?v=${APP_VERSION}"`);
+  });
+
+  test('GET /favicon.ico serves the ICO favicon', async () => {
+    const res = await app.request('/favicon.ico');
+    const faviconPath = join(process.cwd(), 'public', 'favicon.ico');
+    const expectedFavicon = await readFile(faviconPath);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('image/x-icon');
+    expect(res.headers.get('cache-control')).toBe(
+      'public, max-age=86400, immutable',
+    );
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(
+      Uint8Array.from(expectedFavicon),
+    );
   });
 
   test('GET /styles.css serves compiled CSS or 503', async () => {
