@@ -1,4 +1,5 @@
-export { APP_NAME, APP_VERSION, APP_TAGLINE } from '../config';
+export const MAINTAINER_NAME = 'Aadarsh';
+export const MAINTAINER_URL = 'https://aadarsh.online';
 
 export const EXAMPLE_URLS = [
   'https://example.com',

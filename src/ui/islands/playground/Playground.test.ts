@@ -64,7 +64,9 @@ describe('Playground', () => {
       await screen.findByText('Success', {}, { timeout: 5000 }),
     ).toBeVisible();
     expect(screen.getByText('Example title')).toBeVisible();
-    expect(screen.getByText(/4 words · .* characters · 1 metadata field/)).toBeVisible();
+    expect(
+      screen.getByText(/4 words · .* characters · 1 metadata field/),
+    ).toBeVisible();
     expect(screen.getByRole('region', { name: 'Crawl result' })).toHaveFocus();
 
     await user.click(screen.getByRole('tab', { name: 'Metadata' }));
@@ -294,10 +296,7 @@ describe('Playground', () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       'fetch',
-      vi.fn(
-        () =>
-          new Promise<Response>(() => undefined),
-      ),
+      vi.fn(() => new Promise<Response>(() => undefined)),
     );
     render(Playground, {
       props: { init, baseUrl: 'http://localhost:3000' },

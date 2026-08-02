@@ -25,6 +25,36 @@
 
   const rateLimitWindowSec = $derived(init.rateLimit.windowMs / 1000);
 
+  const rateLimitDetail = $derived(
+    rateLimitWindowSec === 60
+      ? `Up to ${init.rateLimit.maxRequests} crawls per minute`
+      : `Up to ${init.rateLimit.maxRequests} requests per ${rateLimitWindowSec}s`,
+  );
+
+  const capabilities = $derived([
+    {
+      icon: Tags,
+      label: 'Page metadata',
+      detail: 'Title, description, and social tags',
+    },
+    {
+      icon: Database,
+      label: 'Response caching',
+      detail: 'Faster results for URLs crawled recently',
+    },
+    {
+      icon: Gauge,
+      label: 'Fair rate limits',
+      detail: rateLimitDetail,
+    },
+    {
+      icon: FileText,
+      label: 'Simple HTTP API',
+      detail: 'POST /crawl with a page URL',
+      mono: true as const,
+    },
+  ]);
+
   function playgroundHref(url?: string) {
     const trimmed = url?.trim() ?? '';
     if (trimmed === '') return '/playground';
@@ -37,8 +67,9 @@
   }
 </script>
 
+<div class="page-fold page-fold-balanced">
 <section class="hero-grid animate-fade-up" aria-labelledby="hero-title">
-  <div class="py-3 lg:py-8">
+  <div>
     <p class="eyebrow">
       <ArrowRightLeft class="size-3.5" />
       Web to Markdown
@@ -68,7 +99,7 @@
         autocomplete="url"
         aria-label="Page URL"
         bind:value={heroUrl}
-        class="h-12 flex-1 font-mono"
+        class="h-12 flex-1 border-border bg-surface-raised font-mono shadow-sm"
       />
       <Button type="submit" class="h-12 sm:px-5">
         Try it
@@ -126,23 +157,19 @@
 </section>
 
 <aside
-  class="animate-fade-up-delay-1 mt-5 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
+  class="animate-fade-up-delay-1 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
   aria-label="QuickCrawl capabilities"
 >
-  <span class="feature-pill">
-    <Tags class="size-3.5" />
-    Metadata extraction
-  </span>
-  <span class="feature-pill">
-    <Database class="size-3.5" />
-    LRU caching
-  </span>
-  <span class="feature-pill">
-    <Gauge class="size-3.5" />
-    {init.rateLimit.maxRequests} req / {rateLimitWindowSec}s
-  </span>
-  <span class="feature-pill font-mono">
-    <FileText class="size-3.5" />
-    POST /crawl
-  </span>
+  {#each capabilities as capability (capability.label)}
+    <span class="feature-pill">
+      <capability.icon class="mt-0.5 size-3.5 shrink-0 self-start" />
+      <span class="min-w-0">
+        <span class="feature-pill-label">{capability.label}</span>
+        <span class="feature-pill-detail" class:font-mono={'mono' in capability && capability.mono}>
+          {capability.detail}
+        </span>
+      </span>
+    </span>
+  {/each}
 </aside>
+</div>

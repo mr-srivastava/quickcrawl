@@ -119,7 +119,7 @@
   });
 </script>
 
-<div class="flex flex-col gap-5">
+<div class="flex min-h-0 flex-1 flex-col gap-5">
   <PlaygroundCommandBar
     exampleUrls={init.exampleUrls}
     {recentUrls}

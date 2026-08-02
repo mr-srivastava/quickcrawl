@@ -78,9 +78,9 @@
   }
 </script>
 
-<section class={panelClass} aria-label="Playground output">
+<section class={`${panelClass} flex min-h-0 flex-1 flex-col`} aria-label="Playground output">
   {#if panelState.type === 'idle'}
-    <Empty.Root class="min-h-48 border-0 bg-transparent">
+    <Empty.Root class="min-h-0 flex-1 border-0 bg-transparent">
       <Empty.Header>
         <Empty.Title>Paste a URL to crawl</Empty.Title>
         <Empty.Description>
@@ -90,7 +90,7 @@
     </Empty.Root>
   {:else if panelState.type === 'loading'}
     <div
-      class="flex min-h-48 flex-col items-center justify-center gap-4 px-6 py-12"
+      class="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-6 py-12"
       aria-live="polite"
       aria-busy="true"
       aria-label="Extracting page content"

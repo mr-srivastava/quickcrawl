@@ -18,8 +18,8 @@
       : '';
 </script>
 
-<div class="mx-auto max-w-5xl animate-fade-up">
-  <header class="mb-8">
+<div class="page-fold page-fold-balanced mx-auto w-full max-w-5xl">
+  <header class="shrink-0">
     <h1
       class="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
     >
@@ -31,13 +31,15 @@
     </p>
   </header>
 
-  <Playground
-    init={init.playground}
-    baseUrl={init.baseUrl}
-    {initialUrl}
-  />
+  <div class="flex min-h-0 flex-1 flex-col">
+    <Playground
+      init={init.playground}
+      baseUrl={init.baseUrl}
+      {initialUrl}
+    />
+  </div>
 
-  <details class="pipeline-card mt-8">
+  <details class="pipeline-card shrink-0">
     <summary
       class="cursor-pointer list-none px-5 py-4 font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase [&::-webkit-details-marker]:hidden"
     >

@@ -14,6 +14,7 @@
   const rateLimitWindowSec = $derived(init.rateLimit.windowMs / 1000);
 </script>
 
+<div class="page-fold">
 <article class="animate-fade-up">
   <p class="eyebrow">
     <BookOpen class="size-3.5" />
@@ -218,3 +219,4 @@
     </tbody>
   </table>
 </article>
+</div>
