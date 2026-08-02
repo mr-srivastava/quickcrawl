@@ -5,7 +5,9 @@
   import * as InputGroup from '$playground/ui/input-group/index.js';
   import { Separator } from '$playground/ui/separator/index.js';
   import { Spinner } from '$playground/ui/spinner/index.js';
+  import { formatValidationDetails } from './lib/errors';
   import type { LoadingStage } from './lib/loading-stages';
+  import type { PlaygroundError } from './types';
   import GetCodePanel from './GetCodePanel.svelte';
 
   let {
@@ -16,9 +18,9 @@
     baseUrl,
     endpoint,
     initialUrl = '',
+    error,
     onSubmit,
     onCancel,
-    onSelectUrl,
   }: {
     exampleUrls: string[];
     recentUrls?: string[];
@@ -27,13 +29,20 @@
     baseUrl: string;
     endpoint: string;
     initialUrl?: string;
+    error?: PlaygroundError;
     onSubmit: (url: string) => Promise<void>;
     onCancel?: () => void;
-    onSelectUrl?: (url: string) => void;
   } = $props();
 
   let url = $state('');
   let showCode = $state(false);
+  let urlInput = $state<HTMLInputElement | null>(null);
+
+  const validationIssues = $derived(
+    error?.kind === 'validation'
+      ? formatValidationDetails(error.details)
+      : [],
+  );
 
   // Seed once from the prop (full page loads pass URL on first render).
   $effect.pre(() => {
@@ -49,14 +58,40 @@
     await onSubmit(targetUrl);
   }
 
-  function selectUrl(next: string) {
+  async function selectUrl(next: string, submitImmediately = true) {
     url = next;
-    onSelectUrl?.(next);
+    if (submitImmediately && !isLoading) {
+      await onSubmit(next);
+    }
   }
 
   function formatUrlLabel(value: string) {
     return value.replace(/^https?:\/\//, '');
   }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isLoading) {
+      event.preventDefault();
+      onCancel?.();
+      return;
+    }
+
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      const form = (event.currentTarget as HTMLElement).closest('form');
+      form?.requestSubmit();
+    }
+  }
+
+  function focusUrlInput() {
+    urlInput?.focus();
+  }
+
+  $effect(() => {
+    if (error?.kind === 'validation') {
+      focusUrlInput();
+    }
+  });
 </script>
 
 <div class="surface-raised overflow-hidden">
@@ -67,15 +102,21 @@
   >
     <Field.Group>
       <Field.Field>
-        <Field.Label class="sr-only" for="url-input">Page URL</Field.Label>
-        <Field.Description class="sr-only" id="url-hint">
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <Field.Label for="url-input">Page URL</Field.Label>
+          <span class="font-mono text-[0.68rem] tracking-wide text-muted-foreground uppercase">
+            POST {endpoint}
+          </span>
+        </div>
+        <Field.Description id="url-hint">
           Public HTTP and HTTPS pages only. Private network addresses are blocked.
         </Field.Description>
 
         <InputGroup.Root
-          class="h-auto flex-col gap-2 rounded-xl border-border bg-surface-sunken focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15 sm:flex-row sm:items-stretch sm:gap-1 sm:p-1"
+          class="mt-2 h-auto flex-col gap-2 rounded-xl border-border bg-surface-sunken focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15 sm:flex-row sm:items-stretch sm:gap-1 sm:p-1"
         >
           <InputGroup.Input
+            bind:ref={urlInput}
             id="url-input"
             name="url"
             type="url"
@@ -83,9 +124,11 @@
             required
             autocomplete="url"
             aria-describedby="url-hint"
+            aria-invalid={error?.kind === 'validation' ? true : undefined}
             disabled={isLoading}
             bind:value={url}
             class="h-12 font-mono"
+            onkeydown={handleKeydown}
           />
           <InputGroup.Addon align="inline-end" class="flex w-full gap-2 p-0 sm:w-auto">
             {#if isLoading}
@@ -118,6 +161,23 @@
             {/if}
           </InputGroup.Addon>
         </InputGroup.Root>
+
+        {#if error?.kind === 'validation'}
+          <Field.Error class="mt-2">
+            {error.message}
+            {#if validationIssues.length > 0}
+              <ul class="mt-2 list-disc space-y-1 pl-4">
+                {#each validationIssues as issue (issue)}
+                  <li>{issue}</li>
+                {/each}
+              </ul>
+            {/if}
+          </Field.Error>
+        {/if}
+
+        <p class="mt-2 font-mono text-[0.68rem] text-muted-foreground">
+          Press <kbd class="rounded border border-border bg-surface-sunken px-1 py-0.5">⌘</kbd>+<kbd class="rounded border border-border bg-surface-sunken px-1 py-0.5">Enter</kbd> to crawl · <kbd class="rounded border border-border bg-surface-sunken px-1 py-0.5">Esc</kbd> to stop
+        </p>
       </Field.Field>
     </Field.Group>
 
@@ -152,7 +212,9 @@
           type="button"
           variant="secondary"
           size="sm"
-          class="h-auto rounded-full px-2.5 py-1 font-mono text-xs"
+          class="h-auto min-h-9 rounded-full px-2.5 py-1 font-mono text-xs"
+          title={exampleUrl}
+          disabled={isLoading}
           onclick={() => selectUrl(exampleUrl)}
         >
           {formatUrlLabel(exampleUrl)}
@@ -174,10 +236,12 @@
             type="button"
             variant="outline"
             size="sm"
-            class="h-auto rounded-full px-2.5 py-1 font-mono text-xs"
+            class="h-auto min-h-9 max-w-full rounded-full px-2.5 py-1 font-mono text-xs"
+            title={recentUrl}
+            disabled={isLoading}
             onclick={() => selectUrl(recentUrl)}
           >
-            {formatUrlLabel(recentUrl)}
+            <span class="truncate">{formatUrlLabel(recentUrl)}</span>
           </Button>
         {/each}
       </div>

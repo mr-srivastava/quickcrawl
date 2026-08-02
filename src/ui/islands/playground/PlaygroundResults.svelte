@@ -4,16 +4,21 @@
     CheckCircle2,
     CircleAlert,
     Copy,
+    Download,
+    ExternalLink,
     Eye,
     FileText,
+    Tags,
   } from '@lucide/svelte';
   import { onDestroy } from 'svelte';
   import * as Alert from '$playground/ui/alert/index.js';
   import { Badge } from '$playground/ui/badge/index.js';
   import { Button } from '$playground/ui/button/index.js';
+  import * as Empty from '$playground/ui/empty/index.js';
   import * as Tabs from '$playground/ui/tabs/index.js';
   import * as ToggleGroup from '$playground/ui/toggle-group/index.js';
   import { CopyFeedback } from './lib/copy-feedback.svelte';
+  import { downloadText } from './lib/errors';
   import type { CrawlSuccess } from './types';
 
   let {
@@ -32,9 +37,18 @@
   const wordCount = $derived(
     markdown.trim() === '' ? 0 : markdown.trim().split(/\s+/).length,
   );
+  const charCount = $derived(markdown.length);
   const statistics = $derived(
     `${wordCount.toLocaleString()} ${wordCount === 1 ? 'word' : 'words'} · ` +
+      `${charCount.toLocaleString()} ${charCount === 1 ? 'character' : 'characters'} · ` +
       `${metadataEntries.length} metadata ${metadataEntries.length === 1 ? 'field' : 'fields'}`,
+  );
+  const jsonPayload = $derived(JSON.stringify(response, null, 2));
+  const downloadBaseName = $derived(
+    (response.data.title ?? 'crawl-result')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'crawl-result',
   );
 
   let markdownMode = $state('preview');
@@ -72,7 +86,20 @@
       </h3>
       <p class="mt-1 truncate font-mono text-xs text-muted-foreground">{url}</p>
     </div>
-    <Badge variant="secondary">Markdown</Badge>
+    <div class="flex shrink-0 items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <ExternalLink data-icon="inline-start" />
+        Open source
+      </Button>
+      <Badge variant="secondary">Markdown</Badge>
+    </div>
   </div>
 
   {#if clipboard.copyError}
@@ -93,6 +120,12 @@
         <FileText data-icon="inline-start" />
         Markdown
       </Tabs.Trigger>
+      {#if metadataEntries.length > 0}
+        <Tabs.Trigger value="metadata">
+          <Tags data-icon="inline-start" />
+          Metadata
+        </Tabs.Trigger>
+      {/if}
       <Tabs.Trigger value="json">
         <Braces data-icon="inline-start" />
         JSON
@@ -117,61 +150,104 @@
             Raw
           </ToggleGroup.Item>
         </ToggleGroup.Root>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-live="polite"
-          onclick={() => clipboard.copy('markdown', markdown)}
-        >
-          <Copy data-icon="inline-start" />
-          {clipboard.copiedTarget === 'markdown' ? 'Copied' : 'Copy markdown'}
-        </Button>
+        <div class="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onclick={() => downloadText(`${downloadBaseName}.md`, markdown)}
+          >
+            <Download data-icon="inline-start" />
+            Download
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-live="polite"
+            onclick={() => clipboard.copy('markdown', markdown)}
+          >
+            <Copy data-icon="inline-start" />
+            {clipboard.copiedTarget === 'markdown' ? 'Copied' : 'Copy markdown'}
+          </Button>
+        </div>
       </div>
 
       {#if markdownMode === 'preview'}
-        <div class="document-sheet">
-          <div class="markdown-preview">{@html sanitizedPreviewHtml}</div>
-        </div>
+        {#if markdown.trim() === ''}
+          <Empty.Root class="min-h-40 border border-dashed border-border bg-surface-sunken">
+            <Empty.Header>
+              <Empty.Title>No extractable content</Empty.Title>
+              <Empty.Description>
+                The page did not yield Markdown output. Try the Raw view or JSON tab for details.
+              </Empty.Description>
+            </Empty.Header>
+          </Empty.Root>
+        {:else}
+          <div class="document-sheet">
+            <div class="markdown-preview">{@html sanitizedPreviewHtml}</div>
+          </div>
+        {/if}
+      {:else if markdown.trim() === ''}
+        <Empty.Root class="min-h-40 border border-dashed border-border bg-surface-sunken">
+          <Empty.Header>
+            <Empty.Title>Empty Markdown</Empty.Title>
+            <Empty.Description>
+              The crawler returned an empty Markdown string for this page.
+            </Empty.Description>
+          </Empty.Header>
+        </Empty.Root>
       {:else}
         <pre class="code-block">{markdown}</pre>
       {/if}
     </Tabs.Content>
 
-    <Tabs.Content value="json" class="result-panel">
-      <div class="mb-3 flex items-center justify-between gap-3">
-        <span class="font-mono text-xs text-muted-foreground">API response</span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-live="polite"
-          onclick={() =>
-            clipboard.copy('json', JSON.stringify(response, null, 2))}
-        >
-          <Copy data-icon="inline-start" />
-          {clipboard.copiedTarget === 'json' ? 'Copied' : 'Copy JSON'}
-        </Button>
-      </div>
-      <pre class="code-block">{JSON.stringify(response, null, 2)}</pre>
+    {#if metadataEntries.length > 0}
+      <Tabs.Content value="metadata" class="result-panel">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <span class="font-mono text-xs text-muted-foreground">
+            {metadataEntries.length} extracted {metadataEntries.length === 1
+              ? 'field'
+              : 'fields'}
+          </span>
+        </div>
+        <dl class="m-0 grid gap-2 rounded-lg border border-border bg-surface-sunken p-4 sm:grid-cols-[12rem_1fr]">
+          {#each metadataEntries as [key, value] (key)}
+            <dt class="font-mono text-xs font-medium text-foreground">{key}</dt>
+            <dd class="m-0 font-mono text-xs break-words text-muted-foreground">
+              {value}
+            </dd>
+          {/each}
+        </dl>
+      </Tabs.Content>
+    {/if}
 
-      {#if metadataEntries.length > 0}
-        <details class="mt-5 rounded-lg border border-border bg-surface-sunken">
-          <summary
-            class="cursor-pointer px-4 py-3 font-mono text-xs text-muted-foreground uppercase"
+    <Tabs.Content value="json" class="result-panel">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <span class="font-mono text-xs text-muted-foreground">API response</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onclick={() => downloadText(`${downloadBaseName}.json`, jsonPayload)}
           >
-            Metadata ({metadataEntries.length})
-          </summary>
-          <dl class="m-0 grid gap-2 border-t border-border px-4 py-3 sm:grid-cols-[12rem_1fr]">
-            {#each metadataEntries as [key, value] (key)}
-              <dt class="font-mono text-xs font-medium text-foreground">{key}</dt>
-              <dd class="m-0 font-mono text-xs break-words text-muted-foreground">
-                {value}
-              </dd>
-            {/each}
-          </dl>
-        </details>
-      {/if}
+            <Download data-icon="inline-start" />
+            Download
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-live="polite"
+            onclick={() => clipboard.copy('json', jsonPayload)}
+          >
+            <Copy data-icon="inline-start" />
+            {clipboard.copiedTarget === 'json' ? 'Copied' : 'Copy JSON'}
+          </Button>
+        </div>
+      </div>
+      <pre class="code-block">{jsonPayload}</pre>
     </Tabs.Content>
   </Tabs.Root>
 </section>

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { crawlPage } from './api';
+import { crawlPage, PlaygroundRequestError } from './api';
 
 const successBody = {
   success: true,
@@ -68,13 +68,19 @@ describe('crawlPage', () => {
           'https://example.com',
           new AbortController().signal,
         ),
-      ).rejects.toThrow(
-        `Rate limit exceeded. Try again in ${expectedSeconds} seconds.`,
-      );
+      ).rejects.toSatisfy((error: unknown) => {
+        expect(error).toBeInstanceOf(PlaygroundRequestError);
+        expect((error as PlaygroundRequestError).playgroundError).toEqual({
+          kind: 'rate_limit',
+          retryAfterSeconds: expectedSeconds,
+          message: `Rate limit exceeded. Try again in ${expectedSeconds} seconds.`,
+        });
+        return true;
+      });
     },
   );
 
-  test('includes validation details in a 422 message', async () => {
+  test('includes validation details in a structured 422 error', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(() =>
@@ -96,7 +102,15 @@ describe('crawlPage', () => {
 
     await expect(
       crawlPage('/crawl', 'bad', new AbortController().signal),
-    ).rejects.toThrow('Validation failed:');
+    ).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(PlaygroundRequestError);
+      expect((error as PlaygroundRequestError).playgroundError).toEqual({
+        kind: 'validation',
+        message: 'Invalid input',
+        details: [{ path: ['url'], message: 'Invalid URL' }],
+      });
+      return true;
+    });
   });
 
   test.each([
@@ -120,7 +134,15 @@ describe('crawlPage', () => {
 
     await expect(
       crawlPage('/crawl', 'https://example.com', new AbortController().signal),
-    ).rejects.toThrow(`${type} message`);
+    ).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(PlaygroundRequestError);
+      expect((error as PlaygroundRequestError).playgroundError).toEqual({
+        kind: 'crawl',
+        errorType: type,
+        message: `${type} message`,
+      });
+      return true;
+    });
   });
 
   test.each([
@@ -134,7 +156,14 @@ describe('crawlPage', () => {
 
     await expect(
       crawlPage('/crawl', 'https://example.com', new AbortController().signal),
-    ).rejects.toThrow('Invalid response from server');
+    ).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(PlaygroundRequestError);
+      expect((error as PlaygroundRequestError).playgroundError).toEqual({
+        kind: 'invalid_response',
+        message: 'Invalid response from server',
+      });
+      return true;
+    });
   });
 
   test('rejects a non-OK response carrying a success envelope', async () => {
@@ -145,6 +174,31 @@ describe('crawlPage', () => {
 
     await expect(
       crawlPage('/crawl', 'https://example.com', new AbortController().signal),
-    ).rejects.toThrow('Crawl failed');
+    ).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(PlaygroundRequestError);
+      expect((error as PlaygroundRequestError).playgroundError).toEqual({
+        kind: 'crawl',
+        errorType: 'unknown',
+        message: 'Crawl failed',
+      });
+      return true;
+    });
+  });
+
+  test('maps fetch rejections to a network error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))),
+    );
+
+    await expect(
+      crawlPage('/crawl', 'https://example.com', new AbortController().signal),
+    ).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(PlaygroundRequestError);
+      expect((error as PlaygroundRequestError).playgroundError.kind).toBe(
+        'network',
+      );
+      return true;
+    });
   });
 });

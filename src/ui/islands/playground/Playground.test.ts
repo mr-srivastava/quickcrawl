@@ -40,7 +40,7 @@ afterEach(() => {
 });
 
 describe('Playground', () => {
-  test('selects an example URL and renders a successful crawl', async () => {
+  test('auto-submits an example URL and renders a successful crawl', async () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       'fetch',
@@ -59,20 +59,16 @@ describe('Playground', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'example.com' }));
-    expect(screen.getByLabelText('Page URL')).toHaveValue(
-      'https://example.com',
-    );
-    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
 
     expect(
       await screen.findByText('Success', {}, { timeout: 5000 }),
     ).toBeVisible();
     expect(screen.getByText('Example title')).toBeVisible();
-    expect(screen.getByText('4 words · 1 metadata field')).toBeVisible();
+    expect(screen.getByText(/4 words · .* characters · 1 metadata field/)).toBeVisible();
     expect(screen.getByRole('region', { name: 'Crawl result' })).toHaveFocus();
 
-    await user.click(screen.getByRole('tab', { name: 'JSON' }));
-    expect(screen.getByText('Metadata (1)')).toBeVisible();
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
+    expect(screen.getByText('description')).toBeVisible();
     expect(await axe(container)).toHaveNoViolations();
   });
 
@@ -114,9 +110,10 @@ describe('Playground', () => {
     expect(
       screen.getByRole('button', { name: 'Start crawling' }),
     ).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
   });
 
-  test('shows no-title and empty-metadata states', async () => {
+  test('shows no-title, empty markdown, and empty-metadata states', async () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       'fetch',
@@ -131,8 +128,8 @@ describe('Playground', () => {
     expect(
       await screen.findByText('(no title)', {}, { timeout: 5000 }),
     ).toBeVisible();
-    await user.click(screen.getByRole('tab', { name: 'JSON' }));
-    expect(screen.queryByText(/Metadata \(/)).toBeNull();
+    expect(screen.getByText('No extractable content')).toBeVisible();
+    expect(screen.queryByRole('tab', { name: 'Metadata' })).toBeNull();
   });
 
   test('supports tab keyboard navigation and copy feedback', async () => {
@@ -291,6 +288,65 @@ describe('Playground', () => {
         body: JSON.stringify({ url: 'https://example.com' }),
       }),
     );
+  });
+
+  test('shows a cancelled state when stopping an active crawl', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        () =>
+          new Promise<Response>(() => undefined),
+      ),
+    );
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
+
+    await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
+    await user.click(screen.getByRole('button', { name: 'Stop' }));
+
+    expect(await screen.findByText('Crawl cancelled')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  });
+
+  test('shows a rate-limit countdown and enables retry afterward', async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              success: false,
+              error: { type: 'rate_limit', message: 'Rate limit exceeded' },
+            }),
+            {
+              status: 429,
+              headers: {
+                'Content-Type': 'application/json',
+                'Retry-After': '2',
+              },
+            },
+          ),
+        ),
+      ),
+    );
+    render(Playground, {
+      props: { init, baseUrl: 'http://localhost:3000' },
+    });
+
+    await user.type(screen.getByLabelText('Page URL'), 'https://example.com');
+    await user.click(screen.getByRole('button', { name: 'Start crawling' }));
+
+    expect(await screen.findByText('Rate limited')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Retry in 2s' })).toBeDisabled();
+
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeEnabled();
+    vi.useRealTimers();
   });
 });
 
