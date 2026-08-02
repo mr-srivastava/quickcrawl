@@ -39,6 +39,9 @@
   --color-info-subtle: #f1f5f9;
   --color-info-foreground: #334155;
   --color-destructive-subtle: #fef2f2;
+  --color-progress: #ca8a04;
+  --color-progress-subtle: #fef9c3;
+  --color-progress-foreground: #a16207;
 
   /* shadcn semantic aliases */
   --color-background: var(--color-surface-base);
@@ -265,15 +268,86 @@
   }
 
   .pipeline-list {
-    @apply m-0 list-none px-5 py-2;
+    @apply m-0 list-none px-5 py-3;
   }
 
   .pipeline-step {
-    @apply relative flex items-center gap-3 border-b border-border/80 py-4 last:border-b-0;
+    @apply relative flex items-stretch gap-3 transition-[background-color,opacity] duration-300;
+  }
+
+  .pipeline-step-waiting {
+    @apply opacity-50;
+  }
+
+  .pipeline-step-active {
+    @apply opacity-100;
+  }
+
+  .pipeline-step-success {
+    @apply opacity-100;
+  }
+
+  .pipeline-rail {
+    @apply flex w-5 shrink-0 flex-col items-center pt-1.5;
+  }
+
+  .pipeline-line {
+    @apply mt-1.5 min-h-3 w-px flex-1 bg-border;
   }
 
   .pipeline-number {
     @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-sunken font-mono text-[0.65rem] font-medium text-foreground;
+  }
+
+  .pipeline-step-description {
+    @apply transition-opacity duration-300;
+  }
+
+  .pipeline-dot {
+    @apply size-2.5 shrink-0 rounded-full;
+  }
+
+  .pipeline-dot-waiting {
+    @apply bg-ink-faint;
+  }
+
+  .pipeline-dot-active {
+    background-color: var(--color-progress);
+    box-shadow: 0 0 0 3px
+      color-mix(in oklab, var(--color-progress) 22%, transparent);
+    animation: pipeline-dot-pulse 1.4s ease-in-out infinite;
+  }
+
+  .pipeline-dot-success {
+    @apply bg-success;
+    box-shadow: 0 0 0 3px
+      color-mix(in oklab, var(--color-success) 18%, transparent);
+  }
+
+  .status-badge-running {
+    @apply border-progress/25 bg-progress-subtle text-progress-foreground;
+  }
+
+  .status-dot-running {
+    background-color: var(--color-progress);
+    box-shadow: 0 0 0 3px
+      color-mix(in oklab, var(--color-progress) 18%, transparent);
+  }
+
+  .status-dot-pulse {
+    animation: pipeline-dot-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pipeline-dot-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.88);
+    }
   }
 
   .url-control {

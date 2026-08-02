@@ -75,6 +75,9 @@
     --color-info-subtle: #f1f5f9;
     --color-info-foreground: #334155;
     --color-destructive-subtle: #fef2f2;
+    --color-progress: #ca8a04;
+    --color-progress-subtle: #fef9c3;
+    --color-progress-foreground: #a16207;
     --color-background: var(--color-surface-base);
     --color-foreground: var(--color-ink);
     --color-card: var(--color-surface-raised);
@@ -1226,6 +1229,12 @@
   .bg-surface-sunken {
     background-color: var(--color-surface-sunken);
   }
+  .bg-surface-sunken\/40 {
+    background-color: color-mix(in srgb, #eef2f6 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-surface-sunken) 40%, transparent);
+    }
+  }
   .bg-transparent {
     background-color: transparent;
   }
@@ -1301,8 +1310,11 @@
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
   }
-  .py-3 {
-    padding-block: calc(var(--spacing) * 3);
+  .py-2\.5 {
+    padding-block: calc(var(--spacing) * 2.5);
+  }
+  .py-3\.5 {
+    padding-block: calc(var(--spacing) * 3.5);
   }
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
@@ -1330,6 +1342,9 @@
   }
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
+  }
+  .pb-3 {
+    padding-bottom: calc(var(--spacing) * 3);
   }
   .pl-2 {
     padding-left: calc(var(--spacing) * 2);
@@ -1384,6 +1399,9 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-\[0\.7rem\] {
+    font-size: 0.7rem;
+  }
   .text-\[0\.8rem\] {
     font-size: 0.8rem;
   }
@@ -1429,6 +1447,10 @@
   .tracking-\[0\.12em\] {
     --tw-tracking: 0.12em;
     letter-spacing: 0.12em;
+  }
+  .tracking-\[0\.14em\] {
+    --tw-tracking: 0.14em;
+    letter-spacing: 0.14em;
   }
   .tracking-tight {
     --tw-tracking: var(--tracking-tight);
@@ -1480,6 +1502,12 @@
   .text-ink-muted {
     color: var(--color-ink-muted);
   }
+  .text-ink\/70 {
+    color: color-mix(in srgb, #101923 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-ink) 70%, transparent);
+    }
+  }
   .text-muted-foreground {
     color: var(--color-muted-foreground);
   }
@@ -1491,9 +1519,6 @@
   }
   .text-secondary-foreground {
     color: var(--color-secondary-foreground);
-  }
-  .text-success {
-    color: var(--color-success);
   }
   .text-success-foreground {
     color: var(--color-success-foreground);
@@ -2943,24 +2968,42 @@
     margin: 0px;
     list-style-type: none;
     padding-inline: calc(var(--spacing) * 5);
-    padding-block: calc(var(--spacing) * 2);
+    padding-block: calc(var(--spacing) * 3);
   }
   .pipeline-step {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: calc(var(--spacing) * 3);
-    border-bottom-style: var(--tw-border-style);
-    border-bottom-width: 1px;
-    border-color: color-mix(in srgb, #dce3eb 80%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      border-color: color-mix(in oklab, var(--color-border) 80%, transparent);
-    }
-    padding-block: calc(var(--spacing) * 4);
-    &:last-child {
-      border-bottom-style: var(--tw-border-style);
-      border-bottom-width: 0px;
-    }
+    transition-property: background-color,opacity;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+    --tw-duration: 300ms;
+    transition-duration: 300ms;
+  }
+  .pipeline-step-waiting {
+    opacity: 50%;
+  }
+  .pipeline-step-active {
+    opacity: 100%;
+  }
+  .pipeline-step-success {
+    opacity: 100%;
+  }
+  .pipeline-rail {
+    display: flex;
+    width: calc(var(--spacing) * 5);
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    padding-top: calc(var(--spacing) * 1.5);
+  }
+  .pipeline-line {
+    margin-top: calc(var(--spacing) * 1.5);
+    min-height: calc(var(--spacing) * 3);
+    width: 1px;
+    flex: 1;
+    background-color: var(--color-border);
   }
   .pipeline-number {
     display: flex;
@@ -2976,6 +3019,65 @@
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
     color: var(--color-foreground);
+  }
+  .pipeline-step-description {
+    transition-property: opacity;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+    --tw-duration: 300ms;
+    transition-duration: 300ms;
+  }
+  .pipeline-dot {
+    width: calc(var(--spacing) * 2.5);
+    height: calc(var(--spacing) * 2.5);
+    flex-shrink: 0;
+    border-radius: calc(infinity * 1px);
+  }
+  .pipeline-dot-waiting {
+    background-color: var(--color-ink-faint);
+  }
+  .pipeline-dot-active {
+    background-color: var(--color-progress);
+    box-shadow: 0 0 0 3px color-mix(in srgb, #ca8a04 22%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-progress) 22%, transparent);
+    }
+    animation: pipeline-dot-pulse 1.4s ease-in-out infinite;
+  }
+  .pipeline-dot-success {
+    background-color: var(--color-success);
+    box-shadow: 0 0 0 3px color-mix(in srgb, #15803d 18%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-success) 18%, transparent);
+    }
+  }
+  .status-badge-running {
+    border-color: color-mix(in srgb, #ca8a04 25%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-progress) 25%, transparent);
+    }
+    background-color: var(--color-progress-subtle);
+    color: var(--color-progress-foreground);
+  }
+  .status-dot-running {
+    background-color: var(--color-progress);
+    box-shadow: 0 0 0 3px color-mix(in srgb, #ca8a04 18%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-progress) 18%, transparent);
+    }
+  }
+  .status-dot-pulse {
+    animation: pipeline-dot-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pipeline-dot-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.88);
+    }
   }
   .url-control {
     display: flex;

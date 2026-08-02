@@ -2,26 +2,19 @@
   import {
     ArrowRight,
     ArrowRightLeft,
-    Check,
     Database,
     FileText,
     Gauge,
-    ShieldCheck,
     Tags,
   } from '@lucide/svelte';
   import type { HomePageInit } from '$contracts/page';
   import { Button } from '$playground/ui/button/index.js';
   import { Input } from '$playground/ui/input/index.js';
+  import CrawlPipelineCard from '../CrawlPipelineCard.svelte';
 
   let { init }: { init: HomePageInit } = $props();
 
   let heroUrl = $state('');
-
-  const pipelineSteps = [
-    ['01', 'Fetch', 'Safe public request'],
-    ['02', 'Clean', 'Remove page noise'],
-    ['03', 'Convert', 'Generate Markdown'],
-  ] as const;
 
   const rateLimitWindowSec = $derived(init.rateLimit.windowMs / 1000);
 
@@ -113,47 +106,7 @@
     </p>
   </div>
 
-  <div class="pipeline-card" aria-label="Crawl pipeline">
-    <div
-      class="flex items-center justify-between border-b border-border px-5 py-4"
-    >
-      <span
-        class="font-mono text-xs font-medium tracking-[0.12em] text-ink-muted uppercase"
-      >
-        Crawl pipeline
-      </span>
-      <span class="status-badge">
-        <span class="status-dot"></span>
-        Ready
-      </span>
-    </div>
-    <ol class="pipeline-list">
-      {#each pipelineSteps as [step, label, description] (step)}
-        <li class="pipeline-step">
-          <span class="pipeline-number">{step}</span>
-          <span class="min-w-0 flex-1">
-            <strong
-              class="block text-sm font-semibold text-ink"
-            >
-              {label}
-            </strong>
-            <span
-              class="block text-sm text-ink-muted"
-            >
-              {description}
-            </span>
-          </span>
-          <Check class="size-4 text-success" />
-        </li>
-      {/each}
-    </ol>
-    <div
-      class="flex items-center gap-2 border-t border-border px-5 py-3 text-xs text-ink-muted"
-    >
-      <ShieldCheck class="size-4 text-info" />
-      Private and reserved networks stay blocked
-    </div>
-  </div>
+  <CrawlPipelineCard />
 </section>
 
 <aside
