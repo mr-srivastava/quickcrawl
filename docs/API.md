@@ -28,11 +28,11 @@ a CSS comment when `public/styles.css` hasn't been built.
 
 ### `GET /assets/:filename`
 
-The playground asset routes return generated browser JavaScript and source maps
-from `public/assets/`. The entry bundle is `playground.js`; Vite may emit
-additional chunk files that the entry bundle imports at runtime.
+The browser asset routes return generated JavaScript and source maps from
+`public/assets/`. The entry bundle is `app.js`; Vite may emit additional chunk
+files that the entry bundle imports at runtime.
 
-`GET /assets/playground.js` returns `503` with a JavaScript comment when
+`GET /assets/app.js` returns `503` with a JavaScript comment when
 `pnpm run build:client` hasn't generated the bundle. Missing chunk files return
 `404`. Both browser asset URLs include the application version so deployments
 can revalidate changed output.

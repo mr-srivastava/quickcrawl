@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { HomePage } from '../ui/HomePage';
-import { DocsPage } from '../ui/DocsPage';
+import { DocsShell } from '../ui/shell/docs';
+import { HomeShell } from '../ui/shell/home';
 import { APP_NAME, APP_VERSION } from '../config';
 import { clearStylesCache, getStylesCss } from '../lib/styles';
 import {
@@ -44,10 +44,10 @@ uiRoutes.get('/assets/:filename', async (c) => {
   const asset = await getUiAsset(filename);
   if (asset === undefined) {
     const fallback =
-      filename === 'playground.js'
-        ? '// playground not built — run: pnpm run build:client'
+      filename === 'app.js'
+        ? '// app not built — run: pnpm run build:client'
         : '// asset not found';
-    return c.text(fallback, filename === 'playground.js' ? 503 : 404, {
+    return c.text(fallback, filename === 'app.js' ? 503 : 404, {
       'Content-Type': filename.endsWith('.map')
         ? 'application/json'
         : 'text/javascript; charset=utf-8',
@@ -74,9 +74,9 @@ uiRoutes.get('/health', (c) => {
 });
 
 uiRoutes.get('/', (c) => {
-  return c.html(<HomePage />);
+  return c.html(<HomeShell />);
 });
 
 uiRoutes.get('/docs', (c) => {
-  return c.html(<DocsPage />);
+  return c.html(<DocsShell />);
 });

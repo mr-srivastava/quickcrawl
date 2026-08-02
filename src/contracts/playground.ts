@@ -1,7 +1,5 @@
 import * as v from 'valibot';
 
-export const PLAYGROUND_MOUNT_ID = 'playground-island';
-
 const webUrl = v.pipe(
   v.string(),
   v.check((value) => {

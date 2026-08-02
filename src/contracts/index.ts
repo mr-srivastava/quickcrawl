@@ -11,7 +11,17 @@ export {
   type CrawlSuccess,
 } from './crawl';
 export {
-  PLAYGROUND_MOUNT_ID,
+  APP_MOUNT_ID,
+  DocsPageInitSchema,
+  HomePageInitSchema,
+  PageInitSchema,
+  parsePageInit,
+  serializePageInit,
+  type DocsPageInit,
+  type HomePageInit,
+  type PageInit,
+} from './page';
+export {
   PlaygroundInitSchema,
   parsePlaygroundInit,
   serializePlaygroundInit,

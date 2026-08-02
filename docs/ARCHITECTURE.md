@@ -37,7 +37,7 @@ shared infrastructure.
 | `src/server.ts`        | Starts the Hono Node.js adapter for local and bundled use.                               |
 | `src/routes/`          | Defines the crawl transport adapter, browser UI, health, and asset routes.               |
 | `src/contracts/`       | Defines the public HTTP and playground initialization contracts shared by routes and UI. |
-| `src/ui/`              | Renders Hono JSX pages and contains the client-rendered Svelte playground island.        |
+| `src/ui/`              | Renders the Hono JSX document shell and the client-rendered Svelte application. |
 | `src/services/`        | Coordinates workflows and decorates crawling with caching.                               |
 | `src/workflow/`        | Defines the generic task and run-option contracts.                                       |
 | `src/workflows/crawl/` | Implements crawl stages, URL safety, and workflow composition.                           |
@@ -193,29 +193,26 @@ multiple instances don't share counters.
 
 ## UI and styles
 
-The browser UI uses Hono JSX for the document shell and static pages. The home
-page renders a stable playground host with initialization data and useful
-fallback content. A Svelte 5 client island mounts into that host and owns the
-form, request state, result tabs, copying, and Markdown preview. The island
-validates its initialization data and every `/crawl` response at runtime.
+The browser UI uses a minimal Hono JSX document shell and a single client-rendered
+Svelte 5 application. The shell serializes page initialization data into the
+mount element; `app.js` mounts layout, pages, and the crawl playground. All
+visible UI is implemented in Svelte with locally owned shadcn-svelte components
+under `src/ui/islands/playground/ui`.
 
-The island composes locally owned shadcn-svelte source under
-`src/ui/islands/playground/ui`. Hono JSX and Svelte components don't import one
-another. They communicate through serialized plain data defined in
-`src/contracts/` and the public HTTP contract, so the application doesn't
-require SvelteKit or a separate frontend server.
+Hono and Svelte don't import one another. They communicate through serialized
+plain data defined in `src/contracts/` and the public HTTP contract, so the
+application doesn't require SvelteKit or a separate frontend server.
 
-Server routes and the browser island share Valibot schemas in
-`src/contracts/`. Request validation, response parsing, and playground
-initialization all use the same schemas and inferred types. Zod remains for
-workflow error schemas and runtime configuration validation.
+Server routes and the browser application share Valibot schemas in
+`src/contracts/`. Request validation, response parsing, and page initialization
+all use the same schemas and inferred types. Zod remains for workflow error
+schemas and runtime configuration validation.
 
-Tailwind source lives in `src/ui/styles/input.css`. Hono JSX, Svelte components,
-and generated shadcn-svelte sources use the same QuickCrawl semantic color
-tokens. `pnpm run build:assets` generates `public/styles.css` and the ignored
-`public/assets/playground.js` browser bundle. The `/styles.css` and
-`/assets/playground.js` routes disable caching during development and require
-revalidation in production.
+Tailwind source lives in `src/ui/styles/input.css`. Svelte components and
+generated shadcn-svelte sources use the same QuickCrawl semantic color tokens.
+`pnpm run build:assets` generates `public/styles.css` and the ignored
+`public/assets/app.js` browser bundle. The `/styles.css` and `/assets/app.js`
+routes disable caching during development and require revalidation in production.
 
 ## Extension points
 

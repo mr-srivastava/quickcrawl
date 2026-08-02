@@ -76,10 +76,10 @@ Run scripts through pnpm so local and hosted builds use the same toolchain.
 | Command                      | Purpose                                                   |
 | ---------------------------- | --------------------------------------------------------- |
 | `pnpm run dev`               | Runs the server, Svelte, and Tailwind watchers.           |
-| `pnpm run dev:client`        | Watches and rebuilds the Svelte playground.               |
+| `pnpm run dev:client`        | Watches and rebuilds the Svelte client application.       |
 | `pnpm run dev:css`           | Watches and recompiles Tailwind CSS.                      |
 | `pnpm run build:assets`      | Generates the browser JavaScript and stylesheet.          |
-| `pnpm run build:client`      | Generates the Svelte playground browser bundle.           |
+| `pnpm run build:client`      | Generates the Svelte client browser bundle.               |
 | `pnpm run build:css`         | Generates minified `public/styles.css`.                   |
 | `pnpm run format`            | Formats supported repository files with Oxfmt.            |
 | `pnpm run format:check`      | Checks formatting without changing files.                 |
@@ -89,19 +89,19 @@ Run scripts through pnpm so local and hosted builds use the same toolchain.
 | `pnpm test`                  | Runs the Vitest suite once.                               |
 | `pnpm run test:watch`        | Runs Vitest in watch mode.                                |
 | `pnpm run build`             | Generates CSS and bundles the server with Rolldown.       |
-| `pnpm run check:client-size` | Enforces the initial playground's 15 KiB gzip limit.      |
+| `pnpm run check:client-size` | Enforces the initial app bundle's 80 KiB gzip limit.      |
 | `pnpm run check`             | Runs all checks, the build, and the client bundle budget. |
 | `pnpm start`                 | Runs `dist/server.js`.                                    |
 | `pnpm run dev:vercel`        | Runs the application through Vercel CLI.                  |
 
 `public/styles.css` and `public/assets/` are generated output. Change
-`src/ui/styles/input.css`, the Hono JSX pages, or the Svelte playground source,
+`src/ui/styles/input.css`, the Hono document shell, or the Svelte application source,
 then run `pnpm run build:assets`. Don't edit generated browser assets manually.
 
 The shadcn-svelte CLI writes component source into
 `src/ui/islands/playground/ui`. Review and commit that source like application
 code. Add a component with `pnpm dlx shadcn-svelte@latest add <component>` and
-keep its imports inside the Svelte island.
+keep its imports inside the Svelte application.
 
 ## Test changes
 

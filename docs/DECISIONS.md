@@ -402,51 +402,53 @@ sorting. Keep TypeScript type checking as a separate required check.
 
 ---
 
-## ADR-011: Use a Svelte island for the crawl playground
+## ADR-011: Use a Svelte client application behind a Hono document shell
 
 **Date:** August 2, 2026
-**Status:** Accepted
+**Status:** Accepted (amended August 2, 2026)
 
 **Context:**
-The browser playground needs typed request state, accessible interactive
-components, and runtime validation without replacing the lightweight Hono JSX
-document shell or introducing a separate frontend application.
+The browser UI needs typed request state, accessible interactive components,
+and runtime validation without introducing SvelteKit or a separate frontend
+application. The layout, pages, and playground should share one component
+system.
 
 **Decision:**
-Keep Hono JSX for page rendering and mount one client-rendered Svelte 5 island
-for the complete playground. Compose locally owned shadcn-svelte source, build
-the island with Vite, and serve its generated module through Hono. Use client
-rendering rather than Svelte server rendering or hydration.
+Keep a minimal Hono JSX document shell and mount one client-rendered Svelte 5
+application for all visible UI. Compose locally owned shadcn-svelte source, build
+the client with Vite as `app.js`, and serve it through Hono. Serialize page
+initialization data from the shell into the mount element. Use client rendering
+rather than Svelte server rendering or hydration.
 
 **Rationale:**
 
-- Limits the client framework to the only stateful page region
-- Replaces the untyped inline program and selector-based DOM contract
+- One shadcn-svelte design system for layout, pages, and playground
+- Replaces duplicated Hono JSX components and selector-based DOM contracts
 - Provides accessible, locally maintainable interface primitives
 - Preserves the existing API server, page routes, and Tailwind design tokens
-- Leaves static pages free of a client-side framework runtime
+- Keeps Hono responsible only for HTML transport and server-side config injection
 
 **Consequences:**
 
 - **Positive:**
   - Browser requests and initialization data have runtime-validated contracts
-  - Playground components receive Svelte type checking and focused UI tests
+  - All UI components receive Svelte type checking and focused UI tests
   - Hono continues to serve one application without SvelteKit
 - **Negative:**
   - Development and production builds have separate browser and server targets
-  - Contributors must distinguish Hono JSX from Svelte component boundaries
-  - The browser downloads the Svelte, component, Markdown, and sanitization code
+  - Contributors must distinguish the Hono shell from Svelte component boundaries
+  - The browser downloads Svelte, components, Markdown, and sanitization code
+  - Static page content is not present in the initial HTML without JavaScript
 
 **Alternatives considered:**
 
 - Typed vanilla TypeScript: Smaller runtime, but retains manual state rendering
   and accessible widget implementation
-- React with shadcn/ui: Larger runtime and broader migration pressure for one
-  interactive region
+- React with shadcn/ui: Larger runtime and broader migration pressure
 - Astro: Provides native island orchestration, but would replace the current
   presentation framework rather than extend it
-- Full Svelte application: Simplifies one rendering model but unnecessarily
-  moves static Hono pages into a client-oriented toolchain
+- Hono JSX for static pages with a playground-only island: Avoids a larger
+  client bundle but duplicates component styling between TSX and Svelte
 
 ---
 

@@ -86,7 +86,7 @@ Use these naming conventions:
 | Functions and variables       | camelCase        | `extractMetadata`, `crawlResult`  |
 | Constants                     | Upper snake case | `DEFAULT_TIMEOUT_MS`              |
 | Utility and task files        | camelCase        | `urlSafety.ts`, `fetchHtml.ts`    |
-| Class and JSX component files | PascalCase       | `CrawlService.ts`, `HomePage.tsx` |
+| Class and JSX component files | PascalCase       | `CrawlService.ts`, `PageShell.tsx` |
 
 Keep imports grouped as external dependencies, internal modules, and type-only
 imports. Use Oxfmt for repository formatting and Oxlint for correctness-focused

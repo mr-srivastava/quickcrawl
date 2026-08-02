@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Moved layout, home, and docs UI into a single Svelte client application
+  (`app.js`) behind a minimal Hono document shell with serialized page init data.
+- Renamed the browser entry bundle from `playground.js` to `app.js` and raised
+  the initial gzip budget to 80 KiB.
 - Standardized validation error responses, masked internal failure details,
   validated crawl-error variants at runtime, and propagated request
   cancellation through crawl services.

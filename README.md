@@ -69,13 +69,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser for:
 
 ### Build browser assets
 
-The web UI uses Hono JSX for page rendering and a Svelte playground island for
-interactive behavior. The island composes locally owned shadcn-svelte source
-components. Tailwind source lives in `src/ui/styles/input.css`.
+The web UI uses a minimal Hono JSX document shell and a Svelte client application
+for all visible interface. The application composes locally owned shadcn-svelte
+source components. Tailwind source lives in `src/ui/styles/input.css`.
 
 ```bash
-pnpm run build:assets # Build the playground JavaScript and stylesheet
-pnpm run build:client # Build only the playground JavaScript
+pnpm run build:assets # Build the client JavaScript and stylesheet
+pnpm run build:client # Build only the client JavaScript
 pnpm run build:css    # Build only the stylesheet
 ```
 

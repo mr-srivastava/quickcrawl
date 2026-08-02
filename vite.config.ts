@@ -15,9 +15,9 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     lib: {
-      entry: resolve('src/ui/islands/playground/entry.ts'),
+      entry: resolve('src/ui/app/entry.ts'),
       formats: ['es'],
-      fileName: () => 'playground.js',
+      fileName: () => 'app.js',
     },
     outDir: 'public/assets',
     sourcemap: true,
